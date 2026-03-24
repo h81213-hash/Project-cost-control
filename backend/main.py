@@ -16,6 +16,17 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.on_event("startup")
+def startup_warmup():
+    """伺服器啟動時預先載入快取，避免第一個請求等待大型 JSON 讀取"""
+    if not project_service.USE_DB:
+        try:
+            project_service.load_projects()
+            print(">>> [Startup] 專案快取預熱完成")
+        except Exception as e:
+            print(f">>> [Startup] 快取預熱失敗（可忽略）: {e}")
+
+
 # 允許前端 (3002) 連線到後端 (8002)
 app.add_middleware(
     CORSMiddleware,
@@ -70,8 +81,8 @@ def read_root():
 
 @app.get("/projects")
 def list_projects():
-    """取得所有專案列表"""
-    return project_service.load_projects()
+    """取得所有專案列表（僅摘要，不含 rows 資料，大幅提升速度）"""
+    return project_service.load_projects_summary()
 
 
 @app.post("/projects")
@@ -91,12 +102,18 @@ def create_project(project: ProjectCreate):
 
 
 @app.get("/projects/{project_id}")
-def get_project(project_id: str):
-    """取得單一專案詳細資訊"""
-    proj = project_service.get_project(project_id)
+def get_project(project_id: str, page: Optional[int] = None, page_size: int = 50, system_category: Optional[str] = None):
+    """取得單一專案詳細資訊，支援分頁與類別過濾"""
+    proj = project_service.get_project(project_id, page=page, page_size=page_size, system_category=system_category)
     if proj:
         return proj
     return {"status": "error", "message": "找不到該專案"}
+
+
+@app.get("/projects/{project_id}/inquiry_rows")
+def get_inquiry_rows(project_id: str, system_category: str):
+    """僅取得特定分類的標單列資料 (極輕量化)"""
+    return project_service.get_inquiry_rows(project_id, system_category)
 
 
 @app.delete("/projects/{project_id}")

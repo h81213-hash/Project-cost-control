@@ -246,7 +246,7 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2) -> Dict
         is_empty_record = not unit and (quantity is None or str(quantity).strip() == "")
         
         if is_empty_record:
-            full_path = "無類別"
+            full_path = "未分類"
             row["system_category"] = full_path
         elif row.get("is_manual_category"):
             raw_path = row.get("manual_raw_category", row.get("system_category", "未分類"))

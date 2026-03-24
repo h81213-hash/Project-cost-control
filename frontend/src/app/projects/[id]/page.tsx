@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition, memo, useMemo } from "react";
+import { useState, useEffect, useTransition, memo, useMemo, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { API_BASE_URL } from "../../constants";
 
@@ -17,6 +17,13 @@ interface ProjectDetail {
   created_at: string;
   files: { file_name: string; uploaded_at: string; data: any }[];
 }
+
+export const formatQuantity = (num: any) => {
+  if (num === null || num === undefined || num === '') return "-";
+  const parsed = Number(String(num).replace(/,/g, ''));
+  if (isNaN(parsed)) return num;
+  return Math.round(parsed).toString();
+};
 
 function CategorySelectorModal({
   isOpen,
@@ -237,7 +244,7 @@ const ProjectTableRow = memo(({
         <td className="px-4 py-3 text-center opacity-50 font-mono italic">{row.item_no}</td>
         <td className="px-4 py-3 line-through italic whitespace-normal break-words font-medium">{row.description}</td>
         <td className="px-4 py-3 text-center opacity-50">{row.unit}</td>
-        <td className="px-4 py-3 text-right opacity-50 font-mono italic">{row.quantity}</td>
+        <td className="px-4 py-3 text-right opacity-50 font-mono italic">{formatQuantity(row.quantity)}</td>
         <td className="px-4 py-3 text-right opacity-50 font-mono italic">{formatCurrency(parseFloat(String(row.unit_price).replace(/,/g, "")) || 0)}</td>
         <td className="px-4 py-3 text-right opacity-50 font-mono italic">{formatCurrency(parseFloat(String(row.total_price).replace(/,/g, "")) || 0)}</td>
         <td className="px-4 py-3 opacity-30 italic">{row.note}</td>
@@ -307,17 +314,17 @@ const ProjectTableRow = memo(({
         {isModified && row.old_values?.quantity !== row.quantity ? (
           <div className="flex flex-col items-end gap-0.5 animate-in fade-in zoom-in-95 duration-200">
             <span className="text-[10px] text-slate-400 line-through font-normal">
-              {row.old_values.quantity}
+              {formatQuantity(row.old_values.quantity)}
             </span>
             <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-md font-black ring-1 ring-amber-200 flex items-center gap-1 text-sm shadow-sm">
-              {row.quantity}
+              {formatQuantity(row.quantity)}
               <span className={row.quantity > row.old_values.quantity ? 'text-emerald-600' : 'text-rose-600'}>
                 {row.quantity > row.old_values.quantity ? '↑' : '↓'}
               </span>
             </span>
           </div>
         ) : (
-          <span className="font-bold text-slate-700">{row.quantity}</span>
+          <span className="font-bold text-slate-700">{formatQuantity(row.quantity)}</span>
         )}
       </td>
       <td className={`px-4 py-3 text-right font-mono transition-all ${isModified && row.old_values?.unit_price !== row.unit_price ? 'bg-amber-50/50' : ''}`}>
@@ -379,6 +386,10 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(false);
   const [showUnclassified, setShowUnclassified] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const [activeInquiryCategory, setActiveInquiryCategory] = useState<string | null>(null);
+  const [categoryItems, setCategoryItems] = useState<any[]>([]);
+  const [displayedCategoryItemsCount, setDisplayedCategoryItemsCount] = useState(100);
+  const [isFetchingCategoryItems, setIsFetchingCategoryItems] = useState(false);
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [diffResult, setDiffResult] = useState<any>(null);
   const [baseVersionIdx, setBaseVersionIdx] = useState(0);
@@ -392,6 +403,113 @@ export default function ProjectDetailPage() {
   const [ignoredItemIndices, setIgnoredItemIndices] = useState<number[]>([]);
   const [keptRemovedRows, setKeptRemovedRows] = useState<any[]>([]);
   const [revertedItemIndices, setRevertedItemIndices] = useState<number[]>([]);
+  
+  // 當選中詢價類別時，從後端抓取該類別的所有項目 (不受主表格分頁限制)
+  useEffect(() => {
+    if (activeInquiryCategory && projectId) {
+      const fetchItems = async () => {
+        setIsFetchingCategoryItems(true);
+        try {
+          // 專用極輕量化端點，只抓取 rows，避開專案 metadata 序列化成本
+          const response = await fetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows?system_category=${encodeURIComponent(activeInquiryCategory)}`);
+          const rows = await response.json();
+          setCategoryItems(rows || []);
+          setDisplayedCategoryItemsCount(100); // 初始只顯示 100 筆，避免 DOM 渲染過重導致凍結
+        } catch (error) {
+          console.error("Failed to fetch category items:", error);
+        } finally {
+          setIsFetchingCategoryItems(false);
+        }
+      };
+      fetchItems();
+    } else {
+      setCategoryItems([]);
+    }
+  }, [activeInquiryCategory, projectId]);
+  
+  // 無限下滑相關狀態
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [totalRows, setTotalRows] = useState(0);
+
+  const fetchProject = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+    if (pageNum === 1 && !append) {
+        const cacheKey = `project_${projectId}`;
+        if (typeof window !== "undefined") {
+            const cachedData = localStorage.getItem(cacheKey);
+            if (cachedData) {
+                try {
+                    const parsed = JSON.parse(cachedData);
+                    setProject(parsed);
+                    if (parsed.files && parsed.files.length > 0) {
+                        setResult(parsed.files[parsed.files.length - 1].data);
+                    }
+                } catch (e) {
+                    console.error("快取解析失敗", e);
+                }
+            }
+        }
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=50`);
+      const data = await res.json();
+      if (data.id) {
+        setProject(data);
+        if (data.files && data.files.length > 0) {
+          const latestFile = data.files[data.files.length - 1];
+          const newData = latestFile.data;
+          const pagination = newData.pagination;
+
+          if (append) {
+            setResult((prev: any) => ({
+              ...prev,
+              rows: [...(prev?.rows || []), ...(newData.rows || [])]
+            }));
+          } else {
+            setResult(newData);
+            const cacheKey = `project_${projectId}`;
+            if (typeof window !== "undefined") {
+              localStorage.setItem(cacheKey, JSON.stringify(data));
+            }
+          }
+
+          if (pagination) {
+            setTotalRows(pagination.total);
+            setHasMore(pagination.has_more);
+            setPage(pagination.page);
+          } else {
+            setHasMore(false);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("無法載入專案", err);
+    } finally {
+      setLoading(false);
+      setIsFetchingMore(false);
+    }
+  }, [projectId]);
+
+  const loadMore = useCallback(async () => {
+    if (isFetchingMore || !hasMore || loading) return;
+    setIsFetchingMore(true);
+    await fetchProject(page + 1, true);
+  }, [isFetchingMore, hasMore, loading, page, fetchProject]);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastRowElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
+      }
+    }, { rootMargin: '800px' });
+    if (node) observer.current.observe(node);
+  }, [loading, isFetchingMore, hasMore, loadMore]);
+
 
   const tabs = [
     { id: "home", label: "首頁", icon: "🏠" },
@@ -407,51 +525,10 @@ export default function ProjectDetailPage() {
       .catch(e => console.error("無法載入分類樹", e));
 
     fetchProject();
-  }, [projectId]);
-
-  const fetchProject = async () => {
-    // 試著優先從本地快取讀取，達成「秒開」效果
-    const cacheKey = `project_${projectId}`;
-    if (typeof window !== "undefined") {
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData);
-          setProject(parsed);
-          if (parsed.files && parsed.files.length > 0) {
-            setResult(parsed.files[parsed.files.length - 1].data);
-          }
-        } catch (e) {
-          console.error("快取解析失敗", e);
-        }
-      }
-    }
-
-    try {
-      // 移除 ?t=... 和 cache: 'no-store'，讓瀏覽器也能幫忙快取
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}`);
-      const data = await res.json();
-      if (data.id) {
-        setProject(data);
-        // 更新本地快取
-        if (typeof window !== "undefined") {
-          localStorage.setItem(cacheKey, JSON.stringify(data));
-        }
-        if (data.files && data.files.length > 0) {
-          const savedData = data.files[data.files.length - 1].data;
-          setResult(savedData);
-        }
-      }
-    } catch (err) {
-      console.error("無法載入專案", err);
-    } finally {
-      setFetching(false);
-    }
-  };
+  }, [projectId, fetchProject]);
 
   const handleUpload = async () => {
     if (!file) return;
-    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
     try {
@@ -694,7 +771,7 @@ export default function ProjectDetailPage() {
   ];
 
   const getCategoryColor = (cat: string) => {
-    if (!cat || cat === "未分類") return "bg-slate-100 text-slate-400";
+    if (!cat || cat === "未分類" || cat === "無類別") return "bg-slate-100 text-slate-400";
     const lv1 = cat.split(" > ")[0];
     let hash = 0;
     for (let i = 0; i < lv1.length; i++) {
@@ -920,7 +997,7 @@ export default function ProjectDetailPage() {
                     <div>
                       <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1.5">📊 項目統計</span>
                       <span className="text-xl font-black text-slate-800">
-                        {isCompareMode && diffResult ? diffResult.diff.rows.length : result?.rows?.length || 0} 
+                        {isCompareMode && diffResult ? diffResult.diff.rows.length : totalRows} 
                         <small className="text-xs ml-1 font-bold text-slate-400">筆</small>
                         {isPending && <small className="text-[10px] ml-2 text-blue-400 animate-pulse">更新中...</small>}
                       </span>
@@ -939,62 +1016,42 @@ export default function ProjectDetailPage() {
                 {/* Main Table */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-left text-sm border-collapse">
-                      <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-black tracking-wider">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-[10px] text-slate-400 font-black uppercase tracking-widest bg-slate-50 sticky top-0 z-10 border-b border-slate-100">
                         <tr>
-                          {isCompareMode ? (
-                            <>
-                              <th className="px-4 py-3 w-[120px] text-center sticky left-0 bg-slate-50 z-10">狀態</th>
-                              <th className="px-4 py-3 w-[250px] sticky left-[120px] bg-slate-50 z-10">繼承分類</th>
-                            </>
-                          ) : (
-                            <>
-                              <th className="px-4 py-3 w-10 sticky left-0 bg-slate-50 z-10">
-                                <input 
-                                  type="checkbox" 
-                                  checked={selectedIndices.length === result?.rows.length} 
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedIndices(e.target.checked ? result.rows.map((_:any,i:number)=>i) : [])} 
-                                  className="rounded" 
-                                />
-                              </th>
-                              <th className="px-4 py-3 w-[250px] sticky left-10 bg-slate-50 z-10">系統分類</th>
-                            </>
-                          )}
-                          <th className="px-4 py-3 w-[80px] text-center">項次</th>
-                          <th className="px-4 py-3 min-w-[300px]">項目描述</th>
-                          <th className="px-4 py-3 w-[60px] text-center">單位</th>
-                          <th className="px-4 py-3 w-[100px] text-right">數量</th>
-                          <th className="px-4 py-3 w-[120px] text-right">單價</th>
-                          <th className="px-4 py-3 w-[120px] text-right">總價</th>
+                          {isCompareMode ? <th className="px-4 py-3 text-center sticky left-0 bg-inherit shadow-[1px_0_0_0_rgba(0,0,0,0.05)] min-w-[120px]">差異狀態</th> : <th className="px-4 py-3 text-center sticky left-0 bg-inherit shadow-[1px_0_0_0_rgba(0,0,0,0.05)] min-w-[40px]"><input type="checkbox" onChange={(e)=>setSelectedIndices(e.target.checked ? (result?.rows || []).map((_:any, i:number)=>i) : [])} className="rounded" /></th>}
+                          <th className={`px-4 py-3 sticky z-20 bg-inherit shadow-[1px_0_0_0_rgba(0,0,0,0.05)] ${isCompareMode ? 'left-[120px]' : 'left-10'}`}>主控分類 (Lv.{project.classification_depth})</th>
+                          <th className="px-4 py-3 text-center">項次</th>
+                          <th className="px-4 py-3 min-w-[300px]">項目名稱 (Description)</th>
+                          <th className="px-4 py-3 text-center">單位</th>
+                          <th className="px-4 py-3 text-right">數量</th>
+                          <th className="px-4 py-3 text-right">單價</th>
+                          <th className="px-4 py-3 text-right">複價</th>
                           <th className="px-4 py-3 min-w-[150px]">備註</th>
-                          {isCompareMode && <th className="px-4 py-3 w-10">互動</th>}
+                          {isCompareMode && <th className="px-4 py-3 text-center">決策</th>}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {/* Removed Rows in Compare Mode */}
-                        {isCompareMode && diffResult?.diff.removed_rows.map((row: any, i: number) => {
-                           const isKept = keptRemovedRows.some(r => r.description === row.description && r.item_no === row.item_no);
-                           return (
-                             <ProjectTableRow 
-                               key={`rem-${i}`}
-                               row={row}
-                               index={i}
-                               isCompareMode={true}
-                               isRemovedRow={true}
+                      <tbody className="divide-y divide-slate-50 bg-white">
+                        {/* 這裡合併顯示已被刪除的舊項目 (僅比對模式) */}
+                        {isCompareMode && diffResult?.removed_rows.map((row: any, i: number) => {
+                          const isKept = keptRemovedRows.some(kr => kr.item_no === row.item_no && kr.description === row.description);
+                          return (
+                            <ProjectTableRow 
+                               key={`removed-${i}`} 
+                               row={row} 
+                               isRemovedRow={true} 
                                isKept={isKept}
-                               onKeep={() => setKeptRemovedRows([...keptRemovedRows, {...row, diff_status: "unchanged"}])}
-                               project={project}
-                               getCategoryColor={getCategoryColor}
+                               onKeep={() => setKeptRemovedRows([...keptRemovedRows, row])}
                                formatCurrency={formatCurrency}
-                             />
-                           );
+                               getCategoryColor={getCategoryColor}
+                            />
+                          );
                         })}
 
-                        {/* Standard/Diff Rows */}
                         {(isCompareMode ? (diffResult?.diff.rows || []) : (result?.rows || [])).map((row: any, i: number) => {
                           if (isCompareMode && ignoredItemIndices.includes(i)) return null;
                           
-                          const displayCategory = (row.system_category === "未分類" || !row.system_category) 
+                          const displayCategory = (row.system_category === "未分類" || row.system_category === "無類別" || !row.system_category) 
                             ? "未分類" 
                             : (row.system_category.split(">")[project.classification_depth - 1]?.trim() || "-");
                           
@@ -1021,6 +1078,29 @@ export default function ProjectDetailPage() {
                         })}
                       </tbody>
                     </table>
+                    
+                    {/* 無限下滑偵測點 */}
+                    {hasMore && !isCompareMode && (
+                        <div 
+                          ref={lastRowElementRef} 
+                          className="py-8 flex justify-center items-center gap-2 text-slate-400 bg-white border-t border-slate-50"
+                        >
+                            {isFetchingMore ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <span className="text-xs font-medium">載入更多項目中...</span>
+                                </>
+                            ) : (
+                                <span className="text-xs">下滑載入更多項目 ({result?.rows?.length || 0} / {totalRows})</span>
+                            )}
+                        </div>
+                    )}
+                    
+                    {!hasMore && !isCompareMode && (result?.rows?.length || 0) > 0 && (
+                        <div className="py-8 text-center text-slate-300 text-xs bg-slate-50/50 italic">
+                            已顯示所有項目 (共 {totalRows} 筆)
+                        </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1044,10 +1124,159 @@ export default function ProjectDetailPage() {
 
         {/* Other Tabs Placeholders */}
         {activeTab === "inquiry" && (
-          <div className="bg-white rounded-3xl border border-slate-200 border-dashed p-32 text-center animate-in fade-in slide-in-from-bottom-8">
-            <div className="text-6xl mb-6">🛠️</div>
-            <h3 className="text-2xl font-black text-slate-800">詢價單功能開發中</h3>
-            <p className="text-slate-400 mt-2 max-w-sm mx-auto">未來在此可以直接針對選中的項目生成詢價單並發送給供應商，簡化採購流程。</p>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8">
+            {!activeInquiryCategory ? (
+              <>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                      詢價管理中心
+                      <div className="text-sm bg-slate-100 text-slate-600 px-3 py-1 rounded-lg font-bold shadow-inner flex items-center gap-1.5">
+                        <span className="text-slate-400">總計</span> {totalRows} <span className="text-[10px] text-slate-400">筆項目</span>
+                      </div>
+                    </h3>
+                    <p className="text-slate-400 mt-1">系統已根據 LV.2 大類別自動彙整項目，您可以點擊類別查看細節並準備詢價單。</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(() => {
+                    const analysisSystems = result?.analysis?.systems || {};
+                    const groups: Record<string, { count: number, total: number, items: any[] }> = {};
+                    
+                    // 從後端的全量分析摘要中提取資料（這涵盖了整份標單，而不僅是前 50 筆）
+                    Object.entries(analysisSystems).forEach(([fullPath, info]: [string, any]) => {
+                      const parts = fullPath.split(" > ") || ["未分類"];
+                      // 以「二級顯示名稱」作為彙整基準
+                      const groupKey = parts.length >= 2 ? parts[1].trim() : parts[0].trim();
+                      
+                      if (!groups[groupKey]) groups[groupKey] = { count: 0, total: 0, items: [] };
+                      groups[groupKey].count += info.count || 0;
+                      groups[groupKey].total += info.total_amount || 0;
+                    });
+
+                    return Object.entries(groups).map(([groupKey, info]) => {
+                      const colorClass = getCategoryColor(groupKey);
+
+                      return (
+                        <div 
+                          key={groupKey} 
+                          onClick={() => setActiveInquiryCategory(groupKey)}
+                          className="group bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all cursor-pointer relative overflow-hidden"
+                        >
+                          <div className={`absolute top-0 left-0 w-1.5 h-full ${colorClass.split(" ")[0]}`}></div>
+                          
+                          <div className="flex justify-between items-start mb-4">
+                            <h4 className="text-lg font-black text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis">{groupKey}</h4>
+                          </div>
+                          
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] text-slate-400 font-bold uppercase">項目</span>
+                              <span className="text-xl font-black text-slate-900">{info.count} <small className="text-[10px] font-bold text-slate-400">筆</small></span>
+                            </div>
+                            <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                            <div className="flex flex-col">
+                              <span className="text-[9px] text-slate-400 font-bold uppercase">預估總額</span>
+                              <span className="text-xl font-black text-blue-600">{formatCurrency(info.total)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </>
+            ) : (
+              <div className="space-y-6 animate-in slide-in-from-right-8 fade-in">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setActiveInquiryCategory(null)}
+                    className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all"
+                  >
+                    ⬅️
+                  </button>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-800">
+                      {activeInquiryCategory} - 項目清單
+                    </h3>
+                    <p className="text-slate-400 text-sm">檢視並確認要加入詢價單的項目細節。</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <tr>
+                        <th className="px-6 py-4">項次</th>
+                        <th className="px-6 py-4">項目名稱 (Description)</th>
+                        <th className="px-6 py-4 text-center">單位</th>
+                        <th className="px-6 py-4 text-right">數量</th>
+                        <th className="px-6 py-4 text-right">單價 (預估)</th>
+                        <th className="px-6 py-4 text-right">複價</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {isFetchingCategoryItems ? (
+                        <>
+                          {[...Array(5)].map((_, i) => (
+                            <tr key={i} className="border-b border-slate-50 animate-pulse">
+                              <td className="px-6 py-4"><div className="h-3 bg-slate-100 rounded-full w-12"></div></td>
+                              <td className="px-6 py-4"><div className={`h-3 bg-slate-100 rounded-full ${i % 2 === 0 ? 'w-4/5' : 'w-3/5'}`}></div></td>
+                              <td className="px-6 py-4 text-center"><div className="h-3 bg-slate-100 rounded-full w-8 mx-auto"></div></td>
+                              <td className="px-6 py-4 text-right"><div className="h-3 bg-slate-100 rounded-full w-10 ml-auto"></div></td>
+                              <td className="px-6 py-4 text-right"><div className="h-3 bg-blue-50 rounded-full w-20 ml-auto"></div></td>
+                              <td className="px-6 py-4 text-right"><div className="h-3 bg-blue-100 rounded-full w-24 ml-auto"></div></td>
+                            </tr>
+                          ))}
+                        </>
+                      ) : categoryItems.length > 0 ? (
+                        <>
+                          {categoryItems.slice(0, displayedCategoryItemsCount).map((row: any, i: number) => (
+                            <tr key={i} className="hover:bg-blue-50/30 transition-colors border-b border-slate-50 last:border-0">
+                              <td className="px-6 py-4 font-mono text-slate-400">{row.item_no || "-"}</td>
+                              <td className="px-6 py-4 font-bold text-slate-800">{row.description}</td>
+                              <td className="px-6 py-4 text-center">{row.unit}</td>
+                              <td className="px-6 py-4 text-right font-black">{formatQuantity(row.quantity)}</td>
+                              <td className="px-6 py-4 text-right text-slate-400 italic">NT$ {row.unit_price || 0}</td>
+                              <td className="px-6 py-4 text-right font-black text-blue-600">{formatCurrency(parseFloat(String(row.total_price || 0).replace(/,/g, '')))}</td>
+                            </tr>
+                          ))}
+                          {categoryItems.length > displayedCategoryItemsCount && (
+                            <tr>
+                              <td colSpan={6} className="py-6 text-center bg-slate-50/30">
+                                <button 
+                                  onClick={() => setDisplayedCategoryItemsCount(prev => prev + 200)}
+                                  className="px-6 py-2 bg-white border border-slate-200 rounded-full text-sm font-black text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                >
+                                  顯示更多項目 (還有 {categoryItems.length - displayedCategoryItemsCount} 筆)
+                                </button>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="py-20 text-center text-slate-400 italic">尚未找到相關項目資料。</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="flex justify-end gap-4 mt-8">
+                  <button 
+                    onClick={() => setActiveInquiryCategory(null)}
+                    className="px-8 py-3 rounded-2xl font-bold text-slate-400 hover:text-slate-600"
+                  >
+                    取消返回
+                  </button>
+                  <button className="px-10 py-4 bg-blue-600 text-white rounded-[2rem] font-black shadow-xl shadow-blue-200 hover:scale-105 active:scale-95 transition-all">
+                    🎨 設計詢價單內容
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
