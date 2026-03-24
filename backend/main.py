@@ -27,10 +27,16 @@ def startup_warmup():
             print(f">>> [Startup] 快取預熱失敗（可忽略）: {e}")
 
 
-# 允許前端 (3002) 連線到後端 (8002)
+# 配置 CORS 中間件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "https://project-cost-control-app.netlify.app"
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

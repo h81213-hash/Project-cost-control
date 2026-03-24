@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-from sqlalchemy.orm import Session, defer, undefer
+from sqlalchemy.orm import Session, defer, undefer, selectinload
 from database import SessionLocal
 from models import Project, ProjectFile
 
@@ -78,7 +78,10 @@ def load_projects_summary() -> List[Dict[str, Any]]:
         from models import Project
         db = SessionLocal()
         try:
-            projects = db.query(Project).all()
+            # 關鍵優化：預設不抓取檔案的 data 內容，防止讀取專案列表時記憶體爆掉
+            projects = db.query(Project).options(
+                selectinload(Project.files).defer(ProjectFile.data)
+            ).all()
             result = []
             for p in projects:
                 proj_dict = {
@@ -206,8 +209,10 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
     if USE_DB:
         db = get_db_session()
         try:
-            # 使用 defer 延遲加載 ProjectFile.data，防止一次載入數十 MB 的 JSON 到記憶體
-            project = db.query(Project).filter(Project.id == project_id).first()
+            # 關鍵優化：使用 selectinload + defer(data) 讀取專案，完全不抓歷史版本的 JSON 內容
+            project = db.query(Project).filter(Project.id == project_id).options(
+                selectinload(Project.files).defer(ProjectFile.data)
+            ).first()
             if not project:
                 return None
             
