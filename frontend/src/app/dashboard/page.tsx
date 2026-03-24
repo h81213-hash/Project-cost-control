@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { API_BASE_URL } from "../constants";
 
 export default function Dashboard() {
   const [file, setFile] = useState<File | null>(null);
@@ -26,7 +27,7 @@ export default function Dashboard() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8002/upload", {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });

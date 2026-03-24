@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition, memo, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { API_BASE_URL } from "../../constants";
 
 interface ProjectDetail {
   id: string;
@@ -400,7 +401,7 @@ export default function ProjectDetailPage() {
   ];
 
   useEffect(() => {
-    fetch("http://localhost:8002/categories")
+    fetch(`${API_BASE_URL}/categories`)
       .then(res => res.json())
       .then(data => setCategoriesTree(data))
       .catch(e => console.error("無法載入分類樹", e));
@@ -410,7 +411,7 @@ export default function ProjectDetailPage() {
 
   const fetchProject = async () => {
     try {
-      const res = await fetch(`http://localhost:8002/projects/${projectId}?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}?t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       if (data.id) {
         setProject(data);
@@ -434,7 +435,7 @@ export default function ProjectDetailPage() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await fetch(`http://localhost:8002/projects/${projectId}/upload`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -464,8 +465,8 @@ export default function ProjectDetailPage() {
     
     try {
       const endpoint = isBatch 
-        ? `http://localhost:8002/projects/${projectId}/batch_classify`
-        : `http://localhost:8002/projects/${projectId}/manual_classify`;
+        ? `${API_BASE_URL}/projects/${projectId}/batch_classify`
+        : `${API_BASE_URL}/projects/${projectId}/manual_classify`;
         
       const body = isBatch
         ? {
@@ -496,7 +497,7 @@ export default function ProjectDetailPage() {
         if (isBatch) setSelectedIndices([]);
         
         // Refresh categories
-        fetch("http://localhost:8002/categories", { cache: 'no-store' })
+        fetch(`${API_BASE_URL}/categories`, { cache: 'no-store' })
           .then(res => res.json())
           .then(data => setCategoriesTree(data));
       } else {
@@ -513,7 +514,7 @@ export default function ProjectDetailPage() {
   const handleExport = () => {
     if (!project) return;
     // 使用直接跳轉觸發下載，避免 fetch 的 Blob 處理與 CORS 限制問題
-    window.location.href = `http://localhost:8002/projects/${project.id}/export?version_idx=${baseVersionIdx}`;
+    window.location.href = `${API_BASE_URL}/projects/${project.id}/export?version_idx=${baseVersionIdx}`;
   };
 
 
@@ -522,7 +523,7 @@ export default function ProjectDetailPage() {
     setLoading(true);
     try {
       const targetIdx = targetVersionIdx === -1 ? project.files.length - 1 : targetVersionIdx;
-      const res = await fetch(`http://localhost:8002/projects/${projectId}/compare`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/compare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -567,7 +568,7 @@ export default function ProjectDetailPage() {
 
       const mergedRows = [...finalRows, ...keptRemovedRows];
 
-      const res = await fetch(`http://localhost:8002/projects/${projectId}/apply_diff`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/apply_diff`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -596,7 +597,7 @@ export default function ProjectDetailPage() {
     if (!project || !window.confirm("確定要刪除此標單版本嗎？此操作無法恢復。")) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8002/projects/${projectId}/files/${index}`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/files/${index}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -619,7 +620,7 @@ export default function ProjectDetailPage() {
   const handleDepthChange = async (newDepth: number) => {
     if (!project) return;
     try {
-      const res = await fetch(`http://localhost:8002/projects/${projectId}/settings`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/settings`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classification_depth: newDepth }),
@@ -630,7 +631,7 @@ export default function ProjectDetailPage() {
       
       if (result && result.rows) {
         setLoading(true);
-        const anaRes = await fetch(`http://localhost:8002/analyze`, {
+        const anaRes = await fetch(`${API_BASE_URL}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rows: result.rows, max_depth: newDepth }),

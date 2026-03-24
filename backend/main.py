@@ -8,6 +8,11 @@ import io
 from fastapi.responses import StreamingResponse
 from services.excel_parser import ExcelParser
 from services import project_service, category_service, excel_parser, diff_service
+from database import engine, Base
+import models
+
+# 啟動時自動建立資料表 (如果不存在)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -273,7 +278,9 @@ def batch_classify(project_id: str, req: BatchClassifyRequest):
         
         data["analysis"] = analysis
         data["rows"] = rows
-        project_service.save_projects(projects)
+        
+        # 使用新方法儲存，支援 JSON 與 DB
+        project_service.update_project_files(project_id, files)
         
         return {"status": "success", "updated_count": updated_count, "data": data}
     except Exception as e:
@@ -331,8 +338,8 @@ def manual_classify(project_id: str, req: ManualClassifyRequest):
         data["analysis"] = analysis
         data["rows"] = rows
         
-        # 7. 永久儲存回 json
-        project_service.save_projects(projects)
+        # 使用新方法儲存，支援 JSON 與 DB
+        project_service.update_project_files(project_id, files)
         
         return {"status": "success", "data": data}
     except Exception as e:

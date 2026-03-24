@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "../constants";
 
 interface Project {
   id: string;
@@ -39,7 +40,7 @@ export default function ProjectsPage() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("http://localhost:8002/projects");
+      const res = await fetch(`${API_BASE_URL}/projects`);
       const data = await res.json();
       setProjects(data);
     } catch (err) {
@@ -52,7 +53,7 @@ export default function ProjectsPage() {
   const handleCreate = async () => {
     if (!formName.trim()) return;
     try {
-      const res = await fetch("http://localhost:8002/projects", {
+      const res = await fetch(`${API_BASE_URL}/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -92,7 +93,7 @@ export default function ProjectsPage() {
     e.stopPropagation();
     if (!confirm("確定要刪除此專案嗎？此操作無法復原。")) return;
     try {
-      await fetch(`http://localhost:8002/projects/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE_URL}/projects/${id}`, { method: "DELETE" });
       fetchProjects();
     } catch (err) {
       console.error("刪除失敗");
