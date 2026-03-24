@@ -46,8 +46,6 @@ def load_projects() -> List[Dict[str, Any]]:
     global _projects_cache_dict
     
     if USE_DB:
-        from database import SessionLocal
-        from models import Project
         db = SessionLocal()
         try:
             projects = db.query(Project).all()
@@ -74,8 +72,6 @@ def load_projects_summary() -> List[Dict[str, Any]]:
     JSON 模式：利用快取讀取後去除 data 欄位，確保不額外 I/O。
     DB 模式：只查詢 projects 表，不 join files 的 data 欄位。"""
     if USE_DB:
-        from database import SessionLocal
-        from models import Project
         db = SessionLocal()
         try:
             # 關鍵優化：預設不抓取檔案的 data 內容，防止讀取專案列表時記憶體爆掉
