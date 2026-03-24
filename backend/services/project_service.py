@@ -3,10 +3,9 @@ import os
 import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
-# Lazy imports to speed up module loading
-# from sqlalchemy.orm import Session
-# from database import SessionLocal
-# from models import Project, ProjectFile
+from sqlalchemy.orm import Session, defer, undefer
+from database import SessionLocal
+from models import Project, ProjectFile
 
 # NOTE: 第一階段使用 JSON 檔做輕量化持久化，第三階段改為 PostgreSQL
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
@@ -125,8 +124,18 @@ def get_project_from_cache(project_id: str) -> Optional[Dict[str, Any]]:
         load_projects()
     return _projects_cache_dict.get(project_id) if _projects_cache_dict else None
 
-def serialize_project(p: "Project") -> Dict[str, Any]:
-    """將 SQLAlchemy 物件轉換為字典"""
+def serialize_project(p: "Project", include_data: bool = False) -> Dict[str, Any]:
+    """將 SQLAlchemy 物件轉換為字典，預設不包含巨大的 data 欄位以節省記憶體"""
+    files_list = []
+    for f in p.files:
+        file_info = {
+            "file_name": f.file_name,
+            "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else "",
+        }
+        if include_data:
+            file_info["data"] = f.data
+        files_list.append(file_info)
+
     return {
         "id": p.id,
         "name": p.name,
@@ -139,13 +148,7 @@ def serialize_project(p: "Project") -> Dict[str, Any]:
         "classification_depth": p.classification_depth,
         "created_at": p.created_at.isoformat() if p.created_at else "",
         "updated_at": p.updated_at.isoformat() if p.updated_at else "",
-        "files": [
-            {
-                "file_name": f.file_name,
-                "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else "",
-                "data": f.data
-            } for f in p.files
-        ]
+        "files": files_list
     }
 
 def create_project(name: str, client: str = "", location: str = "", manager: str = "", start_date: str = "", end_date: str = "", note: str = "", classification_depth: int = 3) -> Dict[str, Any]:
@@ -203,49 +206,47 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
     if USE_DB:
         db = get_db_session()
         try:
+            # 使用 defer 延遲加載 ProjectFile.data，防止一次載入數十 MB 的 JSON 到記憶體
             project = db.query(Project).filter(Project.id == project_id).first()
             if not project:
                 return None
             
-            # 序列化專案基本資訊
-            result = serialize_project(project)
+            # 使用輕量化序列化 (不含 data)
+            result = serialize_project(project, include_data=False)
             
             if result.get("files"):
-                new_files = []
-                for i, f in enumerate(result["files"]):
-                    # Shallow copy to avoid mutating SQLAlchemy's internal dicts
-                    file_copy = {k: v for k, v in f.items() if k != "data"}
-                    orig_data = f.get("data", {})
-                    data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
-                    all_rows = orig_data.get("rows", [])
-                    
-                    if system_category:
-                        all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
-                    
-                    # Pagination logic
-                    if page is not None and not system_category:
-                        if i == len(result["files"]) - 1:
-                            # Latest file: Paginate
-                            start_idx = (page - 1) * page_size
-                            end_idx = start_idx + page_size
-                            data_copy["rows"] = all_rows[start_idx:end_idx]
-                            data_copy["pagination"] = {
-                                "total": len(all_rows),
-                                "page": page,
-                                "page_size": page_size,
-                                "has_more": end_idx < len(all_rows)
-                            }
-                        else:
-                            # Historical files: Strip rows to prevent massive 20MB+ payloads freezing the API
-                            data_copy["rows"] = []
-                            data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
-                    else:
-                        data_copy["rows"] = all_rows
-                        data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
-                        
-                    file_copy["data"] = data_copy
-                    new_files.append(file_copy)
-                result["files"] = new_files
+                # 找出要讀取的檔案索引 (最新版或指定版本)
+                target_idx = len(result["files"]) - 1
+                
+                # 只有最新版本或是請求分頁時，我們才手動從 DB 抓取那「一個」檔案的 data
+                # 這樣就不會 5 個版本 25MB 全塞進 Render 記憶體
+                target_file_obj = project.files[target_idx]
+                
+                # 手動讀取該檔案的 data (此時會觸發單一 SELECT 讀取 JSON)
+                raw_data = target_file_obj.data or {}
+                all_rows = raw_data.get("rows", [])
+                
+                if system_category:
+                    all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                
+                data_copy = {k: v for k, v in raw_data.items() if k != "rows"}
+                
+                if page is not None and not system_category:
+                    start_idx = (page - 1) * page_size
+                    end_idx = start_idx + page_size
+                    data_copy["rows"] = all_rows[start_idx:end_idx]
+                    data_copy["pagination"] = {
+                        "total": len(all_rows),
+                        "page": page,
+                        "page_size": page_size,
+                        "has_more": end_idx < len(all_rows)
+                    }
+                else:
+                    data_copy["rows"] = all_rows
+                    data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                
+                # 將處理好的分頁資料放入 result 的最新檔案中
+                result["files"][target_idx]["data"] = data_copy
                 
             return result
         finally:
@@ -300,16 +301,18 @@ def _get_cached_rows(project_id: str) -> List[Dict[str, Any]]:
     if project_id in _inquiry_rows_cache:
         return _inquiry_rows_cache[project_id]
 
+    # 限制快取數量，避免 Render 記憶體爆掉 (最多保留 5 個專案的快取)
+    if len(_inquiry_rows_cache) > 5:
+        _inquiry_rows_cache.clear()
+
     # 快取未命中，從資料來源載入
     rows: List[Dict[str, Any]] = []
     if USE_DB:
-        from database import SessionLocal
-        from models import Project
         db = SessionLocal()
         try:
             project = db.query(Project).filter(Project.id == project_id).first()
             if project and project.files:
-                # max() 比 sorted()[-1] 更快，不需要完整排序
+                # max() 比 sorted()[-1] 更快，且只在需要時讀取 data
                 latest_file = max(project.files, key=lambda x: x.uploaded_at)
                 rows = latest_file.data.get("rows", []) if latest_file.data else []
         finally:
