@@ -410,14 +410,32 @@ export default function ProjectDetailPage() {
   }, [projectId]);
 
   const fetchProject = async () => {
+    // 試著優先從本地快取讀取，達成「秒開」效果
+    const cacheKey = `project_${projectId}`;
+    if (typeof window !== "undefined") {
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        try {
+          const parsed = JSON.parse(cachedData);
+          setProject(parsed);
+          if (parsed.files && parsed.files.length > 0) {
+            setResult(parsed.files[parsed.files.length - 1].data);
+          }
+        } catch (e) {
+          console.error("快取解析失敗", e);
+        }
+      }
+    }
+
     try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}?t=${Date.now()}`, { cache: 'no-store' });
+      // 移除 ?t=... 和 cache: 'no-store'，讓瀏覽器也能幫忙快取
+      const res = await fetch(`${API_BASE_URL}/projects/${projectId}`);
       const data = await res.json();
       if (data.id) {
         setProject(data);
-        // Force default depth to 2 if it's currently something else or not set
-        if (data.classification_depth !== 2) {
-          handleDepthChange(2);
+        // 更新本地快取
+        if (typeof window !== "undefined") {
+          localStorage.setItem(cacheKey, JSON.stringify(data));
         }
         if (data.files && data.files.length > 0) {
           const savedData = data.files[data.files.length - 1].data;
@@ -426,6 +444,8 @@ export default function ProjectDetailPage() {
       }
     } catch (err) {
       console.error("無法載入專案", err);
+    } finally {
+      setFetching(false);
     }
   };
 
