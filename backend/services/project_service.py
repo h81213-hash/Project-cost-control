@@ -210,37 +210,43 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
             # 序列化專案基本資訊
             result = serialize_project(project)
             
-            # 如果有提供分頁參數，則對標單列 (rows) 進行切片
-            if page is not None and result.get("files"):
-                # 這裡假設我們只對「最新一份標單」進行分頁處理，這也是前端主要顯示的內容
-                latest_file = result["files"][-1]
-                data = latest_file.get("data", {})
-                rows = data.get("rows", [])
+            if result.get("files"):
+                new_files = []
+                for i, f in enumerate(result["files"]):
+                    # Shallow copy to avoid mutating SQLAlchemy's internal dicts
+                    file_copy = {k: v for k, v in f.items() if k != "data"}
+                    orig_data = f.get("data", {})
+                    data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
+                    all_rows = orig_data.get("rows", [])
+                    
+                    if system_category:
+                        all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                    
+                    # Pagination logic
+                    if page is not None and not system_category:
+                        if i == len(result["files"]) - 1:
+                            # Latest file: Paginate
+                            start_idx = (page - 1) * page_size
+                            end_idx = start_idx + page_size
+                            data_copy["rows"] = all_rows[start_idx:end_idx]
+                            data_copy["pagination"] = {
+                                "total": len(all_rows),
+                                "page": page,
+                                "page_size": page_size,
+                                "has_more": end_idx < len(all_rows)
+                            }
+                        else:
+                            # Historical files: Strip rows to prevent massive 20MB+ payloads freezing the API
+                            data_copy["rows"] = []
+                            data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                    else:
+                        data_copy["rows"] = all_rows
+                        data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                        
+                    file_copy["data"] = data_copy
+                    new_files.append(file_copy)
+                result["files"] = new_files
                 
-                # 若有分類過濾需求 (用於詢價單明細)
-                if system_category:
-                    # 匹配規則：只要完整路徑中包含該關鍵字即可 (支援 LV.1 或 LV.2 匹配)
-                    rows = [r for r in rows if system_category in r.get("system_category", "")]
-                
-                total_rows = len(rows)
-                
-                # 如果有提供分頁參數且沒有過濾 (過濾時通常需要看全部)
-                if page is not None and not system_category:
-                    start_idx = (page - 1) * page_size
-                    end_idx = start_idx + page_size
-                    data["rows"] = rows[start_idx:end_idx]
-                    data["pagination"] = {
-                        "total": total_rows,
-                        "page": page,
-                        "page_size": page_size,
-                        "has_more": end_idx < total_rows
-                    }
-                else:
-                    data["rows"] = rows
-                    data["pagination"] = {
-                        "total": total_rows,
-                        "has_more": False
-                    }
             return result
         finally:
             db.close()
@@ -249,50 +255,43 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
         projects = load_projects()
         for p in projects:
             if p["id"] == project_id:
-                # 若有過濾或分頁需求，手動建立輕量化副本，避免使用極其緩慢的 deepcopy
-                if (page is not None or system_category) and p.get("files"):
-                    # 1. 複製基礎資訊
-                    p_view = {k: v for k, v in p.items() if k != "files"}
-                    
-                    # 2. 僅複製最新的檔案與其 metadata (不含大型 data)
-                    latest_file = p["files"][-1]
-                    file_view = {k: v for k, v in latest_file.items() if k != "data"}
-                    
-                    # 3. 處理 data 摘要與 rows (這才是主要的效能瓶頸)
-                    data_orig = latest_file.get("data", {})
-                    data_view = {k: v for k, v in data_orig.items() if k != "rows"}
-                    all_rows = data_orig.get("rows", [])
-                    
-                    # 過濾邏輯
-                    if system_category:
-                        filtered_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
-                    else:
-                        filtered_rows = all_rows
-                    
-                    total_rows = len(filtered_rows)
-                    
-                    # 分頁處理
-                    if page is not None and not system_category:
-                        start_idx = (page - 1) * page_size
-                        end_idx = start_idx + page_size
-                        data_view["rows"] = filtered_rows[start_idx:end_idx]
-                        data_view["pagination"] = {
-                            "total": total_rows,
-                            "page": page,
-                            "page_size": page_size,
-                            "has_more": end_idx < total_rows
-                        }
-                    else:
-                        data_view["rows"] = filtered_rows
-                        data_view["pagination"] = {
-                            "total": total_rows,
-                            "has_more": False
-                        }
+                # 重新打包避免使用緩慢的 deepcopy
+                p_view = {k: v for k, v in p.items() if k != "files"}
+                
+                if p.get("files"):
+                    new_files = []
+                    for i, f in enumerate(p["files"]):
+                        file_copy = {k: v for k, v in f.items() if k != "data"}
+                        orig_data = f.get("data", {})
+                        data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
+                        all_rows = orig_data.get("rows", [])
                         
-                    file_view["data"] = data_view
-                    p_view["files"] = [file_view]
-                    return p_view
-                return p
+                        if system_category:
+                            all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                            
+                        if page is not None and not system_category:
+                            if i == len(p["files"]) - 1:
+                                start_idx = (page - 1) * page_size
+                                end_idx = start_idx + page_size
+                                data_copy["rows"] = all_rows[start_idx:end_idx]
+                                data_copy["pagination"] = {
+                                    "total": len(all_rows),
+                                    "page": page,
+                                    "page_size": page_size,
+                                    "has_more": end_idx < len(all_rows)
+                                }
+                            else:
+                                data_copy["rows"] = []
+                                data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                        else:
+                            data_copy["rows"] = all_rows
+                            data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                            
+                        file_copy["data"] = data_copy
+                        new_files.append(file_copy)
+                    p_view["files"] = new_files
+                    
+                return p_view
         return None
 
 def _get_cached_rows(project_id: str) -> List[Dict[str, Any]]:
