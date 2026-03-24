@@ -1,0 +1,5133 @@
+{
+    "管線": {
+        "keywords": [
+            "管材",
+            "線",
+            "配管",
+            "管"
+        ],
+        "children": {
+            "PVC管(大洋)": {
+                "keywords": [
+                    "已選取1個項目"
+                ],
+                "children": {
+                    "PVC管  6\" x 8.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管  3\" x 5.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管  1\" x 3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管  3/4\" x 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管 (16)         1/2\" x 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管 (20)         3/4\" x 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管 (28)         1\" x 3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管   3/4\"* 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管   1\"* 3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管  3\"* 5.5mm(電信引進管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 排水管     2\"* 4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "導線管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管 (20)      3/4\" x 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管 (28)       1\" x 3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管 3/4\" *2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管 1\" *3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 管  1/2\"*2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 管  3/4\"*2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 管  1\"*3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC\"管材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "進水管預留套管5\"PVC*3.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "污水PVC-DWV管 橘紅色低噪音管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC-DWV 污排水管 (橘紅色)2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC-DWV 污排水管 (橘紅色)3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC-DWV 污排水管 (橘紅色)4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC-DWV 污排水管 (橘紅色)5\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC-DWV 污排水管 (橘紅色)8\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC雨水管(1F以上管道間或包柱內)、地下室筏基坑內排水管、結構體外覆土區": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 雨水排水 2\"x4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 雨水排水 3\"x5.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 雨水排水 5\"x7.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 雨水排水 6\"x8.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC空調排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3/4\"x3.0mm(含13mmt保溫管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3/4\"x3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1\"x3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2\"x4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "透氣管  PVC管 (1F以上管道間或包柱內)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC透氣管      2\"x2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC透氣管      3\"x3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "裝修排水管 PVC 排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "裝修排水管  PVC 4\"X7.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "複壁PVC排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC排水管       2\"x4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "排水管  PVC 3\"X5.5m": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "筏基連通管    4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "筏基連通管    6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC 導線管   1/2\"*2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC管1\"(鋼索用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電氣設備工程123": {
+                        "keywords": [
+                            "電氣設備工程000000"
+                        ],
+                        "children": {}
+                    },
+                    "台電配電室受電箱、集中表箱設備工程": {
+                        "keywords": [
+                            "已選取2個項目"
+                        ],
+                        "children": {}
+                    },
+                    "公共、停車場開關箱設備工程": {
+                        "keywords": [
+                            "已選取2個項目"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "EMT管(2606)": {
+                "keywords": [],
+                "children": {
+                    "EMT導線管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E25": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E31": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E39": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E51": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E63": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E75": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT E(25)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT E(31)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急廣播系統配管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(25)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(31)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(39)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(51)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(63)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管     E(75)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E-19": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT管  E-19": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E19": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "RSG管": {
+                "keywords": [],
+                "children": {
+                    "RSG管(鍍鋅管厚管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RSG管 (82)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RSG管 (104)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RSG 導線管 3\"(電信引進管洩水箱至MDF)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "消防-STPG、SGP管(6445.4626)1-1/2\"(含)以下": {
+                "keywords": [],
+                "children": {
+                    "40∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "15∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "25∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "32∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "STPG管    1\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "消防-STPG、SGP管(6445.4626)2\"(含)以上": {
+                "keywords": [],
+                "children": {
+                    "65∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "100∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "50∮  (消防栓箱排水立管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "50∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2\"GIP排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "80∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "150∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2\" GIP 排水管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "STPG管    2-1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "STPG管    4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "STPG管    6\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "鑄鐵管": {
+                "keywords": [],
+                "children": {
+                    "污水CIP-內外環氧樹脂塗裝鑄鐵管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 5\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 8\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 污排水管 (橘紅色) 10\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管道雨水排水CIP-內外環氧樹脂塗裝鑄鐵管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 雨水排水 2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 雨水排水 3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 雨水排水 4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 雨水排水 5\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 雨水排水 6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管道空調排水 CIP-內外環氧樹脂塗裝鑄鐵管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 空調排水 2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP 空調排水 3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "透氣管  CIP-內外環氧樹脂塗裝鑄鐵管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP透氣管      2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP透氣管      3\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "SUS管2\"(含)以下": {
+                "keywords": [],
+                "children": {
+                    "油箱不銹鋼SUS 1-1/2\"透氣管FL+400cm": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "SUS被覆管2\"(含)以下": {
+                "keywords": [],
+                "children": {
+                    "不銹鋼冷水管   1/2\"x0.8mm(被覆厚度0.8mm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼冷水管   3/4\"x1.0mm(被覆厚度0.8mm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼冷水管   1\"x1.0mm(被覆厚度0.8mm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發泡被覆不銹鋼熱水管 1/2\"x0.8mm(被覆厚度2.6mm)(牆內垂直用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發泡被覆不銹鋼熱水管3/4\"x1.0mm(被覆厚度3.3mm)(主浴花灑牆內垂直用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發泡被覆不銹鋼熱水管 1/2\"x0.8mm(被覆厚度6mm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發泡被覆不銹鋼熱水管 3/4\"x1.0mm(被覆厚度6mm)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "SUS管2-1/2\"(含)以上": {
+                "keywords": [],
+                "children": {
+                    "不銹鋼冷水管   3\"x4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼冷水管   4\"x4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼冷水管   5\"x5.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼冷水管   8\"x5.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼管(引進管)  3\"*4.0x40.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼(揚水管)4\"*4.0x40.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水箱排水管SUS   2\"*3.5mm含防蟲網": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水箱排水管SUS   4\"*4.0mm含防蟲網": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水箱排水管SUS   5\"*5.0mm含防蟲網": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3\"×4.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "6\"×5.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "PVC.PEX耐熱電線": {
+                "keywords": [],
+                "children": {
+                    "裸銅線 100m㎡": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "裸銅線  22m㎡": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC線  100mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC線  22mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC線  14mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電線類": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電纜     600V級       2.0mm/3C": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級       3.5mm²/2C": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級       5.5mm²/2C": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級       5.5mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           8mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           14mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           22mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           30mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           38mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           50mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           60mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級           80mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級          100mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級          150mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級          200mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "FR防火耐燃線(耐火950℃, 90分鐘)": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      2.0mm": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      5.5mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      8mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      14mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      22mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      30mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      38mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      60mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      80mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      100mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C      150mm2": {
+                        "keywords": [
+                            "FR防火耐燃線"
+                        ],
+                        "children": {}
+                    },
+                    "CAT 6": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "裸銅線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "14mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "60mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "室內電信電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CAT.6網路線(取代0.5-4P-PE-PVC 各戶室內電信電纜)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "0.5-10P-PE-PVC 電信電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "同軸電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RG-6U四層遮蔽型雙鋁雙網，遮蔽率60%以上": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "100mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐熱電線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐熱電線 HR 1.2mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐熱電線 HR1.6mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐熱電線 HR 2.0mm*3c對絞線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐燃電線 FR2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "耐燃電線 FR5.5mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "600V級HR 300℃耐燃電纜及FR 950℃耐燃電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HR 2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "600V級HR耐熱電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1.6mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "一般電線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級         125mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電線     600V級         250mm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "FR防火耐燃線     950°C     200mm2": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "水電消防設備": {
+        "keywords": [
+            "水電",
+            "給排水",
+            "消防",
+            "電氣",
+            "工程",
+            "電力",
+            "弱電",
+            "照明",
+            "空調",
+            "設備"
+        ],
+        "children": {
+            "消防-機械接頭另件2-1/2\"(含)以上(SPT)": {
+                "keywords": [],
+                "children": {
+                    "2\"以上採可饒性機械接頭20kg/cm2或300psi": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另件": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "鑄鐵管另件": {
+                "keywords": [],
+                "children": {
+                    "CIP污水管配管壓環接頭另件(清潔口上翹45度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP雨水管配管壓環接頭另件(清潔口上翹45度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CIP空調排水管配管壓環接頭另件(清潔口上翹45度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "GIP透氣管配管壓環接頭另件": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "SUS壓接另件2\"(含)以下(BENKAN)": {
+                "keywords": [],
+                "children": {
+                    "2\"含以下快速雙壓著另料": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "SUS機械接頭另件2-1/2\"(含)以上(SHURJIONT)": {
+                "keywords": [],
+                "children": {
+                    "2-1/2\"含以上機械接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另件(機械接頭)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "保溫材": {
+                "keywords": [],
+                "children": {
+                    "PE保溫被覆白膠帶": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "保溫管接頭保溫另件(美耐)": {
+                "keywords": [],
+                "children": {
+                    "被覆管美耐保溫另件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "美耐保溫另件": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "水錶位承插另件(EZ-JOINT)": {
+                "keywords": [],
+                "children": {
+                    "水錶位承插另件": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "國產閥類(給排水.消防)": {
+                "keywords": [],
+                "children": {
+                    "屋頂各戶水錶前閘閥": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "球塞凡而  (螺紋式)    1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "球塞凡而  (螺紋式)    3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘門凡而": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘門凡而  (螺紋式)  1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘門凡而  (螺紋式)  3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘門凡而  (螺紋式)  1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘門凡而  (螺紋式)  2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶型凡而  (法蘭式)  4\" (16K)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶型凡而  (法蘭式)  3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶型凡而  (法蘭式)  4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶型凡而  (法蘭式)  5\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "齒輪式蝶型凡而  (法蘭式)  8\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而 (螺紋式)      1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而 (螺紋式)      3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而 (螺紋式)      1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而 (法蘭式)      4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "靜音緩衝式逆止凡而  4\" (16K)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電磁閥(雨水蓄水池補水用)  3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "角閥型水垂吸收氣(螺紋式)  1/2\" 臉盆.馬桶": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "角閥型水垂吸收氣(螺紋式)  3/4\" 熱水器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "凡而類": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC閘閥2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "齒輪式蝶型凡而  (法蘭式)  6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止凡而  (螺紋式)  2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全流量偏心閘閥3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全流量偏心閘閥6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全流量逆止閥 3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全流量逆止閥 6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "6\"電動蝶閥齒輪式 10kg/c㎡  (雨水回收用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "6\"Y型過濾器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶閥 65∮16K(石墨鑄鐵)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶閥 100∮16K(石墨鑄鐵)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緩衝(無聲)逆止閥 100∮ 16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "底閥100∮10K (不鏽鋼)(附清潔用鍊條)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "Y型過濾器 100∮ (鑄鐵)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥 100∮10K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘閥": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全流量球塞閥 50∮10K(鉋金銅)-開放閥用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘閥 50∮(原液槽用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶閥 100∮10K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止閥": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緩衝(無聲)逆止閥 100∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止閥 50∮(原液槽用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "底閥 100∮10K (不鏽鋼)(附清潔用鍊條)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "把手式蝶閥 100∮16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "齒輪式蝶閥 150∮16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緩衝逆止閥 150∮16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "底閥 150∮10K (不鏽鋼)(附清潔用鍊條)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥 4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "昇桿閘閥 150∮16K(調壓閥及逆止閥旁通管用)(B1F，R2F)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "閘閥 25∮16K(補給水管用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "逆止閥 25∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緩衝逆止閥 100∮16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼幫浦壓力調整閥 6\" 16K  2次側出口壓力設定為1~1.5bar.流量2400 l/min": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "洩壓閥 4\" 16K 設定動作壓力17kg/cm2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥 1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "調壓閥 4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "Y型過濾器6\" 16K 6.3mm不鏽鋼網目": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "壓力開關組 設定壓力2kg以上": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水錘吸收器  6\", 法蘭式 16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "呼氣閥1/2\"  16K": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "水錘吸收器.減壓閥組.自動進排氣閥.釋氣閥.定水位閥(奕華)": {
+                "keywords": [],
+                "children": {
+                    "子母式定水位閥3\"(附1/2\"浮球凡而)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水錘吸收器(含維修閘閥)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "給水下水管用水錘吸收器3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "給水下水管用水錘吸收器1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "泵浦用水錘吸收器4\" 16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥組(含不鏽鋼考克×2、油壓力表及考克、過濾器)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥組 1\"(內含一次側水垂吸收器及維修閘閥)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥組 3/4\"(內含一次側水垂吸收器及維修閘閥)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "總表後自動進排氣閥": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3/4\"   進氣量:780L/min 排氣量:18L/min": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "大小型吸氣閥": {
+                "keywords": [],
+                "children": {
+                    "大型吸氣閥": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "防震軟管": {
+                "keywords": [],
+                "children": {
+                    "高壓不銹鋼防震軟管含不銹鋼法蘭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "4\"(法蘭式)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "4\"(法蘭式) 16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "8\"(法蘭式)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓不銹鋼304防震軟管 2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓不銹鋼304防震軟管 3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓不銹鋼304防震軟管 6\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼防震軟管 100∮  16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼防震軟管100∮10K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼防震軟管150∮16K": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼防震軟管25∮": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "避震器": {
+                "keywords": [],
+                "children": {
+                    "台電變壓器氣墊式避震器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震設備(避震墊)25HP*2台": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SUS避震器底座(0.95KW*14組+0.75KW*1組)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震(給水管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "防震橡膠  4\"固定部": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震  4\"活動部": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震設備(25HP*1組)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震設備(40HP*1組)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震(撒水管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "防震橡膠  6\"固定部": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震  6\"活動部": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震設備(75HP*1組)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "立管防震(連結管、消防管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避震設備(100HP*1組、75HP*1組)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "配電盤.弱電箱體": {
+                "keywords": [
+                    "ATS"
+                ],
+                "children": {
+                    "受電箱P1~P7  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CASE:800*1600*350mm  2.0t mm(門把:A-281-1)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 400AT 380V/35KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤內銅排及固定": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "五金另料&PVC線,端子,色套等配線另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "組裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "受電箱P8~P10  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 800AF 800AT 380V/35KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "三相電錶箱 KWHA1-1,KWHA1-2,KWHA8-1,KWHA8-2  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CASE:2500*1500*350mm  2.0t mm(門把:A-281-1)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "KS 3P 500A": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 50AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "nan": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "三相電錶箱 KWHA2-1~KWHA7-1 , KWHA2-2~KWHA7-2   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 40AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "三相電錶箱 KWHMP,KWHMPA,KWHCAR   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CASE:1200*1600*350mm  2.0t mm(門把:A-281-1)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 800AF 800AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地測試端子箱 70Hx 40Wx 15D cm(含銅板)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MP/EMP/EMR  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CASE:  3.0/2.0t mm (門把:A-281-1)(尺寸依現場施作)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 600AF 500AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 250AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 200AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 175AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 125AT 380/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 75AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 50AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 40AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 30AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 20AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 190V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 50AT 190V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 40AT 190V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 20AT 190V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MC 3∮480V 20KVAR  電容器專用型": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CT 600V  800/5A  15VA  MOLD TYPE": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CT 600V  40/5A  15VA  MOLD TYPE": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ATS 4P 800AF 800AT 30KA NBF TYPE附電氣及機械互鎖裝置及電源指示燈 ,開關跳脫時盤面復歸": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "整套型遠端控制開關 LSSW 內含:NFB 3P 400AF 300AT 380V/30KA及欠相檢知﹐水電承商須留控制至火警受信總機及發電機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "DMS 附 RS485": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "APFR 自動功率因數調整器 6 段": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "半套式電容器組SC 3∮ 480V 20KVAR  防爆型 (MC,HRC-FUSE,SC)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PBL 照光式按鈕開關   30∮ ( LED )": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CS  30∮   ( KEY )": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "TIMER-24HR 停電補償型": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HRC": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "D-FUSE  2A W/BASE及斷電指示燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤面式散熱風扇": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "溫控開關": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "日光燈及微動開關": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B4L,B3L,B2L,B1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CASE:  2.0t mm (門把:A-281-1)(尺寸依現場施作)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 20AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 20AT 220V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 15AT 220V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "二線式製模組 R/Y 6161-38": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 15AT 220V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 1∮220V 100VA*1 (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 20AT 190V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 20AT 110V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 15AT 110V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB3L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB3R,EB2R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB2L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 40AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 1∮220V 15A (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1PG  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 30AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 30AT 220V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 20AT 220V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1L1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1L1-3隔離盤  SUS PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 50AT 190V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1R1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 40AT 190V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1FL  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 125AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 20AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "4FLA,5FLA,6FLA,8FLA,10FLA,12FLA,14FLA,16FLA,18FLA,20FLA,22FLA,24FLA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2FLA,3FLA,7FLA,9FLA,11FLA,13FLA,15FLA,17FLA,19FLA,21FLA,23FLA,25FLA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1L1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1R1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1AP~B4AP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 10HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B2AP1~B4AP1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 75AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 20HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1AP1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4FP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 600AF 500AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 175AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 60AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1FP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 250AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4WP1,EB4WP2  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 3P 50AF 50AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EX 交替電驛": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "液位控制器(雙水位)(加1組監控用),附水銀浮球三只": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CS  30∮   ( 3A )": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4WP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 3P 50AF 15AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 5HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4SP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 3HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B4RP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 15AT 380V/10KA   3P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 1HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E1FAP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1ACP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 20AT 380V/15KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 4P 50AF 40AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 4P 50AF 30AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1AC1-1~3隔離盤  SUS PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 40AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 30AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "D/G  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ACB 3P 1600AF 1200AT 50KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 800AF 800AT 380V/50KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 600AF 600AT 380V/50KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 350AT 380V/50KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 380V/50KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "整套型遠端控制開關 LSSW 內含:NFB 3P 400AF 350AT 380/50KA及欠相檢知﹐水電承商須留控制至火警受信總機及發電機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 25HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ON-DELAY": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER2A~ER25A  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 30AT 190V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "CAR  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 300AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 225AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 1754AT 380V/30KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B4CAR,B4CAR1~B4CAR3,B3CAR1~B3CAR3,\nB2CAR1~B2CAR3  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 40AT 220V/30KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 15AT 220V/30KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HUB 24埠": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1RP  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 2HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B2CAR,B3CAR  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1CAR  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HUB 16埠": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1CAR1  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MPA/EMPA/EMRA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 800AF 800AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 400AF 400AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 175AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 150AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 125AT 380/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 75AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 30AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 20AT 380V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 175AT 190V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 190V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 40AT 190V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 20AT 190V/25KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MC 3∮480V 15KVAR  電容器專用型": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ATS 4P 600AF 500AT 25KA NBF TYPE附電氣及機械互鎖裝置及電源指示燈 ,開關跳脫時盤面復歸": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "整套型遠端控制開關 LSSW 內含:NFB 3P 400AF 300AT 380V/25KA及欠相檢知﹐水電承商須留控制至火警受信總機及發電機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "半套式電容器組SC 3∮ 480V 15KVAR  防爆型 (MC,HRC-FUSE,SC)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B1LA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1LA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 20AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 1∮220V 1/2HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB1RA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 40AT 110V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E2FAPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER3EPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 150AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "TVSS": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER2EPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EB4CWPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 3P 100AF 75AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SMC 3∮380V 25HP": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "液面控制器(61F-G1*1,61F-I*2)(監控用),附熱縮套管包覆SUS316電極棒": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER1FAPA,ER2FAPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 40AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MS 3∮380V 15HP (欠相)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER2FPA  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 225AF 175AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3LA,6LA,9LA,12LA,15LA,18LA,21LA,24LA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "R1LA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 50AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 3P 50AF 20AT 380V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "DF 3A": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "TR 1KVA 220V/DC24V": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E3LA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E6LA,E9LA,E12LA,E15LA,E18LA,E21LA\n,E24LA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER1LA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E3RA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 100AT 190V/10KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER1RA   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E3LA1   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E6LA1,E9LA1,E12LA1,E15LA1,E18LA1,E21LA1,\nE24LA1   PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "TEL  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 20AT 220V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 15AT 220V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ETR  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 100AF 75AT 190V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 20AT 110V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 1P 50AF 15AT 110V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER2A~ER25 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤內銅排及固定 (700A)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3LA,6LA,9LA,12LA,15LA,18LA,21LA,24LA 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤內銅排及固定 (130A)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "R1LA 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E3LA 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤內銅排及固定 (220A)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E6LA,E9LA,E12LA,E15LA,E18LA,E21LA,E24LA 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ER1LA 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E3LA1 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤內銅排及固定 (300A)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "E6LA1,E9LA1,E12LA1,E15LA1,E18LA1,E21LA1,E24LA1 進線銅牌箱  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3A1L~23A1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 50AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 15AT 380V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 30AT 220V/15KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 20AT 220V/15KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3A1R~23A1R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NFB 3P 50AF 40AT 190V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 20AT 110V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 15AT 110V/15KA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ATS 3P 4P 20A 110V/10KA 附電器與機械連鎖及裝置及電源指示燈(MC TYPE)": {
+                        "keywords": [
+                            "ATS"
+                        ],
+                        "children": {}
+                    },
+                    "24A1L~25A1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ELCB 1P 50AF 15AT 220V/15KA   2P代": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A1R~25A1R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A2L~23A2L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A2R~23A2R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A2L~25A2L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A2R~25A2R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A3L~23A3L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A3R~23A3R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A3L~25A3L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A3R~25A3R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A5L~23A5L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A5R~23A5R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A5L~25A5L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A5R~25A5R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A6L~23A6L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A6R~23A6R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A6L~25A6L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A6R~25A6R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A7L~23A7L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A7R~23A7R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A7L~25A7L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A7R~25A7R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3A8L~23A8L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "3A8R~23A8R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A8L~25A8L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24A8R~25A8R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A1L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A1R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A8L  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2A8R  PANEL": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ACB 3P 1200AF 1200AT 35KA及盤面接續銅排": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "弱電整合箱  80*40*12cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "弱電整合箱 70*220*20cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "弱電整合箱 60*200*20cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "散熱宅內箱 70*60*20cm含電話、電視、資訊、監控共用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼洩水箱(70*70*35cm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地端子測試箱 40W×70H×15D cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "DATV配線箱 60W×60H×15D CM": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地端子測試箱 70W×40H×15D CM": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "地下室監控箱(W*H*D)1200*1800*200mm散熱開孔": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "弱電總箱(W*H*D)600*600*200mm": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "變壓器": {
+                "keywords": [
+                    "3Φ3W380V/3Φ4W110-190V50KVA",
+                    "3Φ3W380V/3Φ4W110-190V30KVA"
+                ],
+                "children": {
+                    "TR(MOLD TYPE) IP20 噪音值小CNS規範(銅繞組)H級絕緣附外箱.角架及避震器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "變壓器": {
+                        "keywords": [
+                            "3Φ3W 380V/ 3Φ4W"
+                        ],
+                        "children": {}
+                    }
+                }
+            },
+            "台電受電室通風百葉附防火閘門、壁面進氣防火風門(含安裝工資)": {
+                "keywords": [],
+                "children": {
+                    "台電受電室電表室通風百葉附防火閘門": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "壁面進氣防火風門 W65xH65cm": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "標示牌": {
+                "keywords": [],
+                "children": {
+                    "機房壓克力中文標示牌24*10cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "各箱體中文壓克力標示牌及單線、結線圖(含分屬戶別之公共箱體標示樓層門牌例:表前後開關及受電相等,箱體內迴路電腦打字護貝)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "各戶不銹鋼銘牌": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管路用途中文標示牌及流向標示牌": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不鏽鋼製連結送水管系統操作暨復歸說明標示牌 40cm x 40cm以上": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "接地材料": {
+                "keywords": [],
+                "children": {
+                    "接地銅棒 3/4\"∮-10' 及火泥熔接": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地銅棒 3/4\"*10'L及火泥熔接": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "全模鑄匯流排設備(連工帶料)": {
+                "keywords": [],
+                "children": {
+                    "全模鑄 CU BUSWAY 3Ø4W+1/2G 1200A (銅IP:68；附防火證明)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "直線部份(IP68)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "90°彎頭（加工費）": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "盤面接頭（加工費）": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "編織軟銅帶 (長450mm，不含銅排)）": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "匯流排系統設備安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "線槽線架": {
+                "keywords": [],
+                "children": {
+                    "配電室CABLE TRAY 60x10CM含五分固定螺絲及角鐵": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "鋁製CABLE TRAY 10u陽極處理,梯形電纜架": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "直式 W:300mm   H:100mm    t:3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平L型接頭  W:300mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平T型接頭  W:300mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "末端封板 W=300mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "固定片": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "連接板": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地銅片": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼馬車螺絲 SUS304": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "鋁製CABLE TRAY 10u陽極處理,梯形電纜架(T.TV.C.BA共用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "直式 W:400mm   H:100mm    t:3.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平 W=400mm L型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平 W=400mm T型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "垂直 W=400mm L型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "末端封板 W=400mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 90度平彎接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 90度上升/下降接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM T型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 連接片": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 固定片 L型": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 接地銅片": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電室線槽 60x10CM 馬車螺絲": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平L型接頭  W:400mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水平T型接頭  W:400mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "密閉式不燃性線槽40W*10DCM": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "密閉式不燃線槽 水平 W=400mm L型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "密閉式不燃線槽 水平 W=400mm T型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "密閉式不燃線槽 垂直 W=400mm L型接頭": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "浴廁排風機.浴廁多功能冷暖風機(阿拉斯加)": {
+                "keywords": [],
+                "children": {
+                    "浴廁排風機 85CMH 9mmAq 220V": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "浴廁多功能冷暖風機 220V 含專用配線.逆止風門": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "機房壁扇": {
+                "keywords": [],
+                "children": {
+                    "機房壁扇  1∮220V含BOX(附溫控)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "開關插座(含電話.資訊)": {
+                "keywords": [],
+                "children": {
+                    "單聯壁式暗開關  300V  15A   附指示燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙聯接地型壁式暗插座 125V 15A(大型面板)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙連暗插座(接地型)2P+E 125V 15A 含鐵片、蓋板、BOX(供VIP公共區域.管委會使用空間.等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "跑步機專用單連暗插座(地板掀蓋接地型)2P+E 250V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙連暗插座(接地型)2P+E 125V 15A 含鐵片、蓋板、BOX(供各類機房.機坑.消防栓箱內.弱電整合箱內..等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "單連暗插座(接地型)2P+E 250V 20A 含鐵片、蓋板、BOX(供各類機房)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急照明燈.安全門燈.方向指示燈.樓層指示燈 單連暗插座(接地型)2P+E 250V 20A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "公共開關(夜光)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "S 1P 300V 15A 含鐵片、蓋板、BOX(供VIP公共區域.管委會使用空間.等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SS 1P 300V 15A 含鐵片、蓋板、BOX(供VIP公共區域.管委會使用空間.等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "S 1P 300V 15A 含鐵片、蓋板、BOX(供各類機房..等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙連暗插座(接地型)2P+E 125V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廚房.洗衣機專用暗插座(接地型)2P+E 125V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "室內夜光開關(含大型蓋板)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "S    1P 110V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SS   1P 110V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SSS  1P 110V 15A 含鐵片、蓋板、BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電話/資訊雙插座(6極4蕊)/(cat6)含蓋板BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "資訊雙插座(cat6*2)含蓋板BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "壁內單插座末端型(5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "地板單插座末端型(5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "公共燈具開關插座設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "單連暗插座(接地型)2P+E 250V 20A 含鐵片、蓋板、BOX(廚房.免治)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "避雷針.航空障礙燈(含簽證)": {
+                "keywords": [],
+                "children": {
+                    "公共燈具開關插座設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "LED中亮度航空障礙燈 B型符合FAA認證": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "航障燈用SUS固定架 H=1M (中亮度用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "航障燈主控制盤及光電開關控制器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "放電式電避雷針,本體為SUS316材質,符合海島型氣候": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SUS304不銹鋼支撐架 H:3M經靜電處理(含基礎及鋼索固定)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "防側雷突針含固定座(1/2\"x60cm)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "使照竣工專業技師簽證": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "拉線箱": {
+                "keywords": [],
+                "children": {
+                    "拉線箱附封印鎖孔2.0t鍍鋅鋼板靜電粉體塗裝配合現場施作": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "拉線箱(2.0t鍍鋅鋼板靜電粉體塗裝)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "斷水結線箱&電源供應器放置箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "屋頂水管路保護箱含SUS304*2t蓋板": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "照明設備": {
+                "keywords": [],
+                "children": {
+                    "平頂矮腳燈座, 附5W LED燈泡": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "矮腳燈座及螺旋燈泡5W": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "前後陽台嵌燈  LED燈泡9W 110V": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "浴室廚房嵌燈 LED燈泡9W 110V": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "面盆嵌燈 LED MR16型燈泡 5W 110V 含BOX": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "工程試車用油及驗收後加滿油": {
+                "keywords": [],
+                "children": {
+                    "(提供滿油箱,工程試車用油及驗收後加滿油)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "電動汽車充電器系統設備工程": {
+                "keywords": [],
+                "children": {
+                    "壁掛式充電椿(含電纜、讀卡機)，符合CNS 15511規範。輸入與輸出電源380V，50KW，60HZ，防水防塵等級 IP55，操作介面與控制 RFID 符合規範 ISO 14443 規範。附特斯拉專用轉接頭*2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "後臺管理軟體及系統伺服器電腦                                          (含管理系統軟體、及時充電設備狀態、充電電壓/電流/度數、剩餘充電時間、充電費率選項等功能及監控工業級電腦主機含作業系統)需符合國際OCPP協議": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "22吋螢幕": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "讀卡機(發卡機)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "感應卡": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "壁掛式交流電充電器落地支架": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "24 Port網路交換器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "教育訓練": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電動汽車充電器系統設備安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "充電設備現場設定費": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "電話.電視資訊網路.光纖設備(含線材配線、器具安裝、NCC簽證、不含插座)工程": {
+                "keywords": [],
+                "children": {
+                    "MDF-6 單側5架  含C型端子座 100C*8": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "C型端子座10P": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "C型端子座30P": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "C型端子座20P": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電話模組(二進八出分支模組)含A型端子版 10A": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "網路模組1000Mbps(8埠網路交換機含電源模組及網路承端)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "Cat6A網路短跳接線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電視分配(一進八出電視分配 5-1000MHZ 含放大器)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "四路110AC電源插排模組": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "模塊固定支架": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "0.5-50P-PE-PVC 電信電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "0.5-100P-PE-PVC 電信電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "0.5-200P-PE-PVC 電信電纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配線另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "運什費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "弱電設備安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NCC檢查申請技師簽證費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "DTV 20列不銹鋼特級數位天線, 含不銹鋼腳架H:2M及預埋座": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避雷保安器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛星中繼放大器40dB": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛星二分配器(衛星寬頻式5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛星六分配器(衛星寬頻式5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛星八分配器(衛星寬頻式5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛星一分岐器(衛星寬頻式5~1000MHz)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RG-11U四層遮蔽型雙鋁雙網，遮蔽率95%以上": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "資訊設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "96C-8MB微簇型室內光纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "12C-2MB微簇型室內光纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SM-4C室內扁平光纜": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SC-SC單模光纖跳接線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SC單模光纖引接線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "28C光纖接續箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "4C光纖收容盒(含SC接頭*4)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "96C光纖配線箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "19\" 41U光纖機櫃(OLDF-12)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "標籤用紙": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "硬體安裝含五金另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "光纖佈放工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "光纖熔接工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "光纖衰減及OTDR測試": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "NCC審驗(含技師及乙級技術士簽證)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "VIP視聽系統社區文書處理設備": {
+                "keywords": [],
+                "children": {
+                    "業務播音設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "音樂播放主機(含可裝永久版權音樂)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "永久版權音樂CD片(一套10片)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "DVD播放機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "觸控螢幕面板(具有3*4矩陣功能)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "8x8矩陣參數型主機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "舞台用高壓輸出擴大機(100V/300Wx2)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自動控制機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "總電源時序供應器(RS-485控制)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "音量控制器(60W)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "音量控制器(30W)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "二音路崁頂喇叭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RS-485轉換器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "木製機櫃(室內裝修提供)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "線材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "五金,零料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配線工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "設備安裝,測試工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "程式設定費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "一層多功能室": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "75吋液晶電視": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙頻無線麥克組(手握麥克風x2)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "數位音頻混音機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "300W功率擴大機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDMI矩陣處理器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDMI延伸器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDMI無線傳輸器(傳輸距離30米)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDMI無線接收器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "前景音樂崁頂喇叭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "液晶電視安裝架": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "多媒體影音面板": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "設備安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "一層健身房": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "43吋液晶電視": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "液晶電視懸吊架": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "一層KTV室(兩間)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電腦點歌機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "65吋液晶電視": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雙頻無線麥克風組(手握麥克風x2)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "KTV擴大機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "演唱喇叭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "網路型時序控制器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "紅外線控制器(廣角半球型)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "喇叭吊架組": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC\"管材": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "總存水彎兼淋浴或地板排水口": {
+                "keywords": [],
+                "children": {
+                    "總存水彎兼淋浴或地板排水口": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "總存水彎兼淋浴或地板排水口(SUS材質)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "沉砂桶附軟管": {
+                "keywords": [],
+                "children": {
+                    "90L沉砂桶附軟管": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "防雨罩.尼龍布風管.管束": {
+                "keywords": [],
+                "children": {
+                    "浴廁4\"排風預留套管及PVC尼龍軟管配管(須採風管束帶)至外牆附4\"SUS氟碳烤漆防雨罩工料(與外牆同色)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "排油煙管6\"∮含預留套管.可撓鋁質軟管配管(須採風管束帶)至陽台外附6\"SUS氟碳烤漆防雨罩工料(與外牆同色)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "全熱交換器6\"∮含預留套管及SUS氟碳烤漆防雨罩工料(與外牆同色)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "瓦斯熱水器2-1/2\"∮含預留套管.       不銹鋼強制排氣可撓管配管外覆20mm隔熱材至陽台,外附4\"SUS氟碳烤漆防雨罩工料(與外牆同色)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "龍頭.落水頭.高壓浮球凡而": {
+                "keywords": [],
+                "children": {
+                    "1F&屋頂公設1/2\"水槽龍頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "住戶陽露臺長栓龍頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "洗衣機龍頭1/2\"附軟管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "後陽台洗槽冷熱混合龍頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓浮球凡而": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓浮球凡而 1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓浮球凡而 3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高壓浮球凡而 1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "落水頭類": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "落水頭 (高籠型)   3\"  (不銹鋼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "落水頭 (高籠型)   2\"  (不銹鋼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "車道截水溝落水頭 (高籠型)   3\"  (不銹鋼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "複壁落水頭 (高籠型)   2\"  (不銹鋼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管道底部落水頭 (高籠型)   2\"  (不銹鋼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "空調室內機排水口": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "空調室外機排水口": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "拖布盆排水口3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廚房流理台排水口2\"(附延伸管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廚房地板清潔口2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "洗衣機排水口2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "洗槽排水口2\"(附延伸管)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廁所(乾區)地板落水頭2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "淋浴間(濕區)地板落水頭2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "陽台地板落水頭2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "地下室地板落水頭2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "暗排水平頂接頭   1009": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2F陽台,各層露台,屋頂平台溢水孔(含SUS304內外修飾蓋與外牆同色）": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "明式清潔口        4\" (地板式)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "冷氣管塞頭組": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "高流量過濾系統(3M)": {
+                "keywords": [],
+                "children": {
+                    "3\"引進管高流量過濾系統,去除率25微米總處理量9000噸(符合FDA規定)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "水表用定表管(含由令)": {
+                "keywords": [],
+                "children": {
+                    "水表用定表管（含表前後由令）1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水表用定表管（含表前後由令）3/4\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "集水分配管": {
+                "keywords": [],
+                "children": {
+                    "不銹鋼\"SUS304\"集水分配管(含1/2\"洩水閥,自動釋氣閥)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "屋頂水表固定架": {
+                "keywords": [],
+                "children": {
+                    "屋頂水表固定架SUS304(含立式水表錶箱、抄表台SUS製)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "PP陰井、HDPE透、排水管": {
+                "keywords": [],
+                "children": {
+                    "景觀排水": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PP滲透陰井W:35 D35:cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "落水井W:22.5 D:22.5cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDPE透、排水管  3\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "HDPE透、排水管  5\"": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "給排水泵浦": {
+                "keywords": [],
+                "children": {
+                    "陸上型直立式揚水幫浦  3Φ380V 25HP (接液部分整組不銹鋼304) D=4\" Q=572L 616L/Min H=122M(高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "住戶不銹鋼恆壓變頻加壓泵(含屋外型不銹鋼開關箱)0.95KW,V:1ψ220,H:17M,Q:6 M3/H,D=1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "公共不銹鋼恆壓變頻加壓泵(含屋外型不銹鋼開關箱)0.75KW,V:1ψ220,H:27M,Q:3 M3/H,D=1-1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "沉水式廢水泵防水電纜長度需至開關箱3φ380V 5HP交互並列運轉附著脫裝置及SUS吊鍊規格 : D=4\" Q=430 LPM H=19M(單台水量)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "沉水式污水泵防水電纜長度需至開關箱3φ380V 3HP5HP交互並列運轉及SUS吊鍊規格 :D= 3\" Q=350 LPM H=19M(單台水量)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "沉水式雨水貯集滯洪泵防水電纜長度需至開關箱3φ380V 20HP交互並列運轉附著脫裝置及SUS吊鍊規格 : D=6\" Q=1842 LPM H=20M(單台水量)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "污水工程(含人孔陰井)": {
+                "keywords": [],
+                "children": {
+                    "自設消能陰井∮60CM H=1.4M": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "外管線土方挖掘、埋管、回填及管路防水處理": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "衛工圖審變更及竣工圖修正作業費": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "污水防阻塞措施(詳大樣圖)": {
+                "keywords": [],
+                "children": {
+                    "污水防阻塞措施(詳大樣圖)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "雨水回收設備工程": {
+                "keywords": [],
+                "children": {
+                    "雨水回收設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "美製CARVIN 石英砂過濾桶 TM-26": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雨水回收 沉水式幫浦 1HP": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "20#石英砂": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "紫外線殺菌機 78W": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "液位控制系統": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2\"過濾循環配管材料PVC厚管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC給水配件及膠劑": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC電導管及配件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC控制及感應電纜線": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "凡而及五金另件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管路及配件配管按裝工(含管路預配)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電導管配管及控制線感應線穿線工": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "設備按裝工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自動控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "設定及試水調整": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "運什費及工地小運搬": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雜項工料": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "消防設備含廣播及簽證": {
+                "keywords": [],
+                "children": {
+                    "現行消防設備師士監造簽証及相關文件照片費用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防施工查驗及竣工報告書、設備師士簽証費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防申請室內裝修報竣、變更圖審簽証費用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "智慧型定址複合式火警受信總機4回路 17500點": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中/英文液晶顯示模組(畫面同時顯示定址點狀態：正常/火警/斷線/故障)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "迴路(RS232或RS485)通信迴路內建隔離功能/自我偵測重碼功能": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "具有線路接地自動偵測功能抗高雜訊干擾(EMI/EMC),符合CE檢驗規範": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "主控操作模組,系統通訊模組,電源供應模組,預備電源保護裝置、電源模組防雷擊突波保護裝置及電壓異常偵測": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "可分別設定9段日夜間靈敏調整": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "定址設備可同時輸出4組移報,4000組群組連動": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中英文熱感式列表機/內置緊急廣播移報模組": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "總機需有電源關閉異常訊號移報輸出": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "外接22吋觸控螢幕及電腦主機含圖控軟體編輯": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "防災中心控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電源供應器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "火警受信副機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "總機執行軟體及程式編寫設定費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廣播迴路移報介面": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(監視)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(控制)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(隔離模組)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(控制-廣播移報)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(預留監視)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼器(預留控制)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "火警綜合盤(不含火警警鈴)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "防火鐵捲門控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "偵煙感知器(雙LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "差動感知器(雙LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "定溫感知器(LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "補償式探測器(LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "定址式偵煙感知器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "定溫式探測器 特種(LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "瓦斯漏氣檢知器(吸頂式)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "偵煙式局限型(獨立式住警器)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急照明燈 LED 嵌頂式": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急照明燈  LED 吸頂式": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急照明燈 LED 壁掛式": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "出口標示燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B級導光式LED燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "C級導光式LED燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "避難方向指示燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "B級導光式LED燈雙面單向左或右 附吊桿": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "樓層表示燈(C級導光式LED燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電磁門扣 DC-24V": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "排煙室排煙閘門手動開關": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "ABC乾粉滅火器10型(含箱座標示牌)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "10P滅火器放置箱25x60x18cm/單支裝含標示牌": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "瓦斯漏氣檢知器用FUPS 3000VA(3KVA)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電磁門扣用FUPS  3000VA(3KVA)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "綜合消防栓箱(含模組箱及滅火器箱) 綜合盤，38毫釐消防栓16K，15m水帶x2，瞄子，泵浦啟動燈等不含警鈴  顏色依業主指定色": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "綜合消防栓箱(含模組箱及滅火器箱) 綜合盤，緊電插座，緊急電話，38毫釐消防栓16K，15m水帶x2，瞄子，泵浦啟動燈等不含警鈴  顏色依業主指定色": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "綜合消防栓箱(含模組箱及滅火器箱) 綜合盤，緊電插座，38毫釐消防栓16K，15m水帶x2，瞄子，泵浦啟動燈等附件齊全不含警鈴  顏色依業主指定色": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "綜合消防栓箱及水帶箱(含模組箱及滅火器箱) 綜合盤，緊電插座，緊急電話，38毫釐消防栓16K，15m水帶x2，瞄子，65毫釐瞄子，20M水帶x2，泵浦啟動燈不含警鈴  顏色依業主指定色": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防測試出水口 40∮ (附標示牌)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "減壓閥 1 1/2\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急廣播主機1500W 40L  含DVD": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急廣播電話總機 25L": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急通話裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廣播喇叭  (5W,崁頂型,L級)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廣播喇叭  (5W,吸頂型,L級)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廣播喇叭  (5W,壁掛型,L級)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "泡沫頭 放射壓力 2.5Kg 放射量 35L/min": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "感知頭  UL/FM認可(標示溫度68℃以下,動作時間60sec以內)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "一齊開放閥 50∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "泡沫原液槽 500L": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "泡沫原液 3%含消檢及管委會測試用量": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "比例混合器 100∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "手動啟動開關 25∮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "砲金銅螺紋式測試閥1\"": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自動警報逆止閥 4\"(標示牌及配件)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水流警報器  DC24V埋入式UL/FM認可": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自動撒水頭優美向下型 有效半徑 2.3M": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "集熱板": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "末端查驗管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自動警報逆止閥 100∮(標示牌及配件)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "撒水送水口 150AX65AX65A含SUS面板": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "10F以下綜合消防栓箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "單口型出水口65A(16K)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "11F以上綜合消防栓箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "單口型出水口,65A(16K)-11F以上樓層，各層須設置2只": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "連結測試出水口 65A(16K) (附標示牌)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼機房出水口(B1F, R2F), 65A(16K)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼機房連結送水口(B1F, R2F)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "連結送水口(1F)(優美崁入型附不繡鋼箱體)4\"×2 1/2\"×2 1/2\" (16K)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼送水口及箱體(11F, 16F, 210F)  60x40x22cm  t=2.0mm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼送水用出水口(16F,21F)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "通話裝置子機  含箱體": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "連結泵浦啟動開關  (含標示燈)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "C級導光式LED燈雙面單向左或右 附吊桿": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "移交管委會後第一年檢修申報費用(裕鑫消防)": {
+                "keywords": [],
+                "children": {
+                    "移交管委會後第一年檢修申報費用": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "消防泵浦": {
+                "keywords": [],
+                "children": {
+                    "陸上式整套型消防泵浦 25HPH=131M, Q=300L/MIN（含16K不銹鋼軟管、16K緩衝無聲逆止閥、16K閘閥等配件全 油浸式壓力表）              註:泵浦於交貨前需依現場管系之管徑及彎頭等重新水力計算選擇適合之流量及揚程(馬達為大同或東元高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "陸上式整套型泡沫泵浦 30KW(40HP)H=72M,Q=1050L/MIN 100∮ 含10K不銹鋼軟管 10K緩衝(無聲)逆止閥 10K閘閥  油浸式壓力表         註:泵浦於交貨前需依現場管系之管徑及彎頭等重新水力計算選擇適合之流量及揚程(馬達為大同或東元高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "陸上式整套型撒水泵浦 56.25KW(75HP)H=138M,Q=1080L/MIN 150∮ 含16K不銹鋼軟管 16K緩衝無聲逆止閥 16K閘閥 油浸式壓力表                   註:泵浦於交貨前需依現場管系之管徑及彎頭等重新水力計算選擇適合之流量及揚程(馬達為大同或東元高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "整組型電動連結送水管幫浦 74.6KW(100HP)D=6\" Q=2400L/MIN H=103M 全套標準配件,20k閥件全閉揚程為141M以下 ( 油浸式壓力表,馬達為大同或東元高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "整組型電動中繼消防幫浦 56.25KW(75HP)D=6\" Q=2400L/MIN H=84M  全套標準配件,20k閥件 ( 油浸式壓力表,馬達為大同或東元高效率馬達符合IE3)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "充油式壓力表": {
+                "keywords": [],
+                "children": {
+                    "充油式壓力表   30kgf/cm2刻度": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "充油式壓力表   20kgf/cm2刻度": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "吸音處理及浮動地板": {
+                "keywords": [],
+                "children": {
+                    "RF消防機房壁面與頂板施作32K50mm吸音玻纖板外覆沖孔板吸音處理": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RF機房浮動地板": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "組合式垃圾冷藏庫": {
+                "keywords": [],
+                "children": {
+                    "組合式垃圾冷藏庫(2~5℃)設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "氣冷式壓縮機組 壓縮機3φ380V 2HP": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "冷藏庫外板鹽化鋼板,內板不銹鋼板厚度0.5mm全平板，庫板厚度6cm，庫內淨高240cm": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "20W奈米殺菌燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "循環脫臭裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "環保冷媒R404C型": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "溫度控制裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "微電腦省電ECO控制裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高密度硬質PU保溫材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "庫內地板加設止滑棧板": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "抗菌防黴接合封邊材料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "節能塗裝": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "庫門與庫板同材料及防反鎖裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "60CM*60CM感應式垂直自動氣密投入門": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "廚餘冷凍式貯存機(雙槽)內含120L*2廚餘筒": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "除霜除霧裝置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "機組防震及按裝": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "銅管焊接": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配電,配排水": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "加壓探漏,真空處理": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "試機調整及運雜費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "660公升垃圾子車": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "660公升資源回收子車": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "240公升資料回收子車": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼廚餘回收專用推車": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "120公升廚餘桶": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "不銹鋼櫃式洗水槽附感應式水龍頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "拖布盆": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "臨時水電設備材料": {
+                "keywords": [],
+                "children": {
+                    "MP臨時電源總盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MR臨時插座總盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "MPA照明電力盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "OP1工務所照明電力盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "RP1工務所插座電力盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "各層電力PR開關箱": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PD給水電力控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PE抽水電力控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PA進排風電力控制盤": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "變壓器3Φ4W  208/120V  100KVA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "220V LED 燈泡23Wx1": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "220V LED 燈泡75Wx1": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "樓梯間LED防水條燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "300W  LED探照燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管線及另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "臨時避雷針(含管線器材)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急廣播主機 200W": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急對講主機 30回(含子機30台)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急廣播喇叭 5W": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "緊急照明燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "蹲式活動廁所(蹲式馬桶.水箱.衛生紙架.抽風扇.照明燈.洗手台)外加塑膠小便斗": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "活動小便斗": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2HP抽水泵含水位控制器(取土孔)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "5HPx2抽水泵含水位控制器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1/2HP移動式抽水泵含水位控制器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "7.5HP*2恆壓變頻加壓泵": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "出水口考克": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "沉砂池": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "臨時排水正式轉換器具(陽台及露台使用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "SUS洗槽含龍頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "陸上型化糞池20人份": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "汙物泵": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "圍籬週邊PVC給水管全數更換為SUS 1-1/2\"壓接管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "臨時通風設備工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "20HP 660CMM 40mmaq風機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2HP 250CMM 10mmaq活動式風機 (附腳架及輪子)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "調節風門": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "風管及另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "安裝及施工": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消音風箱65dBA": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "器材維修管理": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "臨時工務所設置遷移(燈,插,電話,網路,冷氣)搬遷三次": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "工地臨時滅火器ABC 10P": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "垃圾管道警報系統": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "高溫施工場所降溫水霧系統": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "樓板灌漿後自動灑水養護系統": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "無線電對講訊號改善設備工程(含工料)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "數位中繼台 MOTOROLA SLR5300": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "功率分配器 FLY GFQ-450-2": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "功率耦合器 FLY FD63-45": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "低損耗訊號線 CFD400NL-LW": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "訂製頻率雙工器 FLY FD63-45": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "專用訂製頻率室內天線 S-578  0.68M": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "專用訂製頻率室外天線 S-710   1.7M": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "規畫.測試工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "客戶端手持機頻率燒入": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接頭及固定架五金配件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "安裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "交屋測試設備": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "小夜燈": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "10\"以上液晶電視機": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "網路,電話,BNC,USB多工網路測試器": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "水管25M(軟管)(冷氣排水測試用)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "各戶交屋資料(竣工圖,衛浴設備,暖風機,排風機,全熱交換機,加壓馬達,監控對講設備,)128GB隨身碟": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管委會驗收前管路設備清潔": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "移交管委會維修備品(T8 LED燈管40支,LED燈泡一箱,消防箱LED燈10顆,消防受信廣播總機保險絲各 20只,開關箱保險絲及按鈕LED燈各20只)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "毛胚屋交驗屋臨時照明2.0x3C cable Wire 40M 明線+3組燈泡": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "水電消防工資另料": {
+        "keywords": [
+            "安裝",
+            "工資",
+            "另料"
+        ],
+        "children": {
+            "消防-車牙另件1-1/2\"(含)以下(SHURJIONT)": {
+                "keywords": [],
+                "children": {
+                    "1-1/2\"含以下採車牙(20kg/cm2或300psi)": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "發電機黑煙管岩棉保溫工程(含不鏽鋼皮.油坑.防油堤)": {
+                "keywords": [],
+                "children": {
+                    "10\"GIP排煙管外加1\"厚玻璃纖維棉外包28#鋁皮": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發電機油箱防油堤含油箱基礎座工程H:依現場": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "電氣.弱電配管.消防電工資另料包(含臨時電)": {
+                "keywords": [],
+                "children": {
+                    "配線另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "接地工程止水銅板斷水處理,責任施工": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "機械鑽孔及打洞修補": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "外管線土方挖掘、埋管、回填及管路防水處理": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "6\"引進管防水型封塞空管管塞 PP-06": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "6\"引進管防水型封塞三孔管路封塞滿 PP-21": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "五金另料及消耗品(含配管防震)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "運什費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "按裝及測試工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "另料及消耗品": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "五金另料及消耗品": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC配管另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "EMT配管另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配線另件(5.5以下穩速搭安全接頭)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "吊架(含角鋼,全牙螺桿,膨脹螺絲等)3/8”": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "吊架及五金工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留穿樑、版套管及打洞修補": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "工包安裝配管工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "室外專用防水接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "出線口(供電動門,自然排煙窗,電動百葉,電磁閥,柵欄機,車道控制…等附BOX.蓋板)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "平頂電燈出線口含BOX": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電源出線口 (附蓋板、BOX) (電動衣架電源.排煙窗電源.電動門電源.冷氣電源.等等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "天花板延伸配管配線工料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "天花板設備開孔安裝鎖固補強件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "發電機.進排風機 20cm RC基礎座工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管吊架及五金工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "監控設備各式出線口": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管箱體安裝工資(含穿水線)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "中繼機房漏水偵測設施": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "各式器具配合二工天花板施工移位": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "業主自購工程,承商配合RC基礎,管路套管預留,SUS氟碳烤漆防雨罩,防火填塞": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配線另件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "吊架及固定五金(含配管防震)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "另料、耗損及運什費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防電工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "打鑿修補及鑽孔費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "臨時水電拆除復原費(管線材料交業主點收)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留管配合施作": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "安裝及施工": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留穿樑套管及打洞修補費及復原": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "給排水工資另料包(含臨時水工資.PVC另件.通風罩安裝.不含SUS管壓接另件及滾溝另件)": {
+                "keywords": [],
+                "children": {
+                    "配管另料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "基礎台 H:15cm(含南方C型鋼、排水)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "加壓泵BY PASS管路及閘閥等配件(屋外採SUS)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "龍頭彎專用全鍛造不銹鋼304內外牙接頭": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "外管工事(土方挖掘、埋管、回填)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "絕緣被覆配管固定及吊架工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留穿樑、版套管及打洞修補": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "試水試壓工程(臨時水灌入持壓)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "另料耗損及運雜費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "按裝及測試工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "配管另件(清潔口上翹45度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC雨水管配管另件(清潔口上翹45度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "PVC排水管配管另件": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "天然瓦斯幹管.支管.牆.樓版預留套管(依瓦斯公司)(含瓦斯爐台牆1-1/2\"套管及防火填塞)工料及鑽孔費用(含五金)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "空調4\"穿樑預留套管工料費用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "試水試壓工程(空調室內機排水通水後灌入臨時水持壓)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "排水立管出水溝出裝設透明管": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "浴缸 3分保護夾板(尺寸同浴缸)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "silicon工料(浴缸.下嵌式面盆等)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "設備與瓷磚縫隙白色填縫劑填實": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "運什費(含吊高及搬運費,保管費)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "按裝工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "業主自購工程,承商配合RC基礎,管路套管預留,SUS氟碳烤漆防雨罩,防火填塞": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留管路配置": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "安裝及施工": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            },
+            "消防水工資另料包(不含1-1/2\"含以下車牙另件)含發電機黑煙管及油管工資(不含保溫)": {
+                "keywords": [],
+                "children": {
+                    "五金另料及消耗品(含配管防震)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "運什費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "按裝及測試工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "管路油漆工程(一底二度)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "試水試壓工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "基礎台 H:15cm(含南方C型鋼、排水)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防屋外管路及吊架採不銹鋼施作工料": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "吊架及固定五金(含配管防震)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "預留穿樑、版套管及打洞修補": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "另料、耗損及運什費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "消防水工資": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "送水管土方挖掘、埋管、回填及管路防水處理": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "防火填塞工程": {
+        "keywords": [
+            "填塞",
+            "防火"
+        ],
+        "children": {
+            "防火填塞工程": {
+                "keywords": [],
+                "children": {
+                    "防火區劃貫穿處防火阻絕填塞工程": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "樓板貫穿部防火阻絕": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "金屬管防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "塑膠管防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "電纜線防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "線槽防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "金屬保溫管防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "匯流排防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "鐵皮風管防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "金屬保溫風管防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "複雜管件防火阻絕, 含防火材料及墊底材": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "混凝土牆貫穿部防火阻絕": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "輕隔間貫穿部防火阻絕": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "破壞取樣回復費用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "施作位置圖、計算書、施作照片拍攝及光碟製作費用": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "雜項另料(支撐元件及施工損耗材料)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "責任施作工資(含責任施工標籤張貼)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "1.防火阻絕工程須連工帶料責任施工, 現場施工人員須經原廠授權完整教育訓練及授權責任施工.": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "2.現場施作工法及材料需通過CNS 14514建築物防火區劃貫穿部耐火試驗, 並經由內政部審核認可通過 , 具兩小時以上防火時效.": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "送水送電費用(含竣工勘驗及簽證費)": {
+        "keywords": [],
+        "children": {
+            "送水送電費用(含竣工勘驗及簽證費)": {
+                "keywords": [],
+                "children": {
+                    "竣工送電技師現場拍照查驗車馬補助費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "自來水圖審變更及竣工圖修正作業費": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "按承攬合約金額1%給付品興營造": {
+        "keywords": [],
+        "children": {
+            "按承攬合約金額1%給付品興營造": {
+                "keywords": [],
+                "children": {
+                    "工地生活廢棄物清運費及衛生管理、水電費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "按承攬合約金額1%給付品興營造": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "雜項費用": {
+        "keywords": [
+            "清潔",
+            "雜項",
+            "保險",
+            "運費"
+        ],
+        "children": {
+            "雜項費用": {
+                "keywords": [],
+                "children": {}
+            }
+        }
+    },
+    "小計(直接成本)": {
+        "keywords": [],
+        "children": {}
+    },
+    "利潤及管理費(含施工圖)": {
+        "keywords": [],
+        "children": {
+            "利潤及管理費(含施工圖及變更圖審費)": {
+                "keywords": [],
+                "children": {
+                    "勞工安全衛生費": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "工程綜合保險費(含第三人及僱主意外險)": {
+                        "keywords": [],
+                        "children": {}
+                    },
+                    "施工產生垃圾廢棄物清運費及工地清潔費": {
+                        "keywords": [],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "小計(間接成本)": {
+        "keywords": [],
+        "children": {}
+    },
+    "直接成本+間接成本": {
+        "keywords": [],
+        "children": {}
+    },
+    "業主自購類": {
+        "keywords": [],
+        "children": {
+            "業主自購，承商安裝": {
+                "keywords": [
+                    "拖布盆含龍頭銅配件全",
+                    "L1訂製不銹鋼壁燈/LED6.5w*2/10°+9W暈光線型燈/3000K",
+                    "已選取39個項目",
+                    "已選取25個項目",
+                    "123456789"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "標題": {
+        "keywords": [],
+        "children": {
+            "子標題": {
+                "keywords": [
+                    "台電配電室受電箱、電表箱設備工程",
+                    "電燈、開關插座設備工程",
+                    "外構燈具設備工程(燈具引線不得小於1.25mm2)",
+                    "安全梯排煙設備工程"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "其他": {
+        "keywords": [],
+        "children": {
+            "屬台電": {
+                "keywords": [
+                    "NFB1P50AF-15AT10KA110V"
+                ],
+                "children": {}
+            }
+        }
+    },
+    "Owner": {
+        "keywords": [],
+        "children": {
+            "Sub": {
+                "keywords": [],
+                "children": {
+                    "PBL 照光式按鈕開關   30∮ ( LED )": {
+                        "keywords": [
+                            "PBL照光式按鈕開關30∮(LED)LED_test"
+                        ],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    },
+    "BatchTest": {
+        "keywords": [],
+        "children": {
+            "Systems": {
+                "keywords": [],
+                "children": {
+                    "電氣設備工程": {
+                        "keywords": [
+                            "已選取2個項目"
+                        ],
+                        "children": {}
+                    },
+                    "弱電設備工程": {
+                        "keywords": [
+                            "已選取2個項目"
+                        ],
+                        "children": {}
+                    }
+                }
+            }
+        }
+    }
+}
