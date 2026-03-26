@@ -15,6 +15,8 @@ class Project(Base):
     end_date = Column(String, default="")
     note = Column(String, default="")
     classification_depth = Column(Integer, default=3)
+    floor_area = Column(String, default="") # 樓地板面積 (顯示用，可能含單位)
+    report_config = Column(JSON, default=dict) # 報表設定：折數、合計項、備註等
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

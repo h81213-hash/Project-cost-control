@@ -145,6 +145,8 @@ def serialize_project(p: "Project", include_data: bool = False) -> Dict[str, Any
         "end_date": p.end_date,
         "note": p.note,
         "classification_depth": p.classification_depth,
+        "floor_area": p.floor_area,
+        "report_config": p.report_config,
         "created_at": p.created_at.isoformat() if p.created_at else "",
         "updated_at": p.updated_at.isoformat() if p.updated_at else "",
         "files": files_list
@@ -479,5 +481,96 @@ def update_project_files(project_id: str, files_data: List[Dict[str, Any]]) -> b
                 p["updated_at"] = datetime.now().isoformat()
                 save_projects(projects)
                 invalidate_inquiry_rows_cache(project_id)
+                return True
+        return False
+def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dict[str, Any]]) -> bool:
+    """批量更新標單項目資訊 (廠商報價、折數等)"""
+    print(f"Updating inquiry rows for project {project_id}, category: {system_category}")
+    print(f"Updates received: {len(updates)}")
+    
+    if USE_DB:
+        db = get_db_session()
+        try:
+            project = db.query(Project).filter(Project.id == project_id).first()
+            if not project or not project.files:
+                return False
+            
+            latest_file = max(project.files, key=lambda x: x.uploaded_at)
+            data = latest_file.data
+            rows = data.get("rows", [])
+            
+            # 建立更新對照表 (使用 item_no + description 做 key)
+            update_map = {(u.get("item_no"), u.get("description")): u for u in updates}
+            print(f"Update map keys: {list(update_map.keys())}")
+            
+            modified = False
+            match_count = 0
+            for i, row in enumerate(rows):
+                if row.get("system_category") == system_category:
+                    key = (row.get("item_no"), row.get("description"))
+                    if key in update_map:
+                        print(f"Match found at index {i} for key {key}")
+                        match_count += 1
+                        u = update_map[key]
+                        if "unit_price" in u:
+                            row["unit_price"] = u["unit_price"]
+                        if "discount_rate" in u:
+                            row["discount_rate"] = u["discount_rate"]
+                        
+                        # 重算複價與公司成本
+                        qty = float(row.get("quantity", 0))
+                        price = float(row.get("unit_price", 0))
+                        disc = float(row.get("discount_rate", 1))
+                        
+                        row["total_price"] = qty * price
+                        row["internal_cost"] = row["total_price"] * disc
+                        modified = True
+            
+            print(f"Total matches found: {match_count}, modified: {modified}")
+            if modified:
+                latest_file.data = data
+                project.updated_at = datetime.utcnow()
+                db.commit()
+                invalidate_inquiry_rows_cache(project_id)
+            return True
+        finally:
+            db.close()
+    else:
+        projects = load_projects()
+        for p in projects:
+            if p["id"] == project_id and p.get("files"):
+                latest_file = p["files"][-1]
+                data = latest_file["data"]
+                rows = data.get("rows", [])
+                
+                update_map = {(u.get("item_no"), u.get("description")): u for u in updates}
+                print(f"[JSON] Update map keys: {list(update_map.keys())}")
+                
+                modified = False
+                match_count = 0
+                for row in rows:
+                    if row.get("system_category") == system_category:
+                        key = (row.get("item_no"), row.get("description"))
+                        if key in update_map:
+                            print(f"[JSON] Match found for key {key}")
+                            match_count += 1
+                            u = update_map[key]
+                            if "unit_price" in u:
+                                row["unit_price"] = u["unit_price"]
+                            if "discount_rate" in u:
+                                row["discount_rate"] = u["discount_rate"]
+                            
+                            qty = float(row.get("quantity", 0))
+                            price = float(row.get("unit_price", 0))
+                            disc = float(row.get("discount_rate", 1))
+                            
+                            row["total_price"] = qty * price
+                            row["internal_cost"] = row["total_price"] * disc
+                            modified = True
+                
+                print(f"[JSON] Total matches found: {match_count}, modified: {modified}")
+                if modified:
+                    save_projects(projects)
+                    invalidate_inquiry_rows_cache(project_id)
                 return True
         return False

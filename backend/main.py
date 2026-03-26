@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Body, Request
+from fastapi import FastAPI, UploadFile, File, Body, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
@@ -7,7 +7,7 @@ import pandas as pd
 import io
 from fastapi.responses import StreamingResponse
 from services.excel_parser import ExcelParser
-from services import project_service, category_service, excel_parser, diff_service
+from services import project_service, category_service, excel_parser, diff_service, report_service
 from database import engine, Base
 import models
 
@@ -54,7 +54,8 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectSettings(BaseModel):
-    classification_depth: int
+    classification_depth: Optional[int] = None
+    report_config: Optional[Dict[str, Any]] = None
 
 
 class AnalyzeRequest(BaseModel):
@@ -113,7 +114,7 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: int = 50
     proj = project_service.get_project(project_id, page=page, page_size=page_size, system_category=system_category)
     if proj:
         return proj
-    return {"status": "error", "message": "找不到該專案"}
+    raise HTTPException(status_code=404, detail="找不到該專案")
 
 
 @app.get("/projects/{project_id}/inquiry_rows")
@@ -128,18 +129,50 @@ def delete_project(project_id: str):
     success = project_service.delete_project(project_id)
     if success:
         return {"status": "success"}
-    return {"status": "error", "message": "找不到該專案"}
+    raise HTTPException(status_code=404, detail="找不到該專案")
 
 
 @app.patch("/projects/{project_id}/settings")
 def update_project_settings(project_id: str, settings: ProjectSettings):
-    """更新專案設定（例如分類深度）"""
-    updated = project_service.update_project_settings(
-        project_id, {"classification_depth": settings.classification_depth}
-    )
+    """更新專案設定（例如分類深度、報表配置、詢價模板）"""
+    # 將 settings 中非 None 的欄位提取出來
+    update_dict = {k: v for k, v in settings.dict().items() if v is not None}
+    
+    updated = project_service.update_project_settings(project_id, update_dict)
     if updated:
         return {"status": "success", "project": updated}
-    return {"status": "error", "message": "找不到該專案"}
+    raise HTTPException(status_code=404, detail="找不到該專案")
+
+
+# === 報表管理 API ===
+
+@app.post("/projects/{project_id}/inquiry_rows/update")
+async def update_inquiry_rows(project_id: str, payload: Dict[str, Any]):
+    """批量更新特定類別下的詢價項目"""
+    system_category = payload.get("system_category")
+    updates = payload.get("updates", [])
+    if not system_category:
+        raise HTTPException(status_code=400, detail="必須提供類別名稱")
+    
+    success = project_service.update_inquiry_rows(project_id, system_category, updates)
+    if success:
+        return {"status": "success"}
+    raise HTTPException(status_code=500, detail="更新失敗")
+
+@app.get("/projects/{project_id}/reports")
+def get_project_report(project_id: str, depth: int = 1):
+    """取得專案報表數據 (LV.1 或 LV.2)"""
+    return report_service.get_report_data(project_id, depth=depth)
+
+
+@app.post("/projects/{project_id}/reports/config")
+async def update_report_config(project_id: str, request: Request):
+    """更新專案報表設定 (樓地板面積、各類別折數、利潤率等)"""
+    body = await request.json()
+    success = report_service.update_report_config(project_id, body)
+    if success:
+        return {"status": "success"}
+    return {"status": "error", "message": "更新失敗"}
 
 
 # === 分類管理 API ===
@@ -492,6 +525,190 @@ def export_project_excel(project_id: str, version_idx: int = -1):
     output.seek(0)
     
     filename = f"{proj['name']}_V{version_idx+1}_分級分析.xlsx"
+    from urllib.parse import quote
+    encoded_filename = quote(filename)
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{encoded_filename}"
+        }
+    )
+
+
+@app.get("/projects/{project_id}/inquiry_export")
+async def export_inquiry_excel(project_id: str, category: str):
+    """
+    根據投標詢價範本格式，匯出指定類別的詢價 Excel。
+    """
+    # 修正：使用正確的函數名稱 get_project
+    proj = project_service.get_project(project_id)
+    if not proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    # 獲取模板設定，優先使用儲存的值，否則使用系統預設或專案內容
+    raw_tpl = proj.get("report_config", {}).get("inquiry_template", {})
+    tpl = {
+        "company_name": raw_tpl.get("company_name") or "聖暉工程科技股份有限公司",
+        "phone": raw_tpl.get("phone") or "02-2655-8067",
+        "fax": raw_tpl.get("fax") or "02-2655-8073",
+        "address": raw_tpl.get("address") or "115台北市南港區園區街3-2號5樓之2(軟體園區H棟)",
+        "mail": raw_tpl.get("mail") or "yiyi_yang@acter.com.tw",
+        "contact_person": raw_tpl.get("contact_person") or "楊尚嬑 小姐  分機:609",
+        "project_name": raw_tpl.get("project_name") or proj.get("name", ""),
+        "project_location": raw_tpl.get("project_location") or proj.get("location", ""),
+        "deadline": raw_tpl.get("deadline") or ""
+    }
+    
+    # 獲取該類別項目
+    files = proj.get("files", [])
+    if not files:
+        raise HTTPException(status_code=400, detail="No versions found")
+        
+    latest_data = files[-1].get("data", {})
+    rows = latest_data.get("rows", [])
+    
+    # 過濾屬於該類別及其子類別的項目
+    # 注意：category 是 LV.2 或大類的顯示名稱
+    filtered_rows = []
+    for r in rows:
+        cat_path = r.get("manual_raw_category") or r.get("system_category") or ""
+        if category in cat_path:
+            filtered_rows.append(r)
+            
+    # 使用 openpyxl 建立格式化 Excel
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "詢價內容"
+    
+    # 字體與樣式 (依據使用者要求：標楷體，特定字重與大小)
+    font_normal = Font(name="標楷體", size=12)
+    font_bold = Font(name="標楷體", size=12, bold=True)
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+    border_thin = Border(
+        left=Side(style='thin'), 
+        right=Side(style='thin'), 
+        top=Side(style='thin'), 
+        bottom=Side(style='thin')
+    )
+    
+    # 填充表頭 (Row 1-11)
+    # 填充表頭 (Row 1-5)
+    ws.merge_cells('A1:G1')
+    ws['A1'] = tpl.get('company_name', '聖暉工程科技股份有限公司')
+    ws['A1'].font = Font(name="標楷體", size=22, bold=True)
+    ws['A1'].alignment = align_center
+    
+    ws.merge_cells('A2:G2')
+    ws['A2'] = "投標-詢價單"
+    ws['A2'].font = Font(name="標楷體", size=18, bold=True)
+    ws['A2'].alignment = align_center
+    
+    ws.merge_cells('A3:G3')
+    ws['A3'] = f"電話：{tpl.get('phone', '')}  傳真：{tpl.get('fax', '')}"
+    ws['A3'].font = Font(name="標楷體", size=14)
+    ws['A3'].alignment = align_center
+
+    ws.merge_cells('A4:G4')
+    ws['A4'] = f"地址：{tpl.get('address', '')}"
+    ws['A4'].font = Font(name="標楷體", size=14)
+    ws['A4'].alignment = align_center
+
+    ws.merge_cells('A5:G5')
+    ws['A5'] = f"Mail：{tpl.get('mail', '')}  聯絡人：{tpl.get('contact_person', '')}"
+    ws['A5'].font = Font(name="標楷體", size=14)
+    ws['A5'].alignment = align_center
+    
+    # 分隔線 (Row 5 Bottom 使用雙線)
+    side_double = Side(style='double')
+    for col in range(1, 8):
+        ws.cell(row=5, column=col).border = Border(bottom=side_double)
+
+    # 專案資訊 (Row 6-8)
+    ws['A6'] = "致："
+    ws['D6'] = "電話："
+    ws['F6'] = "傳真："
+    ws['A6'].font = font_normal
+    ws['D6'].font = font_normal
+    ws['F6'].font = font_normal
+    
+    # 設置藍色字體給工程資訊 (Size 12)
+    font_blue = Font(name="標楷體", size=12, color="0000FF")
+    
+    ws['A7'] = f"工程名稱：{tpl['project_name']}"
+    ws['A7'].font = font_blue
+    
+    ws['A8'] = f"工程地點：{tpl['project_location']}"
+    ws['A8'].font = font_blue
+    
+    ws['A9'] = "報價內容注意事項"
+    ws['A9'].font = font_bold
+    ws['A10'] = "1. 請報實售價，並於備註欄位註明報價廠牌、型號及折數(廠牌煩請備註)"
+    ws['A10'].font = font_normal
+    
+    deadline_val = tpl['deadline']
+    if deadline_val:
+        # 如果使用者已經輸入了包含「懇請於」的完整句子，就不再重複加
+        if "懇請於" in deadline_val:
+            ws['A11'] = f"2. {deadline_val}"
+        else:
+            ws['A11'] = f"2. 懇請於 {deadline_val} 前回覆報價"
+    else:
+        ws['A11'] = "2. 請參閱附件報價時間"
+    ws['A11'].font = font_bold
+    
+    # 欄位標題 (Row 12)
+    headers = ["項次", "品名/規格", "單位", "數量", "單價", "總價", "備註"]
+    for col, text in enumerate(headers, 1):
+        cell = ws.cell(row=12, column=col)
+        cell.value = text
+        cell.font = font_bold
+        cell.alignment = align_center
+        cell.border = border_thin
+        
+    # 填充內容 (Row 13+)
+    for idx, r in enumerate(filtered_rows, 1):
+        row_num = 12 + idx
+        cells = []
+        cells.append(ws.cell(row=row_num, column=1, value=idx))
+        cells.append(ws.cell(row=row_num, column=2, value=r.get("description", "")))
+        cells.append(ws.cell(row=row_num, column=3, value=r.get("unit", "")))
+        cells.append(ws.cell(row=row_num, column=4, value=r.get("quantity", 0)))
+        cells.append(ws.cell(row=row_num, column=5, value=None))
+        cells.append(ws.cell(row=row_num, column=6, value=None))
+        cells.append(ws.cell(row=row_num, column=7, value=r.get("remark", "")))
+        
+        for cell in cells:
+            cell.border = border_thin
+            cell.font = font_normal
+        
+        # 設置對齊
+        ws.cell(row=row_num, column=1).alignment = align_center
+        ws.cell(row=row_num, column=3).alignment = align_center
+        ws.cell(row=row_num, column=4).alignment = align_right
+        
+    # 調整欄寬
+    # 調整欄寬 (依據範本視覺比例)
+    ws.column_dimensions['A'].width = 6
+    ws.column_dimensions['B'].width = 45
+    ws.column_dimensions['C'].width = 8
+    ws.column_dimensions['D'].width = 8
+    ws.column_dimensions['E'].width = 10
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 18
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    safe_category = category.replace("/", "_").replace("\\", "_")
+    filename = f"詢價單_{safe_category}.xlsx"
     from urllib.parse import quote
     encoded_filename = quote(filename)
     

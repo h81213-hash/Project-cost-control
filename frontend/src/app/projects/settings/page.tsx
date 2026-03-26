@@ -2,6 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { 
+  Settings, 
+  Plus, 
+  Trash2, 
+  Key, 
+  ChevronDown, 
+  ChevronRight, 
+  Search, 
+  ArrowLeft, 
+  CheckCircle2, 
+  GripVertical, 
+  FolderPlus,
+  ArrowUpCircle,
+  AlertCircle
+} from "lucide-react";
+import { API_BASE_URL } from "../../constants";
 
 interface CategoryNode {
   keywords: string[];
@@ -17,34 +33,34 @@ function deepClone<T>(obj: T): T {
 // ── 層級色彩 ───────────────────────────────────
 const LEVEL_STYLES = [
   { 
-    // Lv.1: 章節標題 (12px 色條 + 陰影)
-    container: "bg-white border border-slate-200 border-l-[12px] border-l-slate-800 shadow-lg mb-3",
-    header: "bg-white text-slate-900 border-none py-1.5",
-    badge: "bg-slate-800 text-white px-3 py-1 text-sm",
-    label: "bg-slate-50 text-slate-700 border-none",
-    input: "bg-white text-slate-900 border-slate-300 focus:ring-slate-400 font-black text-xl",
-    button: "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border-blue-100 font-bold",
-    icon: "text-slate-500"
+    // Lv.1: 章節標題 (精緻的白色卡片 + 圓角 + 柔和陰影)
+    container: "bg-white rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] mb-4",
+    header: "bg-white/50 text-slate-900 border-none py-2.5",
+    badge: "bg-[#007AFF] text-white px-3 py-1 text-[10px] font-bold tracking-widest uppercase",
+    label: "bg-slate-50/50 text-slate-700 border-none",
+    input: "bg-white text-slate-800 border-slate-100 focus:ring-blue-500/20 font-bold text-lg",
+    button: "bg-blue-50/50 text-blue-600 hover:bg-blue-600 hover:text-white border-blue-100/50 font-bold",
+    icon: "text-slate-400 group-hover:text-blue-500"
   },
   { 
-    // Lv.2: 子系統 (無邊框 + 極致緊湊)
-    container: "bg-transparent border-none shadow-none mt-0",
-    header: "bg-transparent text-slate-800 border-none py-0", // 極致緊湊
-    badge: "bg-slate-100 text-slate-600 border-none px-1.5 py-0.5 text-[10px]",
+    // Lv.2: 子系統 (淺色半透明底色)
+    container: "bg-slate-50/30 rounded-2xl border-none shadow-none mt-1",
+    header: "bg-transparent text-slate-700 border-none py-1.5",
+    badge: "bg-white text-slate-400 border border-slate-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest",
     label: "bg-transparent text-slate-600 border-none",
-    input: "bg-transparent text-slate-800 border-slate-200 focus:ring-slate-300 text-base font-extrabold",
+    input: "bg-transparent text-slate-700 border-slate-200 focus:ring-blue-500/10 text-base font-bold",
     button: "text-slate-400 hover:text-blue-600 border-none",
-    icon: "text-slate-400"
+    icon: "text-slate-300 group-hover:text-blue-400"
   },
   { 
-    // Lv.3+: 具體項目 (無邊框 + 極致緊湊)
+    // Lv.3+: 具體項目
     container: "bg-transparent border-none shadow-none mt-0",
-    header: "bg-transparent text-slate-500 border-none py-0", 
-    badge: "bg-transparent text-slate-400 border-none font-normal text-[10px]",
+    header: "bg-transparent text-slate-500 border-none py-1", 
+    badge: "bg-transparent text-slate-300 border-none font-bold text-[8px] uppercase tracking-widest",
     label: "bg-transparent text-slate-400 border-none",
-    input: "bg-transparent text-slate-600 border-none focus:ring-0 text-sm",
+    input: "bg-transparent text-slate-500 border-none focus:ring-0 text-sm",
     button: "text-slate-300 hover:text-slate-500 border-none",
-    icon: "text-slate-300"
+    icon: "text-slate-200"
   }
 ];
 
@@ -153,15 +169,15 @@ function CategoryNodeCard({ name, node, path, depth, onUpdate, onDelete, onRenam
               e.dataTransfer.setData("text/plain", name);
               e.dataTransfer.setData("path", JSON.stringify(path));
             }}
-            className={`cursor-grab active:cursor-grabbing px-1 ${style.icon} hover:text-slate-400`}
+            className={`cursor-grab active:cursor-grabbing p-1.5 rounded-lg hover:bg-slate-100 transition-colors ${style.icon}`}
             title="按住拖動調整順序"
           >
-            ⠿
+            <GripVertical size={14} />
           </div>
 
           {/* 展開箭頭 */}
-          <button onClick={() => setOpen(!open)} className={`w-5 font-bold shrink-0 ${style.icon} hover:text-slate-400`}>
-            {childCount > 0 ? (open ? "▼" : "▶") : "─"}
+          <button onClick={() => setOpen(!open)} className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${style.icon} hover:bg-slate-100`}>
+            {childCount > 0 ? (open ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <div className="w-1 h-1 bg-slate-200 rounded-full" />}
           </button>
 
           {/* 層級標示 */}
@@ -209,29 +225,29 @@ function CategoryNodeCard({ name, node, path, depth, onUpdate, onDelete, onRenam
           {/* 操作按鈕 */}
           <button
             onClick={() => setShowKeywords(!showKeywords)}
-            className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all shrink-0 ${
-              showKeywords ? "bg-amber-100 text-amber-700 border-amber-200" : `bg-transparent border border-transparent hover:border-slate-200 ${style.button}`
+            className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all shrink-0 flex items-center gap-1.5 ${
+              showKeywords ? "bg-amber-100 text-amber-600 border-amber-200/50 shadow-sm" : `bg-transparent border border-transparent hover:bg-slate-100/50 ${style.button}`
             }`}
           >
-            {showKeywords ? "隱藏" : (depth === 0 ? "🔑 關鍵字" : "關鍵字")}
+            <Key size={10} /> {showKeywords ? "隱藏" : "關鍵字"}
             {searchTerm && node.keywords.some(k => k.toLowerCase().includes(searchTerm.toLowerCase())) && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full animate-pulse shadow-sm" title="關鍵字符合" />
+              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse shadow-sm" />
             )}
           </button>
           <button
             onClick={() => { setAddingChild(!addingChild); setOpen(true); }}
-            className={`text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all shrink-0 shadow-sm ${
-              addingChild ? "bg-blue-600 text-white" : `border ${style.button}`
+            className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition-all shrink-0 shadow-sm flex items-center gap-1 ${
+              addingChild ? "bg-[#007AFF] text-white" : `bg-white border ${style.button}`
             }`}
           >
-            ＋ {depth === 0 ? "新增子層級" : "子層"}
+            <Plus size={10} /> {depth === 0 ? "新增層級" : "子層"}
           </button>
           <button
             onClick={() => confirm(`確定刪除「${name}」及其所有子層嗎？`) && onDelete(path)}
-            className={`transition-colors text-xs shrink-0 px-1 opacity-0 group-hover:opacity-100 ${depth === 0 ? "text-slate-400 hover:text-red-500" : "text-slate-300 hover:text-red-500"}`}
+            className={`transition-all p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100`}
             title="刪除此節點"
           >
-            🗑
+            <Trash2 size={14} />
           </button>
         </div>
 
@@ -268,21 +284,21 @@ function CategoryNodeCard({ name, node, path, depth, onUpdate, onDelete, onRenam
 
             {/* === 區塊 B：新增子層輸入框 === */}
             {addingChild && (
-              <div className={`border border-dashed rounded-lg p-2 ${style.container}`}>
-                <p className={`text-[10px] font-bold mb-1.5 opacity-70`}>
-                  📁 在「{name}」裡新增子層
+              <div className={`rounded-2xl p-4 border border-dashed border-blue-200 bg-blue-50/20 mb-2 animate-in fade-in slide-in-from-top-2`}>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <FolderPlus size={12} /> 在「{name}」裡新增子層
                 </p>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   <input
                     value={newChild}
                     onChange={(e) => setNewChild(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && confirmAddChild()}
-                    placeholder={`子層名稱`}
-                    className={`flex-1 text-xs px-3 py-2 rounded-md border outline-none focus:ring-1 ${style.input}`}
+                    placeholder="輸入類別名稱..."
+                    className="flex-1 text-sm bg-white border border-slate-100 rounded-xl px-4 py-2.5 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm"
                     autoFocus
                   />
-                  <button onClick={confirmAddChild} className="bg-blue-600 text-white px-4 py-2 rounded-md font-bold hover:bg-blue-700 transition-all text-xs text-nowrap">建立</button>
-                  <button onClick={() => setAddingChild(false)} className={`px-3 py-2 rounded-md transition-all text-xs text-nowrap ${style.button}`}>取消</button>
+                  <button onClick={confirmAddChild} className="bg-[#007AFF] text-white px-5 py-2.5 rounded-xl font-bold hover:bg-[#0071E3] shadow-md shadow-blue-500/10 active:scale-95 transition-all text-xs">建立</button>
+                  <button onClick={() => setAddingChild(false)} className="px-5 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 font-bold text-xs transition-colors">取消</button>
                 </div>
               </div>
             )}
@@ -372,7 +388,7 @@ export default function CategorySettingsPage() {
   };
 
   useEffect(() => {
-    fetch("http://localhost:8002/categories", { cache: 'no-store' })
+    fetch(`${API_BASE_URL}/categories`, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         const normalize = (n: Record<string, unknown>): CategoryNode => ({
@@ -443,7 +459,7 @@ export default function CategorySettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch("http://localhost:8002/categories", {
+      const res = await fetch(`${API_BASE_URL}/categories`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(tree),
@@ -468,58 +484,67 @@ export default function CategorySettingsPage() {
       <div className="w-full max-w-4xl mx-auto">
 
         {/* 標題 */}
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              ⚙️ 分類架構設定 
-              <span className="text-xs font-normal bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
+        <div className="flex justify-between items-end mb-10">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold text-slate-800 tracking-tight flex items-center gap-3">
+              <Settings size={32} className="text-blue-500" /> 分類架構設定 
+              <span className="text-[11px] font-bold bg-blue-50 text-blue-600 px-3 py-1 rounded-full uppercase tracking-wider">
                 共 {Object.keys(tree).length} 個主項目
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">建立樹狀關鍵字以便自動識別標單項目</p>
+            <p className="text-slate-400 font-medium ml-1">建立樹狀關鍵字以便自動識別標單項目</p>
           </div>
-          <button onClick={() => router.push("/projects")} className="text-xs text-slate-400 hover:text-slate-600 font-medium">← 返回</button>
+          <button 
+            onClick={() => router.push("/projects")} 
+            className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full text-sm font-semibold text-slate-500 border border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <ArrowLeft size={16} /> 返回專案列表
+          </button>
         </div>
 
 
         {/* 新增與搜尋列 */}
-        <div className="flex gap-3 mb-6 items-stretch">
+        <div className="flex gap-4 mb-10 items-stretch">
           {/* 新增頂層 */}
-          <div className="flex-1 bg-white rounded-xl border border-dashed border-blue-200 p-2 flex gap-2 items-center">
+          <div className="flex-[1.5] bg-white/70 backdrop-blur-3xl rounded-[24px] border border-slate-100 p-2 flex gap-2 items-center shadow-[0_8px_30px_rgb(0,0,0,0.03)] focus-within:ring-4 focus-within:ring-blue-500/5 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 ml-1">
+              <ArrowUpCircle size={20} className="text-blue-600" />
+            </div>
             <input
               value={newTop}
               onChange={(e) => setNewTop(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addTop()}
-              placeholder="輸入頂層類別名稱..."
-              className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-300 h-full"
+              placeholder="建立頂層類別 (例如：A. 勞務費)"
+              className="flex-1 bg-transparent px-2 py-3 text-sm font-semibold outline-none placeholder:text-slate-300"
             />
             <button
               onClick={addTop}
               disabled={!newTop.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 transition-all text-xs h-full whitespace-nowrap"
+              className="bg-[#007AFF] text-white px-6 py-2.5 rounded-2xl font-bold hover:bg-[#0071E3] disabled:bg-slate-100 disabled:text-slate-300 transition-all text-xs h-full whitespace-nowrap shadow-md shadow-blue-500/10 active:scale-95"
             >
-              ＋ 建立 Lv.1
+              建立 Lv.1
             </button>
           </div>
 
           {/* 搜尋框 */}
-          <div className="flex-1 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-slate-400 text-sm">🔍</span>
+          <div className="flex-1 relative group">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
+              <Search size={18} className="text-slate-300" />
             </div>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜尋類別名稱或關鍵字..."
-              className="block w-full pl-10 pr-3 py-2 h-full bg-white border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+              placeholder="搜尋關鍵字或分類..."
+              className="block w-full pl-13 pr-10 py-4 h-full bg-white/70 backdrop-blur-3xl border border-slate-100 rounded-[24px] text-sm font-medium placeholder-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500/30 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.03)]"
             />
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm("")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                className="absolute inset-y-0 right-4 flex items-center text-slate-300 hover:text-slate-600 transition-colors"
+                title="清除搜尋"
               >
-                ✕
+                <Trash2 size={16} />
               </button>
             )}
           </div>
@@ -584,14 +609,18 @@ export default function CategorySettingsPage() {
         )}
 
         {/* 儲存按鈕 */}
-        <div className="sticky bottom-4 mt-8 flex justify-end">
+        <div className="sticky bottom-8 mt-12 flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-blue-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-blue-700 disabled:bg-slate-200 transition-all shadow-xl shadow-blue-100 flex items-center gap-2 text-sm"
+            className="group bg-[#007AFF] text-white px-10 py-4 rounded-full font-bold hover:bg-[#0071E3] disabled:bg-slate-200 disabled:text-slate-400 transition-all shadow-[0_12px_30px_rgba(0,122,255,0.3)] flex items-center gap-3 active:scale-95"
           >
-            {saving && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
-            {saving ? "儲存中..." : "✅ 儲存並套用"}
+            {saving ? (
+              <span className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <CheckCircle2 size={20} className="transition-transform group-hover:scale-110" />
+            )}
+            <span className="text-base">{saving ? "儲存中..." : "儲存並套用分類設定"}</span>
           </button>
         </div>
       </div>

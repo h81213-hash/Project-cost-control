@@ -3,6 +3,21 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "../constants";
+import { 
+  LayoutDashboard, 
+  Settings, 
+  Plus, 
+  Trash2, 
+  ChevronRight, 
+  Folder, 
+  Calendar, 
+  User, 
+  Briefcase,
+  MapPin,
+  Pencil,
+  AlertCircle,
+  RefreshCw
+} from "lucide-react";
 
 interface Project {
   id: string;
@@ -23,6 +38,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 表單欄位
   const [formName, setFormName] = useState("");
@@ -39,12 +55,16 @@ export default function ProjectsPage() {
   }, []);
 
   const fetchProjects = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`${API_BASE_URL}/projects`);
+      if (!res.ok) throw new Error("遠端伺服器回應錯誤");
       const data = await res.json();
       setProjects(data);
-    } catch (err) {
-      console.error("無法連線至後端");
+    } catch (err: any) {
+      console.error("無法連線至後端", err);
+      setError("連線後端失敗，請確保後端服務 (Port 8002) 已正確啟動。");
     } finally {
       setLoading(false);
     }
@@ -109,115 +129,123 @@ export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-[4%] py-8">
       <div className="w-full">
-        <header className="mb-8 flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">📋 專案管理中心</h1>
-            <p className="text-slate-500 mt-1">建立專案後即可上傳標單進行智慧解析</p>
+        <header className="mb-12 flex justify-between items-end">
+          <div className="space-y-1">
+            <h1 className="text-[32px] font-semibold text-slate-800 tracking-tight flex items-center gap-3">
+              <LayoutDashboard size={32} className="text-blue-500" /> 專案管理中心
+            </h1>
+            <p className="text-slate-400 font-medium ml-1">建立專案後即可上傳標單進行智慧解析</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
                 onClick={() => router.push("/projects/settings")}
-                className="bg-white text-slate-600 px-5 py-2.5 rounded-lg font-medium border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2"
+                className="bg-white/70 backdrop-blur-3xl text-slate-600 px-6 py-3 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
             >
-                ⚙️ 分類設定
+                <Settings size={18} /> 分類設定
             </button>
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              className="bg-[#007AFF] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#0071E3] transition-all shadow-[0_8px_20px_rgba(0,122,255,0.2)] flex items-center gap-2 active:scale-95"
             >
-              ＋ 新建專案
+              <Plus size={20} /> 新建專案
             </button>
           </div>
         </header>
 
         {/* 新建專案表單 */}
         {showForm && (
-          <div className="bg-white p-6 rounded-xl shadow-md border border-blue-100 mb-8 animate-in fade-in slide-in-from-top-4 duration-300">
-            <h2 className="text-lg font-semibold text-slate-700 mb-4">建立新專案</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">專案名稱 <span className="text-red-500">*</span></label>
+          <div className="bg-white/80 backdrop-blur-3xl p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center gap-3 mb-8">
+               <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
+                 <Plus size={20} className="text-blue-600" />
+               </div>
+               <h2 className="text-xl font-semibold text-slate-800 tracking-tight">建立新專案</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">專案名稱 <span className="text-rose-500">*</span></label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="例：○○建設 A7 機電工程"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm placeholder:text-slate-300"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">業主 / 甲方</label>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">業主 / 甲方</label>
                 <input
                   type="text"
                   value={formClient}
                   onChange={(e) => setFormClient(e.target.value)}
                   placeholder="單位名稱"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm placeholder:text-slate-300"
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">工地位置</label>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">工地位置</label>
                 <input
                   type="text"
                   value={formLocation}
                   onChange={(e) => setFormLocation(e.target.value)}
                   placeholder="縣市、行政區或地址"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm placeholder:text-slate-300"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">專案負責人</label>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">專案負責人</label>
                 <input
                   type="text"
                   value={formManager}
                   onChange={(e) => setFormManager(e.target.value)}
                   placeholder="姓名"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm placeholder:text-slate-300"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">開始日期</label>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">開始日期</label>
                 <input
                   type="date"
                   value={formStartDate}
                   onChange={(e) => setFormStartDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">預計結束日期</label>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">預計結束日期</label>
                 <input
                   type="date"
                   value={formEndDate}
                   onChange={(e) => setFormEndDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm"
                 />
               </div>
 
-
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-600 mb-1">備註說明</label>
+              <div className="col-span-1 md:col-span-2 space-y-2">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">備註說明</label>
                 <textarea
                   value={formNote}
                   onChange={(e) => setFormNote(e.target.value)}
                   placeholder="其他補充說明..."
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px]"
+                  className="w-full bg-slate-50/50 border border-slate-100/80 rounded-[24px] px-5 py-4 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 outline-none transition-all shadow-sm min-h-[100px] placeholder:text-slate-300"
                 />
               </div>
             </div>
-            <div className="mt-6 flex justify-end gap-3 border-t pt-4">
+            
+            <div className="mt-10 flex justify-end gap-4 border-t border-slate-100 pt-8">
               <button
                 onClick={() => { setShowForm(false); resetForm(); }}
-                className="px-6 py-2 text-slate-500 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                className="px-8 py-3 text-slate-400 hover:text-slate-600 font-semibold transition-colors"
               >
                 取消
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!formName.trim()}
-                className="bg-blue-600 text-white px-8 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition-all shadow-md shadow-blue-100"
+                className="bg-[#007AFF] text-white px-10 py-3 rounded-full font-semibold hover:bg-[#0071E3] disabled:bg-slate-100 disabled:text-slate-300 disabled:shadow-none transition-all shadow-lg shadow-blue-500/20 active:scale-95"
               >
                 確認建立專案
               </button>
@@ -232,56 +260,78 @@ export default function ProjectsPage() {
             <div className="text-slate-400">載入中...</div>
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-            <div className="text-4xl mb-4">📂</div>
-            <p className="text-slate-500 text-lg">目前尚無專案紀錄</p>
-            <p className="text-slate-400 text-sm mt-1">請點擊上方按鈕建立您的第一個採購專案</p>
+          <div className="text-center py-24 bg-white/50 backdrop-blur-3xl rounded-[40px] border border-dashed border-slate-200 flex flex-col items-center justify-center">
+            <div className="w-20 h-20 rounded-[28px] bg-slate-50 border border-slate-100 flex items-center justify-center mb-6 text-slate-300">
+               <Folder size={40} />
+            </div>
+            <p className="text-slate-500 text-xl font-semibold tracking-tight">目前尚無專案紀錄</p>
+            <p className="text-slate-400 font-medium mt-2 max-w-xs mx-auto leading-relaxed">請點擊右上方「新建專案」按鈕，開啟您的第一個智慧採購專案</p>
           </div>
         ) : (
           <div className="grid gap-4">
             {projects.map((proj) => (
               <div
                 key={proj.id}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all p-6 flex justify-between items-center cursor-pointer group relative overflow-hidden"
                 onClick={() => router.push(`/projects/${proj.id}`)}
+                className="group bg-white/80 backdrop-blur-3xl rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100/50 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:border-blue-200/50 transition-all duration-500 cursor-pointer flex justify-between items-center relative overflow-hidden"
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-blue-600 transition-colors"></div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                  <div className="flex items-center gap-4 mb-4">
+                    <h3 className="text-xl font-bold text-slate-800 tracking-tight group-hover:text-[#007AFF] transition-colors duration-300">
                       {proj.name}
                     </h3>
-                    <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">
-                      {proj.files?.length || 0} 份標單
-                    </span>
+                    <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                      <Briefcase size={10} /> {proj.files?.length || 0} 份標單
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-1 gap-x-6 mt-3 text-sm text-slate-500">
-                    {proj.manager && <div className="flex items-center gap-1">負責人：{proj.manager}</div>}
-                    {proj.client && <div className="flex items-center gap-1">業主：{proj.client}</div>}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-10 text-[13px] text-slate-500">
+                    {proj.manager && (
+                      <div className="flex items-center gap-2 group-hover:text-slate-700 transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                          <User size={12} />
+                        </div>
+                        <span className="font-medium">負責人：</span>
+                        <span className="text-slate-600 font-semibold">{proj.manager}</span>
+                      </div>
+                    )}
+                    {proj.client && (
+                      <div className="flex items-center gap-2 group-hover:text-slate-700 transition-colors">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                          <Briefcase size={12} />
+                        </div>
+                        <span className="font-medium">業主：</span>
+                        <span className="text-slate-600 font-semibold">{proj.client}</span>
+                      </div>
+                    )}
                     {(proj.start_date || proj.end_date) && (
-                      <div className="flex items-center gap-1 lg:col-span-2">
-                        時程：{formatDate(proj.start_date)} ~ {formatDate(proj.end_date)}
+                      <div className="flex items-center gap-2 group-hover:text-slate-700 transition-colors lg:col-span-1">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                          <Calendar size={12} />
+                        </div>
+                        <span className="font-medium">時程：</span>
+                        <span className="text-slate-600 font-semibold">{formatDate(proj.start_date)} ~ {formatDate(proj.end_date)}</span>
                       </div>
                     )}
                     {proj.note && (
-                      <div className="lg:col-span-4 mt-1 italic text-slate-400 truncate">
-                        備註：{proj.note}
+                      <div className="lg:col-span-3 mt-1 text-slate-400 italic flex items-center gap-2 bg-slate-50/50 p-2 rounded-xl border border-slate-100/50">
+                        <Pencil size={12} className="shrink-0" />
+                        <span className="truncate">備註：{proj.note}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                
+                <div className="flex items-center gap-6">
                   <button
-                    onClick={(id) => handleDelete(proj.id, id)}
-                    className="text-slate-300 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50"
+                    onClick={(e) => handleDelete(proj.id, e)}
+                    className="w-11 h-11 rounded-2xl bg-white text-slate-300 hover:text-rose-500 hover:bg-rose-50 hover:shadow-sm transition-all flex items-center justify-center shadow-sm border border-slate-100"
                     title="刪除專案"
                   >
-                    🗑️
+                    <Trash2 size={20} />
                   </button>
-                  <div className="text-slate-300 group-hover:translate-x-1 group-hover:text-blue-500 transition-all duration-300">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                  <div className="w-12 h-12 rounded-full bg-slate-50 text-slate-300 group-hover:bg-[#007AFF] group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-200 transition-all duration-500 flex items-center justify-center group-hover:scale-110 active:scale-95">
+                    <ChevronRight size={24} />
                   </div>
                 </div>
               </div>

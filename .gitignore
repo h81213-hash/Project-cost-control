@@ -19,3 +19,7 @@ frontend/.env.production.local
 # OS
 .DS_Store
 Thumbs.db
+
+# Database
+*.db
+*.sqlite
