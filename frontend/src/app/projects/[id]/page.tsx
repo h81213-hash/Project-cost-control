@@ -2141,16 +2141,10 @@ export default function ProjectDetailPage() {
                     <SettingsIcon size={18} /> 模板設定
                   </button>
                   <button 
-                    onClick={() => setActiveInquiryCategory(null)}
-                    className="px-8 py-3 rounded-full font-semibold text-slate-400 hover:text-slate-600 transition-all"
-                  >
-                    取消返回
-                  </button>
-                  <button 
                     onClick={handleInquiryExport}
                     className="px-10 py-4 bg-slate-900 text-white rounded-full font-semibold shadow-xl shadow-slate-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                   >
-                    <FileSpreadsheet size={20} /> 設計詢價內容
+                    <FileSpreadsheet size={20} /> 產出詢價單
                   </button>
                 </div>
               </div>
