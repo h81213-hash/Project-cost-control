@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "../constants";
+import { safeFetch } from "../utils/api_utils";
 import { 
   LayoutDashboard, 
   Settings, 
@@ -57,17 +58,13 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(`${API_BASE_URL}/projects`);
-      if (!res.ok) throw new Error("遠端伺服器回應錯誤");
-      const data = await res.json();
+    const { data, error, ok } = await safeFetch(`${API_BASE_URL}/projects`);
+    if (ok) {
       setProjects(data);
-    } catch (err: any) {
-      console.error("無法連線至後端", err);
-      setError("連線後端失敗，請確保後端服務 (Port 8002) 已正確啟動。");
-    } finally {
-      setLoading(false);
+    } else {
+      setError(error || "連線後端失敗");
     }
+    setLoading(false);
   };
 
   const handleCreate = async () => {
@@ -258,6 +255,20 @@ export default function ProjectsPage() {
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
             <div className="text-slate-400">載入中...</div>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 bg-rose-50/50 rounded-[40px] border border-rose-100">
+            <AlertCircle size={40} className="text-rose-500" />
+            <div className="text-center">
+              <p className="text-rose-700 font-bold">{error}</p>
+              <p className="text-slate-400 text-xs mt-1">請確認後端服務 (Port 8002) 是否已正確啟動。</p>
+            </div>
+            <button 
+              onClick={fetchProjects}
+              className="mt-2 px-6 py-2 bg-rose-500 text-white rounded-full font-bold shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all flex items-center gap-2"
+            >
+              <RefreshCw size={16} /> 重新連線
+            </button>
           </div>
         ) : projects.length === 0 ? (
           <div className="text-center py-24 bg-white/50 backdrop-blur-3xl rounded-[40px] border border-dashed border-slate-200 flex flex-col items-center justify-center">

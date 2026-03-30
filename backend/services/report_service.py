@@ -1,14 +1,35 @@
 from typing import List, Dict, Any, Optional
 from services import project_service
+from services.category_service import normalize_text, classify_row
 import json
+import re
 
-def get_report_data(project_id: str, depth: int = 1) -> Dict[str, Any]:
-    """生成報表數據：依深度聚合廠商報價與內部成本 (支援 JSON/DB 模式)"""
-    project = project_service.get_project(project_id)
+def safe_float(val: Any) -> float:
+    """安全轉換數值，處理千分位與非數值字串"""
+    if val is None or val == "":
+        return 0.0
+    if isinstance(val, (int, float)):
+        return float(val)
+    try:
+        # 移除逗號與空格
+        clean_val = str(val).replace(",", "").strip()
+        # 僅保留數字、負號與小數點 (防止 "屬營造" 等非數值字串導致 Crash)
+        match = re.search(r"[-+]?\d*\.?\d+", clean_val)
+        if match:
+            return float(match.group())
+        return 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+def get_report_data(project_id: str, depth: int = 1, version_idx: int = -1) -> Dict[str, Any]:
+    """生成報表數據：依深度聚合廠商報價與內部成本 (支援指定版本)"""
+    # 決定要載入的版本索引
+    v_indices = [version_idx] if version_idx != -1 else None
+    
+    project = project_service.get_project(project_id, include_all_rows=True, version_indices=v_indices)
     if not project:
         return {"status": "error", "message": "專案不存在"}
 
-    # 獲取最新檔案的數據
     files = project.get("files", [])
     if not files:
         return {
@@ -18,9 +39,17 @@ def get_report_data(project_id: str, depth: int = 1) -> Dict[str, Any]:
             "summary": {}
         }
     
-    # 找出最後一個上傳的檔案
-    latest_file = max(files, key=lambda x: x.get("uploaded_at") or "")
-    rows = latest_file.get("data", {}).get("rows", [])
+    # 支援指定版本
+    if version_idx == -1:
+        target_file = max(files, key=lambda x: x.get("uploaded_at") or "")
+    elif 0 <= version_idx < len(files):
+        # 報表生成的邏輯應與 inquiry_rows 保持一致：依 uploaded_at 排序
+        sorted_files = sorted(files, key=lambda x: x.get("uploaded_at") or "")
+        target_file = sorted_files[version_idx]
+    else:
+        return {"status": "error", "message": "版本索引無效"}
+
+    rows = target_file.get("data", {}).get("rows", [])
     
     # 報表設定
     config = project.get("report_config") or {}
@@ -30,7 +59,12 @@ def get_report_data(project_id: str, depth: int = 1) -> Dict[str, Any]:
     # 依選擇深度進行聚合
     aggregated = {}
     for row in rows:
-        sys_cat = row.get("system_category", "未分類")
+        # 動態分類辨識：確保報表與分類圖卡統計邏輯一致
+        sys_cat = row.get("system_category")
+        if not sys_cat:
+            desc = row.get("description", "")
+            sys_cat = classify_row(desc) if desc else "未分類"
+            
         parts = sys_cat.split(" > ")
         display_path = " > ".join(parts[:depth]) if parts else "未分類"
         
@@ -48,12 +82,12 @@ def get_report_data(project_id: str, depth: int = 1) -> Dict[str, Any]:
             }
         
         # 廠商總報價
-        supplier_price = float(row.get("total_price", 0) or 0)
+        supplier_price = safe_float(row.get("total_price", 0))
         
         # 內部成本 (優先採用項目級別的 internal_cost)
-        internal_cost = float(row.get("internal_cost", 0) or 0)
+        internal_cost = safe_float(row.get("internal_cost", 0))
         if internal_cost == 0:
-            # 向後相容：如果項目沒有 internal_cost，則維持原價 (或根據舊分類折數估算，但此需求已指定取消分類折數)
+            # 向後相容：如果項目沒有 internal_cost，則維持原價
             internal_cost = supplier_price
             
         aggregated[display_path]["supplier_total"] += supplier_price

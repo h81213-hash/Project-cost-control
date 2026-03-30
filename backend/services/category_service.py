@@ -37,7 +37,7 @@ def load_categories() -> Dict:
 
 def save_categories(categories: Dict):
     """儲存多層分類樹到 JSON 並清除快取"""
-    global _categories_cache, _name_lookup_cache, _keyword_entries_cache
+    global _categories_cache, _name_lookup_cache, _keyword_entries_cache, _classify_cache
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
     with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
@@ -47,11 +47,14 @@ def save_categories(categories: Dict):
     _keyword_entries_cache = None
     _regex_lookup_cache = None
     _regex_keyword_cache = None
+    _classify_cache = {}  # 重要：清除描述快取，以便應用新的關鍵字
 
 
-def _normalize(text: str) -> str:
+def normalize_text(text: str) -> str:
     """移除空白與特殊符號，方便模糊匹配"""
-    return re.sub(r"[\s\(\)（）\-\"\'\\/,，、。]", "", text).strip().lower()
+    if not text:
+        return ""
+    return re.sub(r"[\s\(\)（）\-\"\'\\/,，、。]", "", str(text)).strip().lower()
 
 
 def _build_lookup_tables():
@@ -78,7 +81,7 @@ def _build_lookup_tables():
         children = node.get("children", {})
         for child_name, child_node in children.items():
             child_path = path_parts + [child_name]
-            norm = _normalize(child_name)
+            norm = normalize_text(child_name)
             entry = {
                 "name": child_name,
                 "path_parts": child_path,
@@ -97,7 +100,7 @@ def _build_lookup_tables():
 
             # 關鍵字索引
             for kw in child_node.get("keywords", []):
-                nkw = _normalize(kw)
+                nkw = normalize_text(kw)
                 if nkw and len(nkw) >= 2:
                     keyword_entries.append((nkw, entry))
                     try:
@@ -109,7 +112,7 @@ def _build_lookup_tables():
 
     for top_name, top_node in categories.items():
         top_path = [top_name]
-        norm = _normalize(top_name)
+        norm = normalize_text(top_name)
         entry = {
             "name": top_name,
             "path_parts": top_path,
@@ -124,7 +127,7 @@ def _build_lookup_tables():
             except: pass
 
         for kw in top_node.get("keywords", []):
-            nkw = _normalize(kw)
+            nkw = normalize_text(kw)
             if nkw and len(nkw) >= 2:
                 keyword_entries.append((nkw, entry))
                 try:
@@ -136,6 +139,7 @@ def _build_lookup_tables():
 
     _name_lookup_cache = name_lookup
     _keyword_entries_cache = keyword_entries
+    # 預先依照深度排序，深度深的（越精確）優先匹配
     _regex_lookup_cache = sorted(regex_lookup, key=lambda x: x[1]["depth"], reverse=True)
     _regex_keyword_cache = regex_keyword
 
@@ -161,8 +165,8 @@ def classify_row(description: str, max_depth: int = 2) -> str:
     _build_lookup_tables()
     raw_desc = str(description)
     cleaned = clean_text(raw_desc)
-    norm_desc = _normalize(raw_desc)
-    norm_cleaned = _normalize(cleaned)
+    norm_desc = normalize_text(raw_desc)
+    norm_cleaned = normalize_text(cleaned)
 
     # --- 策略 1: 精確匹配（正規化後完全相同）---
     res = None
@@ -215,11 +219,14 @@ def _collect_all_paths(node: Dict, current_path: str) -> List[str]:
     return paths
 
 
-def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2) -> Dict[str, Any]:
+def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2, new_keyword: Optional[str] = None) -> Dict[str, Any]:
     """
     分析整個標單的系統分布與成本加總。
-    分類路徑會依 max_depth 截斷。
+    若提供 new_keyword，則僅對受影響的項目（未分類或包含關鍵字者）進行重新掃描 (增量更新)。
     """
+    import time
+    start_time = time.time()
+    
     summary = {
         "total_cost": 0,
         "classification_depth": max_depth,
@@ -227,6 +234,10 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2) -> Dict
     }
 
     summary["systems"]["未分類"] = {"count": 0, "total": 0}
+    
+    # 識別是否為增量更新
+    is_incremental = new_keyword is not None
+    norm_new_keyword = normalize_text(new_keyword) if new_keyword else None
 
     for row in rows:
         if row.get("should_hide"):
@@ -239,22 +250,44 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2) -> Dict
         except:
             total_price = 0
 
-        # 核心優化：若沒單位也沒數量，通常是標題或合計項，標註為無類別
-        # 此規則優先於手動分類，因為標題項不應被歸類到任何系統中
+        # 確認是否需要重新分類
+        needs_reclassify = False
+        if not is_incremental:
+            # 全量更新模式：非手動分類者皆需重掃
+            if not row.get("is_manual_category"):
+                needs_reclassify = True
+        else:
+            # 增量更新模式：僅對未分類或命中新關鍵字者重掃
+            current_cat = row.get("system_category", "未分類")
+            if current_cat == "未分類":
+                needs_reclassify = True
+            elif norm_new_keyword and norm_new_keyword in normalize_text(description):
+                # 只有當項目不是手動強制分類時，才給予自動重新判定的機會
+                if not row.get("is_manual_category"):
+                    needs_reclassify = True
+
+        # 核心優化：若沒單位也沒數量，標註為無類別 (標題/合計)
         unit = str(row.get("unit") or "").strip()
         quantity = row.get("quantity")
         is_empty_record = not unit and (quantity is None or str(quantity).strip() == "")
         
-        if is_empty_record:
-            full_path = "未分類"
-            row["system_category"] = full_path
-        elif row.get("is_manual_category"):
+        if row.get("is_manual_category"):
+            # 手動分類：尊重 manual_raw_category 並依當前深度截斷
             raw_path = row.get("manual_raw_category", row.get("system_category", "未分類"))
             parts = raw_path.split(" > ")
             full_path = " > ".join(parts[:max_depth])
             row["system_category"] = full_path
-        else:
+        elif is_empty_record:
+            full_path = "未分類"
+            row["system_category"] = full_path
+        elif needs_reclassify:
             full_path = classify_row(description, max_depth=max_depth)
+            row["system_category"] = full_path
+        else:
+            # 維持現狀
+            cat = row.get("system_category", "未分類")
+            parts = cat.split(" > ")
+            full_path = " > ".join(parts[:max_depth])
             row["system_category"] = full_path
 
         if full_path not in summary["systems"]:
@@ -271,6 +304,7 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2) -> Dict
         else:
             system["percentage"] = 0
 
+    print(f"[Analyze] Duration: {time.time() - start_time:.3f}s, rows={len(rows)}, incremental={is_incremental}")
     return summary
 
 

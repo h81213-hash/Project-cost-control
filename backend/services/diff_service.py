@@ -58,7 +58,10 @@ def compare_and_merge(old_rows: List[Dict[str, Any]], new_rows: List[Dict[str, A
         "added": 0,
         "removed": 0,
         "modified": 0,
-        "unchanged": 0
+        "unchanged": 0,
+        "inherited_manual": 0,
+        "inherited_auto": 0,
+        "kept_target_manual": 0
     }
     
     merged_rows = []
@@ -76,13 +79,26 @@ def compare_and_merge(old_rows: List[Dict[str, Any]], new_rows: List[Dict[str, A
             # 取出第一個匹配的（先進先出，維持順序穩定性）
             old_row = old_lookup[fp].pop(0)
             
-            # 繼承分類 (CRITICAL)
-            if old_row.get("is_manual_category"):
+            # --- 權重繼承邏輯 (Weighted Merge) ---
+            # 策略 1: 目標版本 (V3) 已有手動分類 -> 優先保留 V3
+            if new_row.get("is_manual_category"):
+                # 保留不變，記錄來源
+                new_row["inheritance_source"] = "target_manual"
+                summary["kept_target_manual"] += 1
+                
+            # 策略 2: V3 沒動手，但基準版本 (V1) 有手動分類 -> 繼承 V1
+            elif old_row.get("is_manual_category"):
                 new_row["is_manual_category"] = True
                 new_row["manual_raw_category"] = old_row.get("manual_raw_category")
                 new_row["system_category"] = old_row.get("system_category")
+                new_row["inheritance_source"] = "base_manual"
+                summary["inherited_manual"] += 1
+                
+            # 策略 3: 二者皆無手動設定 -> 預設跟隨 V1 (確保基準一致)
             else:
                 new_row["system_category"] = old_row.get("system_category")
+                new_row["inheritance_source"] = "base_auto"
+                summary["inherited_auto"] += 1
 
             # 判斷數值是否變更 (數量或單價)
             old_qty = str(old_row.get("quantity", "")).replace(",", "").strip()

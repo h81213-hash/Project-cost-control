@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useTransition, memo, useMemo, useRef, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { API_BASE_URL } from "../../constants";
+import { safeFetch } from "../../utils/api_utils";
 import { 
   Home, 
   FileText, 
@@ -25,6 +26,7 @@ import {
   ChevronRight,
   FileSpreadsheet,
   AlertCircle,
+  Calculator,
   TrendingUp,
   Settings as SettingsIcon,
   Phone,
@@ -255,6 +257,7 @@ function CategorySelectorModal({
   categoriesTree,
   rowDescription,
   isBatch,
+  isSubmitting,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -262,6 +265,7 @@ function CategorySelectorModal({
   categoriesTree: any;
   rowDescription: string;
   isBatch?: boolean;
+  isSubmitting?: boolean;
 }) {
   const [selectedPath, setSelectedPath] = useState<string>("");
   const [addKeyword, setAddKeyword] = useState<boolean>(true);
@@ -415,21 +419,23 @@ function CategorySelectorModal({
         </div>
         <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-white shrink-0">
           <button 
+            disabled={isSubmitting}
             onClick={() => onSave("未分類", false, "", rowDescription)}
-            className="px-4 py-2 text-sm font-medium text-rose-500 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-rose-500 hover:bg-rose-50 border border-rose-100 rounded-xl transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            <Trash2 size={16} /> 設為未分類
+            <Trash2 size={16} /> {isSubmitting ? '處理中...' : '設為未分類'}
           </button>
           <div className="flex gap-3">
-            <button onClick={onClose} className="px-5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+            <button disabled={isSubmitting} onClick={onClose} className="px-5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50">
               取消
             </button>
             <button 
-              disabled={!selectedPath}
+              disabled={!selectedPath || isSubmitting}
               onClick={() => onSave(selectedPath, addKeyword, keyword, rowDescription)}
-              className="px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors"
+              className="px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors flex items-center gap-2"
             >
-              確認儲存
+              {isSubmitting && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+              {isSubmitting ? '儲存中...' : '確認儲存'}
             </button>
           </div>
         </div>
@@ -594,9 +600,6 @@ const ProjectTableRow = memo(({
               <span className="text-slate-400 font-medium text-xs italic">已還原</span>
             ) : (
               <button 
-                onClick={onRevert}
-                title="還原為舊版數值 (Reject Change)" 
-                className="p-1.5 rounded-full hover:bg-blue-100 text-blue-500 transition-all hover:scale-110"
               >
                 <RotateCcw size={16} />
               </button>
@@ -625,7 +628,17 @@ export default function ProjectDetailPage() {
   const [isFetchingCategoryItems, setIsFetchingCategoryItems] = useState(false);
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [diffResult, setDiffResult] = useState<any>(null);
+  const searchParams = useSearchParams();
   const [baseVersionIdx, setBaseVersionIdx] = useState(0);
+  
+  // URL 同步：當網址參數 v 變更時更新 baseVersionIdx，或初始化時設定
+  useEffect(() => {
+    const v = searchParams.get("v");
+    if (v !== null) {
+      const idx = parseInt(v);
+      if (!isNaN(idx)) setBaseVersionIdx(idx);
+    }
+  }, [searchParams]);
   const [targetVersionIdx, setTargetVersionIdx] = useState(-1);
   const [categoriesTree, setCategoriesTree] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -642,12 +655,17 @@ export default function ProjectDetailPage() {
     summary: { profit_rate: 0.18, tax_rate: 0.05 },
     categoryOrder: []
   });
-  // Custom rows: subtotal dividers and deduction items
-  const [customRows, setCustomRows] = useState<Array<{id: string, type: 'subtotal'|'deduction', label: string, afterIndex: number, amount?: number}>>([]);
+  // Custom rows: subtotal dividers, deduction items, and formulas
+  const [customRows, setCustomRows] = useState<Array<{id: string, type: 'subtotal'|'deduction'|'formula', label: string, afterIndex: number, amount?: number, formula?: string}>>([]);
   // Drag state for reordering
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [dragCustomId, setDragCustomId] = useState<string | null>(null);
   const [dragCatIndex, setDragCatIndex] = useState<number | null>(null);
+
+  // Simulation states
+  const [simulationMode, setSimulationMode] = useState(false);
+  const [costSimFactor, setCostSimFactor] = useState(0); // -20 to +20 percentage
+  const [profitSimFactor, setProfitSimFactor] = useState(0); // -20 to +20 percentage
   const [isSyncing, setIsSyncing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [ignoredItemIndices, setIgnoredItemIndices] = useState<number[]>([]);
@@ -657,19 +675,19 @@ export default function ProjectDetailPage() {
   // 詢價單編輯暫存
   const [inquiryEdits, setInquiryEdits] = useState<Record<string, { unit_price: number, discount_rate: number }>>({});
   const [isSavingInquiry, setIsSavingInquiry] = useState(false);
+  const [isReclassifying, setIsReclassifying] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   
-  // 當選中詢價類別時，從後端抓取該類別的所有項目 (不受主表格分頁限制)
+  // 當選中詢價類別或版本變更時，從後端抓取該類別的所有項目
   useEffect(() => {
     if (activeInquiryCategory && projectId) {
       const fetchItems = async () => {
         setIsFetchingCategoryItems(true);
         try {
-          // 專用極輕量化端點，只抓取 rows，避開專案 metadata 序列化成本
-          const response = await fetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows?system_category=${encodeURIComponent(activeInquiryCategory)}`);
+          const response = await fetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows?system_category=${encodeURIComponent(activeInquiryCategory)}&version_idx=${baseVersionIdx}`);
           const rows = await response.json();
           setCategoryItems(rows || []);
-          setDisplayedCategoryItemsCount(100); // 初始只顯示 100 筆，避免 DOM 渲染過重導致凍結
+          setDisplayedCategoryItemsCount(100);
         } catch (error) {
           console.error("Failed to fetch category items:", error);
         } finally {
@@ -677,35 +695,38 @@ export default function ProjectDetailPage() {
         }
       };
       fetchItems();
-      setInquiryEdits({}); // 切換類別時清空暫存
+      setInquiryEdits({}); 
     } else {
       setCategoryItems([]);
     }
-  }, [activeInquiryCategory, projectId]);
+  }, [activeInquiryCategory, projectId, baseVersionIdx]);
 
   const fetchReport = useCallback(async (depth: number) => {
     setIsFetchingReport(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/reports?depth=${depth}`);
-      const data = await res.json();
-      setReportData(data);
-      if (data.config) {
-        setReportConfigEdits({
-          floor_area: data.floor_area || "",
-          categories: data.config.categories || {},
-          summary: data.config.summary || { profit_rate: 0.18, tax_rate: 0.05 }
-        });
-        setCustomRows(data.config.custom_rows || []);
+      const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reports?depth=${depth}&version_idx=${baseVersionIdx}`, {}, 60000);
+      if (ok && data) {
+        setReportData(data);
+        if (data.config) {
+          setReportConfigEdits({
+            floor_area: data.floor_area || "",
+            categories: data.config.categories || {},
+            summary: data.config.summary || { profit_rate: 0.18, tax_rate: 0.05 },
+            categoryOrder: data.config.categoryOrder || [],
+            inquiry_template: data.config.inquiry_template || {}
+          });
+          setCustomRows(data.config.custom_rows || []);
+        }
       }
     } catch (e) {
       console.error("報表載入失敗", e);
     } finally {
       setIsFetchingReport(false);
     }
-  }, [projectId]);
+  }, [projectId, baseVersionIdx]);
 
   useEffect(() => {
-    if (activeTab === "report") {
+    if (activeTab === "report" || activeTab === "analysis") {
       fetchReport(reportDepth);
     }
   }, [activeTab, reportDepth, fetchReport]);
@@ -713,15 +734,16 @@ export default function ProjectDetailPage() {
   const saveReportConfig = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/reports/config`, {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reports/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...reportConfigEdits, custom_rows: customRows })
       });
-      const data = await res.json();
-      if (data.status === "success") {
+      if (ok) {
         fetchReport(reportDepth);
         alert("報表設定已儲存");
+      } else {
+        alert(error || "儲存失敗");
       }
     } catch (e) {
       alert("儲存失敗");
@@ -733,6 +755,14 @@ export default function ProjectDetailPage() {
   const saveInquiryChanges = async () => {
     if (!activeInquiryCategory || Object.keys(inquiryEdits).length === 0) return;
     
+    // 防錯機制：編輯歷史版本時彈出確認
+    const isLatest = baseVersionIdx === (project?.files.length || 1) - 1;
+    if (!isLatest) {
+      if (!window.confirm(`⚠️ 您正在修改「歷史版本 (V${baseVersionIdx + 1})」，這將直接覆寫該版本的原始數據。確定要繼續嗎？`)) {
+        return;
+      }
+    }
+
     setIsSavingInquiry(true);
     try {
       const updates = Object.entries(inquiryEdits).map(([key, val]) => {
@@ -740,20 +770,26 @@ export default function ProjectDetailPage() {
         return { item_no, description, ...val };
       });
 
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows/update`, {
+      const { ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows/update`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ system_category: activeInquiryCategory, updates })
+        body: JSON.stringify({ 
+          system_category: activeInquiryCategory, 
+          updates, 
+          version_idx: baseVersionIdx 
+        })
       });
       
-      const data = await res.json();
-      if (data.status === "success") {
+      if (ok) {
         // 重新抓取資料以同步
-        const response = await fetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows?system_category=${encodeURIComponent(activeInquiryCategory)}`);
-        const rows = await response.json();
-        setCategoryItems(rows || []);
-        setInquiryEdits({});
-        alert("詢價修改已儲存");
+        const { data: rows, ok: fetchOk } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/inquiry_rows?system_category=${encodeURIComponent(activeInquiryCategory)}`);
+        if (fetchOk) {
+          setCategoryItems(rows || []);
+          setInquiryEdits({});
+          alert("詢價修改已儲存");
+        }
+      } else {
+        alert(error || "儲存失敗");
       }
     } catch (e) {
       alert("儲存失敗");
@@ -769,16 +805,17 @@ export default function ProjectDetailPage() {
   const [totalRows, setTotalRows] = useState(0);
 
   const fetchProject = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+    // 捲動不快取，初次載入才檢查
     if (pageNum === 1 && !append) {
-        const cacheKey = `project_${projectId}`;
+        const cacheKey = `project_${projectId}_v${baseVersionIdx}`;
         if (typeof window !== "undefined") {
             const cachedData = localStorage.getItem(cacheKey);
             if (cachedData) {
                 try {
                     const parsed = JSON.parse(cachedData);
                     setProject(parsed);
-                    if (parsed.files && parsed.files.length > 0) {
-                        setResult(parsed.files[parsed.files.length - 1].data);
+                    if (parsed.files && parsed.files[baseVersionIdx]?.data) {
+                        setResult(parsed.files[baseVersionIdx].data);
                     }
                 } catch (e) {
                     console.error("快取解析失敗", e);
@@ -788,13 +825,14 @@ export default function ProjectDetailPage() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=50`);
-      const data = await res.json();
-      if (data.id) {
+      // 傳遞版本索引
+      const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=50&version_idx=${baseVersionIdx}`);
+      if (ok && data && data.id) {
         setProject(data);
-        if (data.files && data.files.length > 0) {
-          const latestFile = data.files[data.files.length - 1];
-          const newData = latestFile.data;
+        // 重要：不再固定取最後一個，而是取 baseVersionIdx
+        const targetFile = data.files[baseVersionIdx] || data.files[data.files.length - 1];
+        if (targetFile && targetFile.data) {
+          const newData = targetFile.data;
           const pagination = newData.pagination;
 
           if (append) {
@@ -804,7 +842,7 @@ export default function ProjectDetailPage() {
             }));
           } else {
             setResult(newData);
-            const cacheKey = `project_${projectId}`;
+            const cacheKey = `project_${projectId}_v${baseVersionIdx}`;
             if (typeof window !== "undefined") {
               localStorage.setItem(cacheKey, JSON.stringify(data));
             }
@@ -835,7 +873,7 @@ export default function ProjectDetailPage() {
       setLoading(false);
       setIsFetchingMore(false);
     }
-  }, [projectId]);
+  }, [projectId, baseVersionIdx]);
 
   const loadMore = useCallback(async () => {
     if (isFetchingMore || !hasMore || loading) return;
@@ -870,10 +908,11 @@ export default function ProjectDetailPage() {
       .catch(e => console.error("無法載入分類樹", e));
 
     fetchProject();
-  }, [projectId, fetchProject]);
+  }, [projectId, fetchProject, baseVersionIdx]);
 
   const handleUpload = async () => {
     if (!file) return;
+    setLoading(true); // START LOADING
     const formData = new FormData();
     formData.append("file", file);
     try {
@@ -883,9 +922,22 @@ export default function ProjectDetailPage() {
       });
       const data = await res.json();
       if (data.status === "success") {
-        setResult(data.data);
+        // [FIX] 不再自動跳轉/分類，保持目前畫面
+        // setResult(data.data); 
+        
+        // 為了讓下拉選單即時更新，清除 localStorage 快取
+        try {
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith(`project_${projectId}`)) {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (e) {
+          console.error("清除快取失敗", e);
+        }
+
         await fetchProject();
-        alert("上傳成功！");
+        alert("標單上傳成功！請從版本選單中選擇新版本開始作業。");
         setFile(null);
       } else {
         alert("解析失敗: " + (data.message || "未知原因"));
@@ -902,62 +954,160 @@ export default function ProjectDetailPage() {
     const isBatch = editingRowIndex === null && selectedIndices.length > 0;
     if (editingRowIndex === null && !isBatch) return;
     
-    setLoading(true);
-    setModalOpen(false);
-    
-    try {
-      const endpoint = isBatch 
-        ? `${API_BASE_URL}/projects/${projectId}/batch_classify`
-        : `${API_BASE_URL}/projects/${projectId}/manual_classify`;
-        
-      const body = isBatch
-        ? {
-            row_indices: selectedIndices,
-            new_category_path: path,
-            add_keyword: addKeyword,
-            keyword: keyword,
-            classification_depth: project?.classification_depth || 4
-          }
-        : {
-            row_index: editingRowIndex,
-            new_category_path: path,
-            add_keyword: addKeyword,
-            keyword: keyword,
-            item_name: itemName,
-            classification_depth: project?.classification_depth || 4
-          };
+    // 防錯機制：編輯歷史版本時彈出確認
+    const isLatest = baseVersionIdx === (project?.files.length || 1) - 1;
+    if (!isLatest) {
+      if (!window.confirm(`⚠️ 您正在修改「歷史版本 (V${baseVersionIdx + 1})」的分類，這將直接覆寫該版本的數據。確定要繼續嗎？`)) {
+        return;
+      }
+    }
 
-      const res = await fetch(endpoint, {
+    setLoading(true);
+    // 不再立即關閉 Modal，而是顯示載入狀態
+    
+    const endpoint = isBatch 
+      ? `${API_BASE_URL}/projects/${projectId}/batch_classify`
+      : `${API_BASE_URL}/projects/${projectId}/manual_classify`;
+      
+    const depth = project?.classification_depth || 4;
+    const body = isBatch
+      ? {
+          row_indices: selectedIndices,
+          new_category_path: path,
+          add_keyword: addKeyword,
+          keyword: keyword,
+          classification_depth: depth,
+          version_idx: baseVersionIdx
+        }
+      : {
+          row_index: editingRowIndex,
+          new_category_path: path,
+          add_keyword: addKeyword,
+          keyword: keyword,
+          item_name: itemName,
+          classification_depth: depth,
+          version_idx: baseVersionIdx
+        };
+
+    // --- Optimistic UI Update ---
+    const oldResult = result;
+    if (result && !addKeyword) {
+      try {
+        const newRows = [...result.rows];
+        const rawTargetIndices = isBatch ? selectedIndices : [editingRowIndex];
+        // 排除 null
+        const targetIndices = rawTargetIndices.filter((idx): idx is number => idx !== null);
+        const newCat = path.split(" > ").slice(0, depth).join(" > ");
+        
+        targetIndices.forEach(idx => {
+          const rowIndexInArray = newRows.findIndex((r: any) => (r._original_index !== undefined ? r._original_index : -1) === idx);
+          if (rowIndexInArray !== -1) {
+            newRows[rowIndexInArray] = { 
+              ...newRows[rowIndexInArray], 
+              system_category: newCat,
+              is_manual_category: true,
+              manual_raw_category: path
+            };
+          }
+        });
+
+        // 簡單更新分析摘要的計數（選擇性）
+        const newAnalysis = JSON.parse(JSON.stringify(result.analysis));
+        if (newAnalysis.systems) {
+          targetIndices.forEach(idx => {
+            const oldRow = result.rows.find((r: any) => (r._original_index !== undefined ? r._original_index : -1) === idx);
+            if (!oldRow) return;
+            const oldCat = oldRow.system_category || "未分類";
+            const rowPrice = parseFloat(String(oldRow.total_price || 0).replace(/,/g, ""));
+            
+            if (newAnalysis.systems[oldCat]) {
+              newAnalysis.systems[oldCat].count = Math.max(0, newAnalysis.systems[oldCat].count - 1);
+              newAnalysis.systems[oldCat].total -= rowPrice;
+            }
+            if (!newAnalysis.systems[newCat]) {
+              newAnalysis.systems[newCat] = { count: 0, total: 0, percentage: 0 };
+            }
+            newAnalysis.systems[newCat].count += 1;
+            newAnalysis.systems[newCat].total += rowPrice;
+          });
+        }
+
+        setResult({ ...result, rows: newRows, analysis: newAnalysis });
+      } catch (err) {
+        console.error("Optimistic UI failed", err);
+      }
+    }
+
+    try {
+      const { data: resData, ok, error } = await safeFetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
-      });
+      }, 30000);
       
-      const resData = await res.json();
-      if (resData.status === "success") {
-        setResult(resData.data);
+      if (ok && resData?.status === "success" && result) {
+        const finalRows = result.rows.map((row: any) => {
+          const patch = resData.updated_rows?.find((u: any) => u._original_index === row._original_index);
+          return patch ? { ...row, ...patch } : row;
+        });
+
+        setResult({ 
+          ...result, 
+          rows: finalRows, 
+          analysis: resData.analysis 
+        });
+
         if (isBatch) setSelectedIndices([]);
+        setModalOpen(false);
         
-        // Refresh categories
-        fetch(`${API_BASE_URL}/categories`, { cache: 'no-store' })
-          .then(res => res.json())
-          .then(data => setCategoriesTree(data));
+        if (addKeyword) {
+          fetch(`${API_BASE_URL}/categories`, { cache: 'no-store' })
+            .then(res => res.json())
+            .then(data => setCategoriesTree(data));
+        }
       } else {
-        alert("儲存失敗: " + resData.message);
+        setResult(oldResult);
+        alert(resData.message || "儲存失敗");
       }
-    } catch (e) {
-      console.error(e);
-      alert("儲存分類發生錯誤");
+    } catch (err) {
+      console.error("Manual save failed", err);
+      setResult(oldResult);
+      alert("網路連線或伺服器錯誤，請稍後再試");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleReclassify = async () => {
+    if (!project || !window.confirm("確定要重新分析分類嗎？\n\n注意：系統僅會重新分析『自動分類』的項目，您手動修改過的分類將會被保留。")) return;
+    
+    setIsReclassifying(true);
+    try {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reclassify?version_idx=${baseVersionIdx}`, {
+        method: "POST",
+      }, 120000);
+      if (ok && data) {
+        alert(`重新分析完成！\n本次共更新了 ${data.updated_count} 個項目的分類。`);
+        await fetchProject(1, false);
+        if (activeTab === "report" || activeTab === "analysis") {
+          fetchReport(reportDepth);
+        }
+      } else {
+        alert(error || "重新分析失敗");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("重新分析失敗");
+    } finally {
+      setIsReclassifying(false);
+    }
+  };
+
   const handleExport = () => {
     if (!project) return;
-    // 使用直接跳轉觸發下載，避免 fetch 的 Blob 處理與 CORS 限制問題
     window.location.href = `${API_BASE_URL}/projects/${project.id}/export?version_idx=${baseVersionIdx}`;
   };
+
 
 
   const handleCompare = async () => {
@@ -965,19 +1115,18 @@ export default function ProjectDetailPage() {
     setLoading(true);
     try {
       const targetIdx = targetVersionIdx === -1 ? project.files.length - 1 : targetVersionIdx;
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/compare`, {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/compare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           base_index: baseVersionIdx, 
           target_index: targetIdx
         }),
-      });
-      const data = await res.json();
-      if (data.status === "success") {
+      }, 180000);
+      if (ok && data) {
         setDiffResult(data.data);
       } else {
-        alert(data.message);
+        alert(error || "比對失敗");
       }
     } catch (e) {
       console.error(e);
@@ -994,7 +1143,6 @@ export default function ProjectDetailPage() {
       const targetIdx = targetVersionIdx === -1 ? project.files.length - 1 : targetVersionIdx;
       const targetFileName = project.files[targetIdx].file_name;
       
-      // Merge kept rows and filter out ignored rows or apply reverted values
       const finalRows = (diffResult.diff.rows as any[]).map((row, idx) => {
         if (revertedItemIndices.includes(idx) && row.old_values) {
           return {
@@ -1010,22 +1158,33 @@ export default function ProjectDetailPage() {
 
       const mergedRows = [...finalRows, ...keptRemovedRows];
 
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/apply_diff`, {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/apply_diff`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           rows: mergedRows,
           file_name: targetFileName
         }),
-      });
-      const data = await res.json();
-      if (data.status === "success") {
-        alert("已成功套用舊版分類並建立新版本！");
+      }, 60000);
+      if (ok) {
+        // --- UX Hint: 詳細的合併報告 ---
+        const s = diffResult.diff.summary;
+        const msg = [
+          "🎉 合併成功並已建立新版本！",
+          `--------------------------`,
+          `📍 從 V${baseVersionIdx + 1} 繼承手動分類：${s.inherited_manual || 0} 筆`,
+          `📍 保留 V${(targetVersionIdx === -1 ? project.files.length - 1 : targetVersionIdx) + 1} 現有手動分類：${s.kept_target_manual || 0} 筆`,
+          `📍 剩餘新項目待分類：${s.added || 0} 筆`,
+          `--------------------------`,
+          `請從版本選單中切換至最新的「合併版本」查看結果。`
+        ].join("\n");
+        
+        alert(msg);
         setIsCompareMode(false);
         setDiffResult(null);
         fetchProject();
       } else {
-        alert(data.message);
+        alert(error || "套用失敗");
       }
     } catch (e) {
       console.error(e);
@@ -1044,18 +1203,20 @@ export default function ProjectDetailPage() {
         inquiry_template: newTemplate
       };
       
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/settings`, {
+      const { data: updateData, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/settings`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ report_config: newConfig }),
       });
       
-      if (!res.ok) throw new Error("儲存模板失敗");
-      const updateData = await res.json();
-      setProject(updateData.project);
-      setReportConfigEdits(updateData.project.report_config || {});
-      setTemplateModalOpen(false);
-      alert("詢價模板儲存成功！");
+      if (ok && updateData) {
+        setProject(updateData.project);
+        setReportConfigEdits(updateData.project.report_config || {});
+        setTemplateModalOpen(false);
+        alert("詢價模板儲存成功！");
+      } else {
+        alert(error || "儲存失敗");
+      }
     } catch (e) {
       console.error(e);
       alert("儲存失敗");
@@ -1074,17 +1235,16 @@ export default function ProjectDetailPage() {
     if (!project || !window.confirm("確定要刪除此標單版本嗎？此操作無法恢復。")) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/files/${index}`, {
+      const { ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/files/${index}`, {
         method: "DELETE",
       });
-      const data = await res.json();
-      if (data.status === "success") {
+      if (ok) {
         await fetchProject();
         setDiffResult(null);
         setBaseVersionIdx(0);
         setTargetVersionIdx(-1);
       } else {
-        alert(data.message);
+        alert(error || "刪除失敗");
       }
     } catch (e) {
       console.error(e);
@@ -1097,25 +1257,28 @@ export default function ProjectDetailPage() {
   const handleDepthChange = async (newDepth: number) => {
     if (!project) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/projects/${projectId}/settings`, {
+      const { data: updateData, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/settings`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ classification_depth: newDepth }),
       });
-      if (!res.ok) throw new Error("更新失敗");
-      const updateData = await res.json();
-      setProject(updateData.project);
+      if (ok && updateData) {
+        setProject(updateData.project);
+      } else {
+        alert(error || "更新失敗");
+        return;
+      }
       
       if (result && result.rows) {
         setLoading(true);
-        const anaRes = await fetch(`${API_BASE_URL}/analyze`, {
+        const { data: anaData, ok: anaOk, error: anaErr } = await safeFetch(`${API_BASE_URL}/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ rows: result.rows, max_depth: newDepth }),
-        });
-        const anaData = await anaRes.json();
-        if (anaData.status === "success") {
+        }, 60000);
+        if (anaOk && anaData) {
           setResult({ ...result, analysis: anaData.analysis, rows: anaData.rows });
+        } else {
+          alert(anaErr || "分析失敗");
         }
       }
     } catch (err) {
@@ -1202,7 +1365,8 @@ export default function ProjectDetailPage() {
                         <p className="text-slate-500 font-bold">正在生成專案報表數據...</p>
                       </div>
                     ) : ( 
-                      <div className="bg-white/80 backdrop-blur-3xl p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 space-y-8">
+                      <>
+                        <div className="bg-white/80 backdrop-blur-3xl p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-slate-900/5 space-y-8">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="space-y-1">
                             <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-3 tracking-tight">
@@ -1249,8 +1413,6 @@ export default function ProjectDetailPage() {
                               type="number"
                               step="0.1"
                               value={
-                                // If it ends with a dot or doesn't have decimals, we need a smarter approach for controlled inputs
-                                // The simplest fix is just to multiply by 100 without forcing toFixed(1) constantly
                                 reportConfigEdits.summary?.profit_rate !== undefined 
                                   ? reportConfigEdits.summary.profit_rate * 100 
                                   : 18
@@ -1278,31 +1440,26 @@ export default function ProjectDetailPage() {
 
                         {/* Toolbar: Add custom rows */}
                         {reportData && (
-                          <div className="flex items-center gap-3 pb-2">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">插入自訂列</span>
-                            <button
-                              onClick={() => setCustomRows(prev => [...prev, {
-                                id: Date.now().toString(),
-                                type: 'subtotal',
-                                label: `小計 ${String.fromCharCode(65 + prev.filter(r => r.type === 'subtotal').length)}`,
-                                afterIndex: (reportData?.categories.filter((c: any) => !reportConfigEdits.categories[c.path]?.hidden).length ?? 1) - 1
-                              }])}
-                              className="flex items-center gap-1.5 px-5 py-2 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold hover:bg-slate-200 transition-all"
-                            >
-                              新增小計行
-                            </button>
-                            <button
-                              onClick={() => setCustomRows(prev => [...prev, {
-                                id: Date.now().toString(),
-                                type: 'deduction',
-                                label: '扣除項目',
-                                afterIndex: (reportData?.categories.filter((c: any) => !reportConfigEdits.categories[c.path]?.hidden).length ?? 1) - 1,
-                                amount: 0
-                              }])}
-                              className="flex items-center gap-1.5 px-5 py-2 bg-orange-50/80 text-orange-600 rounded-full text-xs font-semibold hover:bg-orange-100 transition-all cursor-pointer"
-                            >
-                              新增減項
-                            </button>
+                          <div className="flex flex-col gap-4 mb-6">
+                            <div className="flex items-center justify-between bg-white/50 backdrop-blur-md p-4 rounded-3xl border border-white/40 shadow-sm">
+                              <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">配置工具</span>
+                                  <button
+                                    onClick={() => setCustomRows(prev => [...prev, {
+                                      id: Date.now().toString(),
+                                      type: 'formula',
+                                      label: '自定義小計',
+                                      afterIndex: (reportData?.categories.filter((c: any) => !reportConfigEdits.categories[c.path]?.hidden).length ?? 1) - 1,
+                                      formula: ''
+                                    }])}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-[#007AFF] text-white rounded-2xl text-[13px] font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                                  >
+                                    <Calculator size={15} /> 新增公式行
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
 
@@ -1325,192 +1482,174 @@ export default function ProjectDetailPage() {
                               {(() => {
                                 let visibleCats = reportData?.categories.filter((cat: any) => !reportConfigEdits.categories[cat.path]?.hidden) || [];
                                 
-                                // Sort by custom order if available
                                 if (reportConfigEdits.categoryOrder && reportConfigEdits.categoryOrder.length > 0) {
-                                  visibleCats = visibleCats.sort((a: any, b: any) => {
+                                  visibleCats = [...visibleCats].sort((a: any, b: any) => {
                                     const indexA = reportConfigEdits.categoryOrder.indexOf(a.path);
                                     const indexB = reportConfigEdits.categoryOrder.indexOf(b.path);
                                     if (indexA === -1 && indexB === -1) return 0;
-                                    if (indexA === -1) return 1; // Unordered items go to the bottom
+                                    if (indexA === -1) return 1;
                                     if (indexB === -1) return -1;
                                     return indexA - indexB;
                                   });
                                 }
 
+                                const evaluateFormula = (formulaStr: string, cMap: Record<number, number>, fMap: Record<string, number>) => {
+                                  if (!formulaStr) return 0;
+                                  try {
+                                    let p = formulaStr.trim().toUpperCase();
+                                    p = p.replace(/(\d+)\s*[:~]\s*(\d+)/g, (_, s, e) => {
+                                      const start = parseInt(s), end = parseInt(e);
+                                      const r = [];
+                                      for (let n = Math.min(start, end); n <= Math.max(start, end); n++) r.push(n);
+                                      return `(${r.join('+')})`;
+                                    });
+                                    p = p.replace(/SUM\(([^)]+)\)/g, '($1)');
+                                    p = p.replace(/AVG\(([^)]+)\)|AVERAGE\(([^)]+)\)/g, (_, g1, g2) => {
+                                      const inner = g1 || g2;
+                                      return `((${inner}) / ${inner.split(',').length})`;
+                                    });
+                                    p = p.replace(/\b([A-Z])\b/g, (match) => {
+                                      const v = fMap[match];
+                                      return v !== undefined ? v.toString() : match;
+                                    });
+                                    p = p.replace(/\b(\d+)\b(?!\.)/g, (match) => {
+                                      const v = cMap[parseInt(match)];
+                                      return v !== undefined ? v.toString() : match;
+                                    });
+                                    // eslint-disable-next-line no-new-func
+                                    const result = new Function(`return ${p}`)();
+                                    return typeof result === 'number' && isFinite(result) ? result : null;
+                                  } catch (e) { return null; }
+                                };
+
                                 const rows: React.ReactNode[] = [];
-                                let segSupplier = 0;
-                                let segInternal = 0;
-                                let catDisplayIdx = 0;
+                                const catInternalMap: Record<number, number> = {};
+                                const catSupplierMap: Record<number, number> = {};
+                                const formulaInternalMap: Record<string, number> = {};
+                                const formulaSupplierMap: Record<string, number> = {};
+                                let formulaLabelCounter = 0;
 
+                                visibleCats.forEach((c: any, idx: number) => {
+                                  const factor = simulationMode ? (1 + costSimFactor / 100) : 1;
+                                  catInternalMap[idx + 1] = c.internal_total * factor;
+                                  catSupplierMap[idx + 1] = c.supplier_total * factor;
+                                });
+
+                                const allRowsDisplay: any[] = [];
                                 visibleCats.forEach((cat: any, i: number) => {
-                                  const edit = reportConfigEdits.categories[cat.path] || {};
-                                  const currentRemark = edit.remark !== undefined ? edit.remark : cat.remark;
-                                  segSupplier += cat.supplier_total;
-                                  segInternal += cat.internal_total;
+                                  allRowsDisplay.push({ type: 'cat', data: cat, originalIdx: i });
+                                  const customsHere = customRows.filter(r => r.afterIndex === i);
+                                  customsHere.forEach(cr => {
+                                    allRowsDisplay.push({ type: 'custom', data: cr });
+                                  });
+                                });
 
-                                  // Drag drop classes
-                                  const isDragOver = dragOverIndex === i && dragCatIndex !== null;
+                                if (!reportData) return <tr><td colSpan={9} className="text-center py-12 text-slate-400">數據內容載入中...</td></tr>;
 
-                                  rows.push(
-                                    <tr
-                                      key={`cat-${cat.path}`}
-                                      draggable
-                                      onDragStart={() => { setDragCatIndex(i); setDragCustomId(null); }}
-                                      onDragEnd={() => { setDragCatIndex(null); setDragOverIndex(null); }}
-                                      onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
-                                      onDrop={(e) => {
-                                        e.preventDefault();
-                                        if (dragCustomId !== null) {
-                                          // Move custom row to after this cat index
-                                          setCustomRows(prev => prev.map(r => r.id === dragCustomId ? { ...r, afterIndex: i } : r));
-                                        } else if (dragCatIndex !== null && dragCatIndex !== i) {
-                                          // Reorder category
-                                          const currentOrder = reportConfigEdits.categoryOrder?.length > 0 
-                                            ? [...reportConfigEdits.categoryOrder] 
-                                            : visibleCats.map((c: any) => c.path);
-                                          
-                                          const draggedPath = visibleCats[dragCatIndex].path;
-                                          // Remove dragged item from its original position
-                                          const newOrder = currentOrder.filter((path: string) => path !== draggedPath);
-                                          
-                                          // Find the target path
-                                          const targetPath = visibleCats[i].path;
-                                          const targetIndexInOrder = newOrder.indexOf(targetPath);
-                                          
-                                          if (targetIndexInOrder !== -1) {
-                                            // Insert dragged item after the target item
-                                            newOrder.splice(targetIndexInOrder + 1, 0, draggedPath);
-                                          } else {
-                                            newOrder.push(draggedPath);
-                                          }
-                                          
-                                          setReportConfigEdits((prev: any) => ({
-                                            ...prev,
-                                            categoryOrder: newOrder
-                                          }));
-                                        }
-                                        setDragCatIndex(null);
-                                        setDragCustomId(null);
-                                        setDragOverIndex(null);
-                                      }}
-                                      className={`hover:bg-slate-50 transition-colors border-b border-slate-100/50 cursor-grab ${
-                                        isDragOver ? 'border-t-2 border-t-blue-400' : ''
-                                      }`}
-                                    >
-                                      <td className="px-6 py-5 text-center text-slate-300 text-lg select-none">⠿</td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-slate-400">{++catDisplayIdx}</td>
-                                      <td className="px-6 py-5 text-[13px] font-semibold text-slate-700">{cat.name}</td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-right text-slate-600">{formatCurrency(cat.supplier_total)}</td>
-                                      <td className="px-6 py-5 text-[11px] font-semibold text-right text-slate-400">{cat.supplier_ratio.toFixed(2)}%</td>
-                                      <td className="px-6 py-5 text-[13px] font-semibold text-right text-slate-800">{formatCurrency(cat.internal_total)}</td>
-                                      <td className="px-6 py-5 text-[11px] font-semibold text-right text-slate-400">{((cat.internal_total / (reportData?.summary.direct_internal || 1)) * 100).toFixed(2)}%</td>
-                                      <td className="px-6 py-5">
-                                        <input
-                                          type="text"
-                                          value={currentRemark}
-                                          placeholder="輸入備註..."
-                                          onChange={(e) => setReportConfigEdits((prev: any) => ({
-                                            ...prev,
-                                            categories: { ...prev.categories, [cat.path]: { ...(prev.categories?.[cat.path] || {}), remark: e.target.value } }
-                                          }))}
-                                          className="w-full bg-transparent border border-transparent focus:border-blue-500/30 px-3 py-1.5 text-[13px] text-slate-500 outline-none transition-all focus:bg-white focus:shadow-sm rounded-lg"
-                                        />
-                                      </td>
-                                      <td className="px-6 py-5 text-center">
-                                        <button
-                                          onClick={() => setReportConfigEdits((prev: any) => ({
-                                            ...prev,
-                                            categories: {
-                                              ...prev.categories,
-                                              [cat.path]: { ...prev.categories?.[cat.path], hidden: true }
-                                            }
-                                          }))}
-                                          className="text-slate-300 hover:text-rose-500 transition-all p-1.5 rounded-lg hover:bg-rose-50"
-                                          title="隱藏此分類"
-                                        >
-                                          <Trash2 size={16} />
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  );
+                                const totalBaseSupplier = (reportData.summary.direct_supplier || 1) * (simulationMode ? (1 + costSimFactor / 100) : 1);
+                                const totalBaseInternal = (reportData.summary.direct_internal || 1) * (simulationMode ? (1 + costSimFactor / 100) : 1);
 
-                                  // Render any custom rows that should appear after this category index
-                                  const customHere = customRows.filter(r => r.afterIndex === i);
-                                  customHere.forEach((cr) => {
-                                    if (cr.type === 'subtotal') {
+                                allRowsDisplay.forEach(row => {
+                                  if (row.type === 'cat') {
+                                    const cat = row.data;
+                                    const edit = reportConfigEdits.categories[cat.path] || {};
+                                    const currentRemark = edit.remark !== undefined ? edit.remark : cat.remark;
+                                    const idx = row.originalIdx;
+                                    
+                                    const dispInternal = catInternalMap[idx + 1] || 0;
+                                    const dispSupplier = catSupplierMap[idx + 1] || 0;
+
+                                    rows.push(
+                                      <tr 
+                                        key={`cat-${cat.path}`}
+                                        className={`hover:bg-slate-50/80 transition-all group ${simulationMode ? 'bg-amber-50/20' : ''}`}
+                                      >
+                                        <td className="px-6 py-4 text-center text-slate-300 text-lg select-none group-hover:text-blue-400 cursor-grab" draggable onDragStart={() => { setDragCatIndex(idx); setDragCustomId(null); }}>⠿</td>
+                                        <td className="px-6 py-4 text-[13px] font-medium text-slate-400 text-center">{idx + 1}</td>
+                                        <td className="px-6 py-4">
+                                          <div className="flex flex-col">
+                                            <span className="text-[14px] font-bold text-slate-800">{cat.name}</span>
+                                            <span className="text-[10px] text-slate-400 uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">{cat.path}</span>
+                                          </div>
+                                        </td>
+                                        <td className={`px-6 py-4 text-right text-[14px] font-semibold ${simulationMode ? 'text-amber-600' : 'text-slate-700'} transition-colors underline decoration-slate-100/50 underline-offset-4`}>{formatCurrency(dispSupplier)}</td>
+                                        <td className="px-6 py-4 text-right">
+                                          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{((dispSupplier / totalBaseSupplier) * 100).toFixed(1)}%</span>
+                                        </td>
+                                        <td className={`px-6 py-4 text-right text-[14px] font-semibold ${simulationMode ? 'text-amber-600' : 'text-blue-700'} transition-colors`}>{formatCurrency(dispInternal)}</td>
+                                        <td className="px-6 py-4 text-right">
+                                          <span className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">{((dispInternal / totalBaseInternal) * 100).toFixed(1)}%</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                          <input 
+                                            type="text" 
+                                            value={currentRemark || ''} 
+                                            placeholder="輸入備註..." 
+                                            onChange={(e) => setReportConfigEdits((prev: any) => ({ ...prev, categories: { ...prev.categories, [cat.path]: { ...(prev.categories?.[cat.path] || {}), remark: e.target.value } } }))} 
+                                            className="w-full bg-transparent border border-transparent focus:border-blue-500/30 px-2 py-1 text-[12px] text-slate-500 outline-none transition-all focus:bg-white rounded-lg" 
+                                          />
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                          <button onClick={() => setReportConfigEdits((prev: any) => ({ ...prev, categories: { ...prev.categories, [cat.path]: { ...prev.categories?.[cat.path], hidden: true } } }))} className="text-slate-300 hover:text-rose-500 transition-all p-1.5 rounded-lg hover:bg-rose-50" title="隱藏此分類"><Trash2 size={16} /></button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  } else {
+                                    const cr = row.data;
+                                    if (cr.type === 'formula') {
                                       rows.push(
-                                        <tr
-                                          key={`cr-${cr.id}`}
-                                          draggable
-                                          onDragStart={() => { setDragCustomId(cr.id); setDragCatIndex(null); }}
-                                          onDragEnd={() => { setDragCustomId(null); setDragOverIndex(null); }}
-                                          className="bg-slate-50/80 cursor-grab group"
-                                        >
-                                          <td className="px-6 py-4 text-center text-slate-300 text-lg select-none group-hover:text-slate-400">⠿</td>
-                                          <td colSpan={2} className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                              <BarChart3 size={14} className="text-slate-400" />
+                                        <tr key={`cr-${cr.id}`} className={`${simulationMode ? 'bg-amber-50/40' : 'bg-blue-50/40'} group border-l-4 ${simulationMode ? 'border-amber-500' : 'border-[#007AFF]'} animate-in fade-in slide-in-from-left-2 duration-300`}>
+                                          <td className="px-6 py-4 text-center text-blue-200 text-lg select-none group-hover:text-blue-400 cursor-grab" draggable onDragStart={() => { setDragCustomId(cr.id); setDragCatIndex(null); }}>⠿</td>
+                                          <td className="px-6 py-4 text-center">
+                                            <div className="flex flex-col items-center">
+                                              <span className={`${simulationMode ? 'bg-amber-500' : 'bg-[#007AFF]'} text-white text-[11px] font-black w-7 h-7 flex items-center justify-center rounded-xl shadow-md transform rotate-3 group-hover:rotate-0 transition-all`}>{row.displayLabel}</span>
+                                            </div>
+                                          </td>
+                                          <td className="px-6 py-4">
+                                            <div className="flex flex-col">
                                               <input
                                                 type="text"
                                                 value={cr.label}
                                                 onChange={(e) => setCustomRows(prev => prev.map(r => r.id === cr.id ? { ...r, label: e.target.value } : r))}
-                                                className="bg-transparent font-bold text-[13px] text-slate-700 outline-none border-b border-transparent hover:border-slate-300 focus:border-blue-500 px-1 min-w-0 flex-1 transition-all"
+                                                className="bg-transparent font-bold text-[14px] text-slate-800 outline-none border-b border-transparent hover:border-slate-300 focus:border-[#007AFF] px-0.5 transition-all"
                                               />
+                                              <div className={`flex items-center gap-1.5 mt-1 border ${simulationMode ? 'border-amber-100' : 'border-blue-100'} bg-white/50 rounded-md px-2 py-0.5 w-max`}>
+                                                <span className={`text-[9px] font-black ${simulationMode ? 'text-amber-500' : 'text-blue-500'} uppercase tracking-tighter`}>公式</span>
+                                                <input
+                                                  type="text"
+                                                  value={cr.formula || ''}
+                                                  placeholder="1~3 或 A+B"
+                                                  onChange={(e) => setCustomRows(prev => prev.map(r => r.id === cr.id ? { ...r, formula: e.target.value } : r))}
+                                                  className={`bg-transparent text-[11px] font-mono ${simulationMode ? 'text-amber-600' : 'text-[#007AFF]'} outline-none w-24`}
+                                                />
+                                              </div>
                                             </div>
                                           </td>
-                                          <td className="px-6 py-4 text-[13px] font-bold text-right text-slate-800">{formatCurrency(segSupplier)}</td>
-                                          <td className="px-6 py-4 text-right text-[11px] font-semibold text-slate-400">小計</td>
-                                          <td className="px-6 py-4 text-[13px] font-bold text-right text-blue-700">{formatCurrency(segInternal)}</td>
+                                          <td className={`px-6 py-4 text-right text-[14px] font-bold ${simulationMode ? 'text-amber-600' : 'text-slate-700'} transition-colors`}>{row.computedSupplier !== null ? formatCurrency(row.computedSupplier) : <span className="text-rose-500 text-[10px] animate-pulse">ERR</span>}</td>
+                                          <td className="px-6 py-4 text-center text-[10px] font-black text-blue-300 uppercase tracking-widest italic opacity-50">{simulationMode ? 'Simulated' : 'Custom'}</td>
+                                          <td className={`px-6 py-4 text-[14px] font-bold text-right ${simulationMode ? 'text-amber-600' : 'text-[#007AFF]'} transition-colors`}>{row.computedInternal !== null ? formatCurrency(row.computedInternal) : <span className="text-rose-500 text-[10px] animate-pulse">ERR</span>}</td>
                                           <td className="px-6 py-4"></td>
-                                          <td className="px-6 py-4 text-[11px] text-slate-400 italic">自動加總以上各項</td>
+                                          <td className="px-6 py-4">
+                                            <span className={`text-[10px] ${simulationMode ? 'text-amber-400 bg-amber-100/50' : 'text-blue-400 bg-blue-100/50'} font-bold px-2 py-1 rounded-md`}>自定義計算</span>
+                                          </td>
                                           <td className="px-6 py-4 text-center">
-                                            <button onClick={() => setCustomRows(prev => prev.filter(r => r.id !== cr.id))} className="text-slate-300 hover:text-red-500 p-1 rounded transition-all">✕</button>
+                                            <button onClick={() => setCustomRows(prev => prev.filter(r => r.id !== cr.id))} className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-white hover:bg-rose-500 rounded-full transition-all">✕</button>
                                           </td>
                                         </tr>
                                       );
-                                      // Reset segment accumulators after a subtotal row
-                                      segSupplier = 0;
-                                      segInternal = 0;
-                                    } else if (cr.type === 'deduction') {
+                                    } else if (cr.type === 'subtotal') {
                                       rows.push(
-                                        <tr
-                                          key={`cr-${cr.id}`}
-                                          draggable
-                                          onDragStart={() => { setDragCustomId(cr.id); setDragCatIndex(null); }}
-                                          onDragEnd={() => { setDragCustomId(null); setDragOverIndex(null); }}
-                                          className="bg-orange-50/40 cursor-grab group"
-                                        >
-                                          <td className="px-6 py-4 text-center text-orange-200 text-lg select-none group-hover:text-orange-300">⠿</td>
-                                          <td colSpan={2} className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                              <TrendingUp size={14} className="text-orange-400" />
-                                              <input
-                                                type="text"
-                                                value={cr.label}
-                                                onChange={(e) => setCustomRows(prev => prev.map(r => r.id === cr.id ? { ...r, label: e.target.value } : r))}
-                                                className="bg-transparent font-bold text-[13px] text-orange-700 outline-none border-b border-transparent hover:border-orange-300 focus:border-orange-500 px-1 min-w-0 flex-1 transition-all"
-                                              />
-                                            </div>
-                                          </td>
-                                          <td className="px-6 py-4 text-right">
-                                            <input
-                                              type="number"
-                                              value={cr.amount || 0}
-                                              onChange={(e) => setCustomRows(prev => prev.map(r => r.id === cr.id ? { ...r, amount: parseFloat(e.target.value) || 0 } : r))}
-                                              className="w-36 bg-white border border-orange-200/50 rounded-xl px-3 py-1.5 text-right text-[13px] font-bold text-orange-600 outline-none focus:ring-4 focus:ring-orange-400/10 focus:border-orange-400/50 transition-all shadow-sm"
-                                            />
-                                          </td>
-                                          <td className="px-6 py-4 text-right text-[11px] font-semibold text-orange-400">減項</td>
-                                          <td className="px-6 py-4 text-[13px] font-bold text-right text-orange-600">-{formatCurrency(cr.amount || 0)}</td>
-                                          <td className="px-6 py-4"></td>
-                                          <td className="px-6 py-4 text-[11px] text-orange-400 italic">手動輸入金額</td>
-                                          <td className="px-6 py-4 text-center">
-                                            <button onClick={() => setCustomRows(prev => prev.filter(r => r.id !== cr.id))} className="text-slate-300 hover:text-red-500 p-1 rounded transition-all">✕</button>
+                                        <tr key={`cr-${cr.id}`} className="bg-slate-50/50 text-[11px] text-slate-400 italic border-b border-slate-100">
+                                          <td className="px-6 py-2 text-center text-slate-200">⠿</td>
+                                          <td colSpan={2} className="px-6 py-2">小計分隔線: {cr.label}</td>
+                                          <td colSpan={5} className="px-6 py-2"></td>
+                                          <td className="px-6 py-2 text-center">
+                                            <button onClick={() => setCustomRows(prev => prev.filter(r => r.id !== cr.id))} className="text-rose-400 hover:text-rose-600 font-bold">移除</button>
                                           </td>
                                         </tr>
                                       );
                                     }
-                                  });
+                                  }
                                 });
 
                                 return rows;
@@ -1518,19 +1657,42 @@ export default function ProjectDetailPage() {
 
                               {/* Summary Rows */}
                               {reportData && (() => {
-                                const totalDeductions = customRows.reduce((sum, r) => r.type === 'deduction' ? sum + (r.amount || 0) : sum, 0);
+                                const factor = simulationMode ? (1 + costSimFactor / 100) : 1;
+                                const currentProfitRate = (reportConfigEdits.summary?.profit_rate || 0.18) + (simulationMode ? profitSimFactor / 100 : 0);
+                                
+                                const simDirectSupplier = (reportData.summary.direct_supplier || 0) * factor;
+                                const simDirectInternal = (reportData.summary.direct_internal || 0) * factor;
+                                
+                                const simIndirectSupplier = simDirectSupplier * currentProfitRate;
+                                const simIndirectInternal = simDirectInternal * 0.05;
+
+                                const totalSimSupplier = simDirectSupplier + simIndirectSupplier;
+                                const totalSimInternal = simDirectInternal + simIndirectInternal;
+
+                                const totalDeductions = (customRows.reduce((sum, r) => r.type === 'deduction' ? sum + (r.amount || 0) : sum, 0)) * factor;
+
                                 return (
                                   <>
-                                    <tr className="bg-slate-50 border-t border-slate-100 font-semibold">
-                                      <td className="px-6 py-5"></td>
-                                      <td colSpan={2} className="px-6 py-5 text-[13px] text-slate-700">小計 (直接成本)</td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-right text-slate-800">{formatCurrency(reportData.summary.direct_supplier)}</td>
-                                      <td className="px-6 py-5 text-right"></td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-right text-blue-700">{formatCurrency(reportData.summary.direct_internal)}</td>
-                                      <td className="px-6 py-5 text-right"></td>
-                                      <td className="px-6 py-5 text-[11px] text-slate-400 italic font-normal">依標單明細匯總</td>
-                                      <td className="px-6 py-5"></td>
-                                    </tr>
+                                    {!reportConfigEdits.summary?.hide_subtotal && (
+                                      <tr className={`border-t border-slate-100 font-semibold ${simulationMode ? 'bg-amber-50/50' : 'bg-slate-50'}`}>
+                                        <td className="px-6 py-5"></td>
+                                        <td colSpan={2} className="px-6 py-5 text-[13px] text-slate-700">小計 (直接成本) {simulationMode && <span className="text-[10px] text-amber-500 font-bold ml-2">SIMULATED</span>}</td>
+                                        <td className={`px-6 py-5 text-[13px] font-bold text-right ${simulationMode ? 'text-amber-600' : 'text-slate-800'}`}>{formatCurrency(simDirectSupplier)}</td>
+                                        <td className="px-6 py-5 text-right"></td>
+                                        <td className={`px-6 py-5 text-[13px] font-bold text-right ${simulationMode ? 'text-amber-600' : 'text-blue-700'}`}>{formatCurrency(simDirectInternal)}</td>
+                                        <td className="px-6 py-5 text-right"></td>
+                                        <td className="px-6 py-5 text-[11px] text-slate-400 italic font-normal">{simulationMode ? `已加成 ${costSimFactor}%` : '依標單明細匯總'}</td>
+                                        <td className="px-6 py-5 text-center">
+                                          <button 
+                                            onClick={() => setReportConfigEdits((prev: any) => ({ ...prev, summary: { ...prev.summary, hide_subtotal: true } }))} 
+                                            className="text-slate-300 hover:text-rose-500 transition-all p-1.5 rounded-lg hover:bg-rose-50"
+                                            title="隱藏此列"
+                                          >
+                                            <Trash2 size={16} />
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    )}
                                     {totalDeductions > 0 && (
                                       <tr className="bg-orange-50/40 font-semibold border-t border-orange-100/50">
                                         <td className="px-6 py-4"></td>
@@ -1542,23 +1704,34 @@ export default function ProjectDetailPage() {
                                         <td colSpan={2} className="px-6 py-4 text-[11px] text-orange-400 italic font-normal">所有減項加總</td>
                                       </tr>
                                     )}
-                                    <tr className="bg-white font-semibold border-t border-slate-100">
-                                      <td className="px-6 py-5"></td>
-                                      <td colSpan={2} className="px-6 py-5 text-[13px] text-slate-500">利潤及管理費 ({(reportConfigEdits.summary?.profit_rate * 100).toFixed(1)}%)</td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-right text-slate-600">{formatCurrency(reportData.summary.indirect_supplier)}</td>
-                                      <td className="px-6 py-5 text-right text-[11px] font-semibold text-slate-400">{(reportData.summary.indirect_supplier / reportData.summary.total_supplier * 100).toFixed(2)}%</td>
-                                      <td className="px-6 py-5 text-[13px] font-medium text-right text-blue-600">{formatCurrency(reportData.summary.indirect_internal)}</td>
-                                      <td className="px-6 py-5 text-right text-[11px] font-semibold text-blue-400">{(reportData.summary.indirect_internal / reportData.summary.total_internal * 100).toFixed(2)}%</td>
-                                      <td colSpan={2} className="px-6 py-5 text-[11px] text-slate-400 italic font-normal text-center">利潤自動計算</td>
-                                    </tr>
-                                    <tr className="bg-white border-t-2 border-slate-100 text-slate-900 font-bold">
+                                    {!reportConfigEdits.summary?.hide_profit_row && (
+                                      <tr className="bg-white font-semibold border-t border-slate-100">
+                                        <td className="px-6 py-5"></td>
+                                        <td colSpan={2} className="px-6 py-5 text-[13px] text-slate-500">利潤及管理費 ({(currentProfitRate * 100).toFixed(1)}%) {simulationMode && profitSimFactor !== 0 && <span className="text-[10px] text-emerald-500 ml-1">({profitSimFactor > 0 ? '+' : ''}{profitSimFactor}%)</span>}</td>
+                                        <td className={`px-6 py-5 text-[13px] font-medium text-right ${simulationMode ? 'text-amber-600' : 'text-slate-600'}`}>{formatCurrency(simIndirectSupplier)}</td>
+                                        <td className="px-6 py-5 text-right text-[11px] font-semibold text-slate-400">{((simIndirectSupplier / (totalSimSupplier || 1)) * 100).toFixed(2)}%</td>
+                                        <td className={`px-6 py-5 text-[13px] font-medium text-right ${simulationMode ? 'text-amber-600' : 'text-blue-600'}`}>{formatCurrency(simIndirectInternal)}</td>
+                                        <td className="px-6 py-5 text-right text-[11px] font-semibold text-blue-400">{((simIndirectInternal / (totalSimInternal || 1)) * 100).toFixed(2)}%</td>
+                                        <td className="px-6 py-5 text-[11px] text-slate-400 italic font-normal">利潤自動計算</td>
+                                        <td className="px-6 py-5 text-center">
+                                          <button 
+                                            onClick={() => setReportConfigEdits((prev: any) => ({ ...prev, summary: { ...prev.summary, hide_profit_row: true } }))} 
+                                            className="text-slate-300 hover:text-rose-500 transition-all p-1.5 rounded-lg hover:bg-rose-50"
+                                            title="隱藏此列"
+                                          >
+                                            <Trash2 size={16} />
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    )}
+                                    <tr className={`border-t-2 border-slate-100 text-slate-900 font-bold ${simulationMode ? 'bg-amber-50' : 'bg-white'}`}>
                                       <td className="px-6 py-6 border-t-2 border-slate-100"></td>
-                                      <td colSpan={2} className="px-6 py-6 text-[15px] border-t-2 border-slate-100">合計總攬 (含稅預估)</td>
-                                      <td className="px-6 py-6 text-lg font-semibold text-right border-t-2 border-slate-100">{formatCurrency(reportData.summary.total_supplier - totalDeductions)}</td>
+                                      <td colSpan={2} className="px-6 py-6 text-[15px] border-t-2 border-slate-100">合計總覽 (含稅預估) {simulationMode && <span className="bg-amber-500 text-white text-[9px] px-2 py-0.5 rounded-full ml-2">SIMULATED</span>}</td>
+                                      <td className={`px-6 py-6 text-xl font-bold text-right border-t-2 border-slate-100 ${simulationMode ? 'text-amber-600' : ''}`}>{formatCurrency(totalSimSupplier - totalDeductions)}</td>
                                       <td className="px-6 py-6 text-right font-bold text-slate-400 uppercase text-[10px] tracking-widest border-t-2 border-slate-100">100.00%</td>
-                                      <td className="px-6 py-6 text-xl font-semibold text-right text-blue-600 border-t-2 border-slate-100">{formatCurrency(reportData.summary.total_internal - totalDeductions)}</td>
+                                      <td className={`px-6 py-6 text-2xl font-bold text-right border-t-2 border-slate-100 ${simulationMode ? 'text-amber-600' : 'text-blue-600'}`}>{formatCurrency(totalSimInternal - totalDeductions)}</td>
                                       <td className="px-6 py-6 text-right font-bold text-blue-400 uppercase text-[10px] tracking-widest border-t-2 border-slate-100">100.00%</td>
-                                      <td colSpan={2} className="px-6 py-6 text-[13px] text-slate-400 text-center border-t-2 border-slate-100">預估毛利：<span className="text-slate-700 font-semibold">{formatCurrency((reportData.summary.total_supplier - totalDeductions) - (reportData.summary.total_internal - totalDeductions))}</span></td>
+                                      <td colSpan={2} className="px-6 py-6 text-[13px] text-slate-400 text-center border-t-2 border-slate-100">預估毛利：<span className={`${simulationMode ? 'text-amber-700' : 'text-slate-700'} font-bold text-lg`}>{formatCurrency((totalSimSupplier - totalDeductions) - (totalSimInternal - totalDeductions))}</span></td>
                                     </tr>
                                   </>
                                 );
@@ -1579,15 +1752,16 @@ export default function ProjectDetailPage() {
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
+              )}
 
         {/* Home Tab Content */}
         {activeTab === "home" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
             {/* Project Info Card */}
-            <div className="bg-white/70 backdrop-blur-3xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 relative overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-3xl rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 relative">
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -1612,9 +1786,13 @@ export default function ProjectDetailPage() {
                           onChange={(e) => {
                             const idx = parseInt(e.target.value);
                             setBaseVersionIdx(idx);
+                            // URL 同步
+                            router.push(`/projects/${projectId}?v=${idx}`);
                             if (!isCompareMode) setResult(project.files[idx].data);
                           }}
-                          className="bg-slate-50/50 border border-slate-100 text-slate-700 text-sm rounded-xl px-4 py-2.5 font-medium focus:ring-2 focus:ring-blue-500/20 outline-none hover:bg-white transition-all min-w-[280px] appearance-none cursor-pointer"
+                          className={`bg-slate-50/50 border border-slate-100 text-slate-700 text-sm rounded-xl px-4 py-2.5 font-medium focus:ring-2 focus:ring-blue-500/20 outline-none hover:bg-white transition-all min-w-[280px] appearance-none cursor-pointer ${
+                            baseVersionIdx !== project.files.length - 1 ? 'ring-2 ring-amber-500/30' : ''
+                          }`}
                         >
                           {project.files.map((f, i) => (
                             <option key={i} value={i}>V{i+1}: {f.file_name} ({new Date(f.uploaded_at).toLocaleDateString()})</option>
@@ -1687,16 +1865,54 @@ export default function ProjectDetailPage() {
                       <span className={`text-sm font-bold ${isCompareMode ? 'text-blue-600' : 'text-slate-400'}`}>比對模式</span>
                     </label>
 
-                    {isCompareMode && (
-                      <button
-                        onClick={handleCompare}
-                        disabled={loading}
-                        className="bg-[#007AFF] hover:bg-[#0071E3] text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
-                      >
-                        {loading ? <RotateCcw size={16} className="animate-spin" /> : <Target size={16} />}
-                        {loading ? '比對中...' : '執行比對'}
-                      </button>
-                    )}
+                    <div className="relative group">
+                      {isCompareMode && (
+                        <button
+                          onClick={handleCompare}
+                          disabled={loading}
+                          className="bg-[#007AFF] hover:bg-[#0071E3] text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-blue-500/25 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {loading ? <RotateCcw size={16} className="animate-spin" /> : <Target size={16} />}
+                          {loading ? '比對中...' : '執行比對'}
+                        </button>
+                      )}
+                      
+                      {/* Comparison Help Tooltip */}
+                      {isCompareMode && !loading && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-72 bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-2xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[60] text-xs space-y-3 pointer-events-none">
+                          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <AlertCircle size={14} className="text-blue-500" />
+                            <span className="font-black text-slate-800 uppercase tracking-widest text-[10px]">比對功能說明</span>
+                          </div>
+                          
+                          <div className="space-y-2.5">
+                            <div className="flex gap-2.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
+                              <p className="text-slate-600 leading-relaxed">
+                                <strong className="text-emerald-600">新增項目：</strong>目標版本新增的項次。點擊後方 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-100 text-slate-400 font-bold">✕</span> 可在存檔時排除。
+                              </p>
+                            </div>
+                            
+                            <div className="flex gap-2.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
+                              <p className="text-slate-600 leading-relaxed">
+                                <strong className="text-amber-600">內容變更：</strong>數量或單價變動。標註 <span className="font-bold">↑↓</span> 趨勢，點擊 <span className="inline-block"><RotateCcw size={12} className="text-slate-400" /></span> 可單項還原至舊值。
+                              </p>
+                            </div>
+                            
+                            <div className="flex gap-2.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
+                              <p className="text-slate-600 leading-relaxed">
+                                <strong className="text-rose-600">刪除項目：</strong>僅存在於舊版，預設刪除，可點擊「保留」恢復。
+                              </p>
+                            </div>
+                          </div>
+                          <div className="pt-2 text-[9px] text-slate-400 italic text-center border-t border-slate-50">
+                            提示：比對完成後，點擊「套用繼承」建立新版本
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {!isCompareMode && (
@@ -1815,7 +2031,7 @@ export default function ProjectDetailPage() {
                             <th className="px-6 py-4 text-center sticky left-0 bg-inherit shadow-[1px_0_0_0_rgba(0,0,0,0.05)] min-w-[40px] w-10">
                               <input 
                                 type="checkbox" 
-                                onChange={(e)=>setSelectedIndices(e.target.checked ? (result?.rows || []).map((_:any, i:number)=>i) : [])} 
+                                onChange={(e)=>setSelectedIndices(e.target.checked ? (result?.rows || []).map((r:any)=>r._original_index) : [])} 
                                 className="rounded-md border-slate-300 text-blue-600 focus:ring-blue-500" 
                               />
                             </th>
@@ -1832,8 +2048,7 @@ export default function ProjectDetailPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-50 bg-white">
-                        {/* 這裡合併顯示已被刪除的舊項目 (僅比對模式) */}
-                        {isCompareMode && diffResult?.removed_rows.map((row: any, i: number) => {
+                        {isCompareMode && (diffResult?.diff?.removed_rows || []).map((row: any, i: number) => {
                           const isKept = keptRemovedRows.some(kr => kr.item_no === row.item_no && kr.description === row.description);
                           return (
                             <ProjectTableRow 
@@ -1848,8 +2063,9 @@ export default function ProjectDetailPage() {
                           );
                         })}
 
-                        {(isCompareMode ? (diffResult?.diff.rows || []) : (result?.rows || [])).map((row: any, i: number) => {
-                          if (isCompareMode && ignoredItemIndices.includes(i)) return null;
+                        {(isCompareMode ? (diffResult?.diff?.rows || []) : (result?.rows || [])).map((row: any, i: number) => {
+                          const rowIdx = row._original_index !== undefined ? row._original_index : i;
+                          if (isCompareMode && ignoredItemIndices.includes(rowIdx)) return null;
                           
                           const displayCategory = (row.system_category === "未分類" || row.system_category === "無類別" || !row.system_category) 
                             ? "未分類" 
@@ -1859,19 +2075,19 @@ export default function ProjectDetailPage() {
 
                           return (
                             <ProjectTableRow 
-                              key={i}
+                              key={rowIdx}
                               row={row}
-                              index={i}
+                              index={rowIdx}
                               isCompareMode={isCompareMode}
                               project={project}
                               getCategoryColor={getCategoryColor}
                               formatCurrency={formatCurrency}
-                              onEdit={() => {setEditingRowIndex(i); setModalOpen(true);}}
-                              isSelected={selectedIndices.includes(i)}
-                              onToggleSelect={(checked: boolean) => setSelectedIndices(checked ? [...selectedIndices, i] : selectedIndices.filter(x=>x!==i))}
-                              isReverted={revertedItemIndices.includes(i)}
-                              onRevert={() => setRevertedItemIndices([...revertedItemIndices, i])}
-                              onIgnore={() => setIgnoredItemIndices([...ignoredItemIndices, i])}
+                              onEdit={() => {setEditingRowIndex(rowIdx); setModalOpen(true);}}
+                              isSelected={selectedIndices.includes(rowIdx)}
+                              onToggleSelect={(checked: boolean) => setSelectedIndices(checked ? [...selectedIndices, rowIdx] : selectedIndices.filter(x=>x!==rowIdx))}
+                              isReverted={revertedItemIndices.includes(rowIdx)}
+                              onRevert={() => setRevertedItemIndices([...revertedItemIndices, rowIdx])}
+                              onIgnore={() => setIgnoredItemIndices([...ignoredItemIndices, rowIdx])}
                               displayCategory={displayCategory}
                             />
                           );
@@ -1879,7 +2095,6 @@ export default function ProjectDetailPage() {
                       </tbody>
                     </table>
                     
-                    {/* 無限下滑偵測點 */}
                     {hasMore && !isCompareMode && (
                         <div 
                           ref={lastRowElementRef} 
@@ -1939,6 +2154,20 @@ export default function ProjectDetailPage() {
                     </h3>
                     <p className="text-slate-400 mt-2 text-sm">系統已根據 LV.2 大類別自動彙整項目，您可以點擊類別查看細節並準備詢價。</p>
                   </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-[10px] text-slate-400 italic font-medium text-right leading-tight hidden md:block">
+                      僅重新分析自動分類項<br/>保留手動分類結果
+                    </div>
+                    <button
+                      onClick={handleReclassify}
+                      disabled={isReclassifying}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-700 hover:bg-slate-50 hover:border-blue-200 transition-all shadow-sm active:scale-95 disabled:opacity-50 group"
+                    >
+                      {isReclassifying ? <RotateCcw size={16} className="animate-spin text-blue-500" /> : <RotateCcw size={16} className="text-blue-500 group-hover:rotate-180 transition-transform duration-500" />}
+                      {isReclassifying ? "分析中..." : "重新分析分類"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1946,10 +2175,8 @@ export default function ProjectDetailPage() {
                     const analysisSystems = result?.analysis?.systems || {};
                     const groups: Record<string, { count: number, total: number, items: any[] }> = {};
                     
-                    // 從後端的全量分析摘要中提取資料（這涵盖了整份標單，而不僅是前 50 筆）
                     Object.entries(analysisSystems).forEach(([fullPath, info]: [string, any]) => {
                       const parts = fullPath.split(" > ") || ["未分類"];
-                      // 以「二級顯示名稱」作為彙整基準
                       const groupKey = parts.length >= 2 ? parts[1].trim() : parts[0].trim();
                       
                       if (!groups[groupKey]) groups[groupKey] = { count: 0, total: 0, items: [] };
@@ -2006,17 +2233,32 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
 
-                    <div className="flex items-center gap-4">
-                       {Object.keys(inquiryEdits).length > 0 && (
-                         <button 
-                           onClick={saveInquiryChanges}
-                           disabled={isSavingInquiry}
-                           className="px-6 py-2.5 bg-[#007AFF] text-white rounded-full font-semibold text-sm shadow-lg shadow-blue-500/20 hover:bg-[#0071E3] transition-all flex items-center gap-2 animate-in zoom-in"
-                         >
-                           {isSavingInquiry ? <RotateCcw size={16} className="animate-spin" /> : <Save size={16} />}
-                           {isSavingInquiry ? "儲存中..." : `儲存 ${Object.keys(inquiryEdits).length} 筆變更`}
-                         </button>
-                       )}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        {Object.keys(inquiryEdits).length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={saveInquiryChanges}
+                              disabled={isSavingInquiry}
+                              className={`px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg transition-all flex items-center gap-2 animate-in zoom-in ${
+                                baseVersionIdx === project.files.length - 1 
+                                  ? "bg-[#007AFF] text-white shadow-blue-500/20 hover:bg-[#0071E3]" 
+                                  : "bg-amber-500 text-white shadow-amber-500/20 hover:bg-amber-600"
+                              }`}
+                            >
+                              {isSavingInquiry ? <RotateCcw size={16} className="animate-spin" /> : <Save size={16} />}
+                              {isSavingInquiry ? "儲存中..." : `儲存 ${Object.keys(inquiryEdits).length} 筆變更 ${baseVersionIdx === project.files.length - 1 ? "" : `至 V${baseVersionIdx + 1}`}`}
+                            </button>
+                            
+                            {baseVersionIdx !== project.files.length - 1 && (
+                              <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 flex items-center gap-1.5 animate-pulse">
+                                <AlertCircle size={12} /> 正在編輯歷史版本
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
                     </div>
 
                 <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
@@ -2025,6 +2267,7 @@ export default function ProjectDetailPage() {
                       <tr>
                         <th className="px-6 py-4 w-14">項次</th>
                         <th className="px-6 py-4 min-w-[200px]">項目名稱 (Description)</th>
+                        <th className="px-6 py-4 min-w-[150px]">備註</th>
                         <th className="px-6 py-4 text-center w-16">單位</th>
                         <th className="px-6 py-4 text-right w-20">數量</th>
                         <th className="px-6 py-4 text-center w-32 bg-amber-50/20">廠商報價</th>
@@ -2040,6 +2283,7 @@ export default function ProjectDetailPage() {
                             <tr key={i} className="border-b border-slate-50 animate-pulse">
                               <td className="px-6 py-4"><div className="h-3 bg-slate-100 rounded-full w-12"></div></td>
                               <td className="px-6 py-4"><div className={`h-3 bg-slate-100 rounded-full ${i % 2 === 0 ? 'w-4/5' : 'w-3/5'}`}></div></td>
+                              <td className="px-6 py-4"><div className="h-3 bg-slate-100 rounded-full w-3/4"></div></td>
                               <td className="px-6 py-4 text-center"><div className="h-3 bg-slate-100 rounded-full w-8 mx-auto"></div></td>
                               <td className="px-6 py-4 text-right"><div className="h-3 bg-slate-100 rounded-full w-10 ml-auto"></div></td>
                               <td className="px-6 py-4 text-right"><div className="h-3 bg-blue-50 rounded-full w-20 ml-auto"></div></td>
@@ -2068,6 +2312,7 @@ export default function ProjectDetailPage() {
                                 <tr key={i} className={`hover:bg-blue-50/30 transition-colors border-b border-slate-50 last:border-0 ${currentEdit ? 'bg-amber-50/20' : ''}`}>
                                   <td className="px-6 py-4 font-mono text-slate-400 w-14 whitespace-nowrap">{row.item_no || "-"}</td>
                                   <td className="px-6 py-4 font-bold text-slate-800 min-w-[200px] whitespace-normal break-words leading-relaxed">{row.description}</td>
+                                  <td className="px-6 py-4 text-[12px] text-slate-500 min-w-[150px] whitespace-normal italic">{row.remark || row.note || row.specification || "-"}</td>
                                   <td className="px-6 py-4 text-center w-16 text-slate-500">{row.unit}</td>
                                   <td className="px-6 py-4 text-right font-black w-20">{formatQuantity(row.quantity)}</td>
                                   <td className="px-6 py-4 text-center w-32 bg-amber-50/10">
@@ -2086,7 +2331,7 @@ export default function ProjectDetailPage() {
                                     />
                                   </td>
                                   <td className="px-6 py-4 text-center font-black text-slate-400 w-32">{formatCurrency(totalPrice)}</td>
-                                  <td className="px-6 py-4 text-center w-24 bg-blue-50/10">
+                                  <td className="px-6 py-4 text-center w-24 bg-blue-50/20">
                                     <div className="flex items-center justify-center gap-1">
                                       <input 
                                         type="number"
@@ -2113,7 +2358,7 @@ export default function ProjectDetailPage() {
                           })()}
                           {categoryItems.length > displayedCategoryItemsCount && (
                             <tr>
-                              <td colSpan={8} className="py-6 text-center bg-slate-50/30">
+                              <td colSpan={9} className="py-6 text-center bg-slate-50/30">
                                 <button 
                                   onClick={() => setDisplayedCategoryItemsCount(prev => prev + 200)}
                                   className="px-6 py-2 bg-white border border-slate-200 rounded-full text-sm font-black text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
@@ -2126,7 +2371,7 @@ export default function ProjectDetailPage() {
                         </>
                       ) : (
                         <tr>
-                          <td colSpan={8} className="py-20 text-center text-slate-400 italic">尚未找到相關項目資料。</td>
+                          <td colSpan={9} className="py-20 text-center text-slate-400 italic">尚未找到相關項目資料。</td>
                         </tr>
                       )}
                     </tbody>
@@ -2151,27 +2396,233 @@ export default function ProjectDetailPage() {
             )}
           </div>
         )}
+
+        {/* Cost Analysis Tab Content */}
+        {activeTab === "analysis" && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* KPI Dashboard */}
+            {(() => {
+              const factor = 1 + costSimFactor / 100;
+              const currentProfitRate = (reportConfigEdits.summary?.profit_rate || 0.18) + (profitSimFactor / 100);
+              
+              const baseDirectSupplier = reportData?.summary.direct_supplier || 0;
+              const baseDirectInternal = reportData?.summary.direct_internal || 0;
+              
+              const simDirectSupplier = baseDirectSupplier * factor;
+              const simDirectInternal = baseDirectInternal * factor;
+              
+              const simIndirectSupplier = simDirectSupplier * currentProfitRate;
+              const simIndirectInternal = simDirectInternal * 0.05;
+
+              const revenue = simDirectSupplier + simIndirectSupplier;
+              const cost = simDirectInternal + simIndirectInternal;
+              const profit = revenue - cost;
+              const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+              return (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col gap-2 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                         <TrendingUp size={80} />
+                      </div>
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <FileSpreadsheet size={14} className="text-blue-500" /> 專案預估總收入 (含稅)
+                      </span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-black text-slate-800 tracking-tighter">{formatCurrency(revenue * 1.05)}</span>
+                        <span className="text-sm font-bold text-slate-400">TWD</span>
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                        <span className="text-[10px] bg-slate-50 text-slate-500 px-2 py-1 rounded-lg font-bold">基礎：{formatCurrency((baseDirectSupplier * (1 + (reportConfigEdits.summary?.profit_rate || 0.18))) * 1.05)}</span>
+                        {profitSimFactor !== 0 && (
+                          <span className={`text-[10px] font-bold ${profitSimFactor > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {profitSimFactor > 0 ? '+' : ''}{profitSimFactor}% Adjusted
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col gap-2 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                         <Calculator size={80} />
+                      </div>
+                      <span className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <Zap size={14} className="text-amber-500" /> 專案預估運營成本
+                      </span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-black text-slate-800 tracking-tighter">{formatCurrency(cost)}</span>
+                        <span className="text-sm font-bold text-slate-400">TWD</span>
+                      </div>
+                      <div className="mt-4 flex items-center gap-2">
+                         <span className="text-[10px] bg-slate-50 text-slate-500 px-2 py-1 rounded-lg font-bold">基礎：{formatCurrency(baseDirectInternal + (baseDirectInternal * 0.05))}</span>
+                         {costSimFactor !== 0 && (
+                          <span className={`text-[10px] font-bold ${costSimFactor > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            {costSimFactor > 0 ? '+' : ''}{costSimFactor}% Cost Change
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={`bg-gradient-to-br ${margin >= 20 ? 'from-emerald-600 to-teal-700 shadow-emerald-500/20' : 'from-blue-600 to-indigo-700 shadow-blue-500/20'} rounded-[2rem] p-8 shadow-2xl flex flex-col gap-2 relative overflow-hidden text-white`}>
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                         <PieChart size={80} />
+                      </div>
+                      <span className="text-xs font-black text-white/60 uppercase tracking-widest flex items-center gap-2">
+                        <TrendingUp size={14} className="text-white/80" /> 預估專案毛利率
+                      </span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black tracking-tighter">{margin.toFixed(1)}<small className="text-lg ml-1">%</small></span>
+                      </div>
+                      <div className="mt-4 flex items-center gap-4">
+                         <div className="flex flex-col">
+                           <span className="text-[10px] text-white/50 font-bold uppercase">預估毛利</span>
+                           <span className="text-sm font-black">{formatCurrency(profit)}</span>
+                         </div>
+                         <div className="w-px h-6 bg-white/20"></div>
+                         <div className="flex flex-col">
+                           <span className="text-[10px] text-white/50 font-bold uppercase">淨利預期</span>
+                           <span className="text-sm font-black">{formatCurrency(profit * 0.8)}</span>
+                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Simulation Controls */}
+                  <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-8">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                           <Zap size={22} className="text-amber-500 fill-amber-500" /> "What-if" 成本與利潤模擬
+                        </h3>
+                        <p className="text-slate-400 text-sm mt-1">調整下方參數以模擬不同市場情境下的損益變動</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => { setCostSimFactor(0); setProfitSimFactor(0); }}
+                          className="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2"
+                        >
+                          <RotateCcw size={16} /> 重置所有模擬
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-4">
+                       <div className="space-y-6">
+                          <div className="flex justify-between items-center bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                             <div>
+                               <span className="text-xs font-black text-amber-700 uppercase tracking-widest block mb-1">成本調整因素 (Cost Factor)</span>
+                               <p className="text-[11px] text-amber-600/70">調整原物料與發包成本的漲幅/降幅</p>
+                             </div>
+                             <span className={`text-2xl font-black ${costSimFactor > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+                               {costSimFactor > 0 ? '+' : ''}{costSimFactor}%
+                             </span>
+                          </div>
+                          <div className="px-2">
+                            <input 
+                              type="range" min="-20" max="20" step="1" 
+                              value={costSimFactor}
+                              onChange={(e) => setCostSimFactor(parseInt(e.target.value))}
+                              className="w-full h-2.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            />
+                            <div className="flex justify-between mt-2 px-1 text-[10px] font-black text-slate-300 uppercase">
+                              <span>成本下降 -20%</span>
+                              <span>基準 0%</span>
+                              <span>成本上升 +20%</span>
+                            </div>
+                          </div>
+                       </div>
+
+                       <div className="space-y-6">
+                          <div className="flex justify-between items-center bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                             <div>
+                               <span className="text-xs font-black text-blue-700 uppercase tracking-widest block mb-1">毛利期望值 (Profit Expectations)</span>
+                               <p className="text-[11px] text-blue-600/70">調整對業主的報價利潤加成比率</p>
+                             </div>
+                             <span className="text-2xl font-black text-blue-600">
+                               {profitSimFactor > 0 ? '+' : ''}{profitSimFactor}%
+                             </span>
+                          </div>
+                          <div className="px-2">
+                            <input 
+                              type="range" min="-20" max="20" step="1" 
+                              value={profitSimFactor}
+                              onChange={(e) => setProfitSimFactor(parseInt(e.target.value))}
+                              className="w-full h-2.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                            />
+                            <div className="flex justify-between mt-2 px-1 text-[10px] font-black text-slate-300 uppercase">
+                              <span>毛利調降 -20%</span>
+                              <span>基準 0%</span>
+                              <span>毛利調增 +20%</span>
+                            </div>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Comparison Table */}
+                  <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100">
+                     <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                        <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                           <Layers size={18} className="text-blue-500" /> 各分類模擬數據摘要
+                        </h4>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">LV.1 Summary</span>
+                     </div>
+                     <table className="w-full">
+                        <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                           <tr>
+                              <th className="px-8 py-4 text-left">分類名稱</th>
+                              <th className="px-8 py-4 text-right">原始內部成本</th>
+                              <th className="px-8 py-4 text-right">模擬後內部成本</th>
+                              <th className="px-8 py-4 text-right">變動差額</th>
+                              <th className="px-8 py-4 text-right">佔比比重</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                           {reportData?.categories.map((cat: any) => (
+                             <tr key={cat.path} className="hover:bg-slate-50/50 transition-colors">
+                               <td className="px-8 py-5 font-bold text-slate-700">{cat.name}</td>
+                               <td className="px-8 py-5 text-right font-mono text-slate-400">{formatCurrency(cat.internal_total)}</td>
+                               <td className={`px-8 py-5 text-right font-black font-mono transition-colors ${costSimFactor !== 0 ? 'text-amber-600 bg-amber-50/20' : 'text-slate-800'}`}>
+                                 {formatCurrency(cat.internal_total * factor)}
+                               </td>
+                               <td className={`px-8 py-5 text-right font-bold font-mono ${costSimFactor > 0 ? 'text-rose-500' : costSimFactor < 0 ? 'text-emerald-500' : 'text-slate-300'}`}>
+                                 {costSimFactor !== 0 ? (costSimFactor > 0 ? '+' : '') + formatCurrency(cat.internal_total * (factor - 1)) : '-'}
+                               </td>
+                               <td className="px-8 py-5 text-right font-bold text-slate-400 text-xs">
+                                 {((cat.internal_total / (baseDirectInternal || 1)) * 100).toFixed(1)}%
+                               </td>
+                             </tr>
+                           ))}
+                        </tbody>
+                     </table>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+
+        <CategorySelectorModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleManualSave}
+          categoriesTree={categoriesTree}
+          rowDescription={editingRowIndex !== null ? (isCompareMode ? diffResult?.diff.rows[editingRowIndex]?.description : (result?.rows.find((r: any) => r._original_index === editingRowIndex)?.description || "項目")) : `已選取 ${selectedIndices.length} 個項目`}
+          isBatch={editingRowIndex === null}
+        />
+
+        <InquiryTemplateModal 
+          isOpen={templateModalOpen}
+          onClose={() => setTemplateModalOpen(false)}
+          onSave={handleSaveInquiryTemplate}
+          initialData={{
+            ...reportConfigEdits.inquiry_template,
+            project_name: reportConfigEdits.inquiry_template?.project_name || project.name,
+            project_location: reportConfigEdits.inquiry_template?.project_location || project.location
+          }}
+        />
       </div>
-
-      <CategorySelectorModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={handleManualSave}
-        categoriesTree={categoriesTree}
-        rowDescription={editingRowIndex !== null ? (isCompareMode ? diffResult?.diff.rows[editingRowIndex]?.description : result?.rows[editingRowIndex]?.description) : `已選取 ${selectedIndices.length} 個項目`}
-        isBatch={editingRowIndex === null}
-      />
-
-      <InquiryTemplateModal 
-        isOpen={templateModalOpen}
-        onClose={() => setTemplateModalOpen(false)}
-        onSave={handleSaveInquiryTemplate}
-        initialData={{
-          ...reportConfigEdits.inquiry_template,
-          project_name: reportConfigEdits.inquiry_template?.project_name || project.name,
-          project_location: reportConfigEdits.inquiry_template?.project_location || project.location
-        }}
-      />
     </div>
   );
 }

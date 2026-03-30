@@ -4,8 +4,11 @@ import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session, defer, undefer, selectinload
+from sqlalchemy.orm.attributes import flag_modified
+
 from database import SessionLocal
 from models import Project, ProjectFile
+from services.category_service import normalize_text, classify_row
 
 # NOTE: 第一階段使用 JSON 檔做輕量化持久化，第三階段改為 PostgreSQL
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
@@ -126,7 +129,10 @@ def get_project_from_cache(project_id: str) -> Optional[Dict[str, Any]]:
 def serialize_project(p: "Project", include_data: bool = False) -> Dict[str, Any]:
     """將 SQLAlchemy 物件轉換為字典，預設不包含巨大的 data 欄位以節省記憶體"""
     files_list = []
-    for f in p.files:
+    # 確保檔案依上傳時間排序
+    sorted_files = sorted(p.files, key=lambda x: x.uploaded_at)
+    
+    for f in sorted_files:
         file_info = {
             "file_name": f.file_name,
             "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else "",
@@ -202,8 +208,8 @@ def save_projects(projects: List[Dict[str, Any]]):
             json.dump(projects, f, ensure_ascii=False, indent=2)
         invalidate_cache()
 
-def get_project(project_id: str, page: Optional[int] = None, page_size: Optional[int] = 50, system_category: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """取得單一專案詳細資訊，支援分頁與類別過濾"""
+def get_project(project_id: str, page: Optional[int] = None, page_size: Optional[int] = 50, system_category: Optional[str] = None, version_indices: Optional[List[int]] = None, include_all_rows: bool = False) -> Optional[Dict[str, Any]]:
+    """取得單一專案詳細資訊，支援分頁與類別過濾，並可指定要載入 data 的版本索引 (預設為最新)"""
     if USE_DB:
         db = get_db_session()
         try:
@@ -218,38 +224,50 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
             result = serialize_project(project, include_data=False)
             
             if result.get("files"):
-                # 找出要讀取的檔案索引 (最新版或指定版本)
-                target_idx = len(result["files"]) - 1
+                # 決定要讀取的檔案索引清單 (預設為最新版本)
+                if version_indices is None:
+                    version_indices = [len(result["files"]) - 1]
                 
-                # 只有最新版本或是請求分頁時，我們才手動從 DB 抓取那「一個」檔案的 data
-                # 這樣就不會 5 個版本 25MB 全塞進 Render 記憶體
-                target_file_obj = project.files[target_idx]
+                # SQLAlchemy 的 project.files 已經在 serialize_project 中被排序過了？
+                # 不，serialize_project 回傳的是字典。我們需要對 project.files 本身進行排序以對應索引。
+                db_files = sorted(project.files, key=lambda x: x.uploaded_at)
                 
-                # 手動讀取該檔案的 data (此時會觸發單一 SELECT 讀取 JSON)
-                raw_data = target_file_obj.data or {}
-                all_rows = raw_data.get("rows", [])
-                
-                if system_category:
-                    all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
-                
-                data_copy = {k: v for k, v in raw_data.items() if k != "rows"}
-                
-                if page is not None and not system_category:
-                    start_idx = (page - 1) * page_size
-                    end_idx = start_idx + page_size
-                    data_copy["rows"] = all_rows[start_idx:end_idx]
-                    data_copy["pagination"] = {
-                        "total": len(all_rows),
-                        "page": page,
-                        "page_size": page_size,
-                        "has_more": end_idx < len(all_rows)
-                    }
-                else:
-                    data_copy["rows"] = all_rows
-                    data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
-                
-                # 將處理好的分頁資料放入 result 的最新檔案中
-                result["files"][target_idx]["data"] = data_copy
+                for v_idx in version_indices:
+                    if 0 <= v_idx < len(db_files):
+                        target_file_obj = db_files[v_idx]
+                        
+                        # 手動讀取該檔案的 data (此時會觸發單一 SELECT 讀取 JSON)
+                        raw_data = target_file_obj.data or {}
+                        all_rows = raw_data.get("rows", [])
+                        # 為每一列增加原始索引，以便後續手動分類能精準對應 (即使在有濾網的情況下)
+                        for idx, row in enumerate(all_rows):
+                            row["_original_index"] = idx
+                        
+                        if system_category:
+                            all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                        
+                        data_copy = {k: v for k, v in raw_data.items() if k != "rows"}
+                        
+                        # 分頁邏輯：如果是要求的版本則提供分頁資料
+                        is_target_version = (version_indices and v_idx in version_indices) or (v_idx == len(db_files) - 1)
+                        if include_all_rows:
+                            data_copy["rows"] = all_rows
+                        elif page is not None and not system_category and is_target_version:
+                            start_idx = (page - 1) * page_size
+                            end_idx = start_idx + page_size
+                            data_copy["rows"] = all_rows[start_idx:end_idx]
+                            data_copy["pagination"] = {
+                                "total": len(all_rows),
+                                "page": page,
+                                "page_size": page_size,
+                                "has_more": end_idx < len(all_rows)
+                            }
+                        else:
+                            data_copy["rows"] = all_rows
+                            data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
+                        
+                        # 將處理好的分頁資料放入 result 的對應檔案中
+                        result["files"][v_idx]["data"] = data_copy
                 
             return result
         finally:
@@ -263,18 +281,25 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
                 p_view = {k: v for k, v in p.items() if k != "files"}
                 
                 if p.get("files"):
+                    # 預設僅載入最新版本的 data，若有指定 indices 則載入指定版本
+                    if version_indices is None:
+                        version_indices = [len(p["files"]) - 1]
+                        
                     new_files = []
                     for i, f in enumerate(p["files"]):
                         file_copy = {k: v for k, v in f.items() if k != "data"}
-                        orig_data = f.get("data", {})
-                        data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
-                        all_rows = orig_data.get("rows", [])
                         
-                        if system_category:
-                            all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                        if i in version_indices:
+                            orig_data = f.get("data", {})
+                            data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
+                            all_rows = orig_data.get("rows", [])
                             
-                        if page is not None and not system_category:
-                            if i == len(p["files"]) - 1:
+                            if system_category:
+                                all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                                
+                            # 分頁邏輯
+                            is_target_version = (version_indices and i in version_indices) or (i == len(p["files"]) - 1)
+                            if page is not None and not system_category and is_target_version:
                                 start_idx = (page - 1) * page_size
                                 end_idx = start_idx + page_size
                                 data_copy["rows"] = all_rows[start_idx:end_idx]
@@ -285,54 +310,95 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
                                     "has_more": end_idx < len(all_rows)
                                 }
                             else:
-                                data_copy["rows"] = []
+                                data_copy["rows"] = all_rows
                                 data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
-                        else:
-                            data_copy["rows"] = all_rows
-                            data_copy["pagination"] = {"total": len(all_rows), "has_more": False}
-                            
-                        file_copy["data"] = data_copy
+                            file_copy["data"] = data_copy
+                        
                         new_files.append(file_copy)
                     p_view["files"] = new_files
                     
                 return p_view
         return None
 
-def _get_cached_rows(project_id: str) -> List[Dict[str, Any]]:
-    """取得專案最新版本的 rows（記憶體快取，跨請求共享）\n    第一次呼叫從 DB/JSON 載入並快取，後續直接回傳，大幅降低延遲。"""
+def _get_cached_rows(project_id: str, version_idx: int = -1) -> List[Dict[str, Any]]:
+    """取得專案指定版本的 rows（記憶體快取，跨請求共享）
+    預設 version_idx = -1 代表最新版本。
+    """
     global _inquiry_rows_cache
-    if project_id in _inquiry_rows_cache:
-        return _inquiry_rows_cache[project_id]
+    cache_key = f"{project_id}_{version_idx}"
+    if cache_key in _inquiry_rows_cache:
+        return _inquiry_rows_cache[cache_key]
 
-    # 限制快取數量，避免 Render 記憶體爆掉 (最多保留 5 個專案的快取)
-    if len(_inquiry_rows_cache) > 5:
+    # 限制快取數量，避免 Render 記憶體爆掉
+    if len(_inquiry_rows_cache) > 20: 
         _inquiry_rows_cache.clear()
 
-    # 快取未命中，從資料來源載入
     rows: List[Dict[str, Any]] = []
     if USE_DB:
         db = SessionLocal()
         try:
             project = db.query(Project).filter(Project.id == project_id).first()
             if project and project.files:
-                # max() 比 sorted()[-1] 更快，且只在需要時讀取 data
-                latest_file = max(project.files, key=lambda x: x.uploaded_at)
-                rows = latest_file.data.get("rows", []) if latest_file.data else []
+                target_file = None
+                if version_idx == -1:
+                    target_file = max(project.files, key=lambda x: x.uploaded_at)
+                elif 0 <= version_idx < len(project.files):
+                    # 注意：SQLAlchemy 關聯列表順序可能不保證，
+                    # 建議使用 uploaded_at 排序後取得相對索引
+                    sorted_files = sorted(project.files, key=lambda x: x.uploaded_at)
+                    target_file = sorted_files[version_idx]
+                
+                rows = target_file.data.get("rows", []) if target_file and target_file.data else []
         finally:
             db.close()
     else:
         p = get_project_from_cache(project_id)
         if p and p.get("files"):
-            rows = p["files"][-1].get("data", {}).get("rows", [])
+            files = p["files"]
+            idx = version_idx if version_idx != -1 else len(files) - 1
+            if 0 <= idx < len(files):
+                rows = files[idx].get("data", {}).get("rows", [])
 
-    _inquiry_rows_cache[project_id] = rows
+    _inquiry_rows_cache[cache_key] = rows
     return rows
 
+def get_inquiry_rows(project_id: str, system_category: str, version_idx: int = -1) -> List[Dict[str, Any]]:
+    """專門為詢價單獲取過濾後的標單列"""
+    rows = _get_cached_rows(project_id, version_idx)
+    norm_query = normalize_text(system_category)
+    
+    # 動態模式：部分標單列可能尚未在 DB 中標註 system_category (例如剛上傳或建立新版本後)
+    # 我們在查詢時，針對缺乏分類標註的項目執行即時匹配，以確保與 Summary Card 的分類統計完全同步。
+    filtered = []
+    for r in rows:
+        cat = r.get("system_category")
+        # 1. 如果資料庫已有分類，直接比對
+        if cat:
+            if norm_query in normalize_text(cat):
+                filtered.append(r)
+        # 2. 如果資料庫沒有分類，即時計算分類 (與 Summary 一致)
+        else:
+            description = r.get("description", "")
+            if description:
+                new_cat = classify_row(description)
+                if norm_query in normalize_text(new_cat):
+                    filtered.append(r)
+            elif norm_query == normalize_text("未分類"):
+                filtered.append(r)
+                
+    return filtered
 
-def get_inquiry_rows(project_id: str, system_category: str) -> List[Dict[str, Any]]:
-    """專門為詢價單獲取過濾後的標單列（使用記憶體快取，避免重複反序列化 DB JSON）"""
-    rows = _get_cached_rows(project_id)
-    return [r for r in rows if system_category in r.get("system_category", "")]
+def invalidate_inquiry_rows_cache(project_id: str, version_idx: int = None):
+    """清除全域詢價快取，若提供 version_idx 則僅清除特定版本，否則清除該專案所有版本"""
+    global _inquiry_rows_cache
+    if version_idx is not None:
+        key = f"{project_id}_{version_idx}"
+        if key in _inquiry_rows_cache:
+            del _inquiry_rows_cache[key]
+    else:
+        keys_to_del = [k for k in _inquiry_rows_cache.keys() if k.startswith(f"{project_id}_")]
+        for k in keys_to_del:
+            del _inquiry_rows_cache[k]
 
 def delete_project(project_id: str) -> bool:
     """刪除專案"""
@@ -405,6 +471,8 @@ def update_project_settings(project_id: str, settings: Dict[str, Any]) -> Option
             project.updated_at = datetime.utcnow()
             db.commit()
             db.refresh(project)
+            # 設定變更可能影響分類顯示，清除快取
+            invalidate_inquiry_rows_cache(project_id)
             return serialize_project(project)
         finally:
             db.close()
@@ -433,6 +501,8 @@ def delete_file_from_project(project_id: str, file_index: int) -> bool:
                 db.delete(target_file)
                 project.updated_at = datetime.utcnow()
                 db.commit()
+                # 刪除檔案後清除快取
+                invalidate_inquiry_rows_cache(project_id)
                 return True
             return False
         finally:
@@ -446,6 +516,7 @@ def delete_file_from_project(project_id: str, file_index: int) -> bool:
                     del files[file_index]
                     p["updated_at"] = datetime.now().isoformat()
                     save_projects(projects)
+                    invalidate_inquiry_rows_cache(project_id)
                     return True
         return False
 
@@ -465,6 +536,8 @@ def update_project_files(project_id: str, files_data: List[Dict[str, Any]]) -> b
                 latest_input_data = files_data[-1].get("data")
                 if latest_input_data:
                     latest_db_file.data = latest_input_data
+                    flag_modified(latest_db_file, "data")
+
             
             project.updated_at = datetime.utcnow()
             db.commit()
@@ -483,9 +556,10 @@ def update_project_files(project_id: str, files_data: List[Dict[str, Any]]) -> b
                 invalidate_inquiry_rows_cache(project_id)
                 return True
         return False
-def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dict[str, Any]]) -> bool:
-    """批量更新標單項目資訊 (廠商報價、折數等)"""
-    print(f"Updating inquiry rows for project {project_id}, category: {system_category}")
+
+def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dict[str, Any]], version_idx: int = -1) -> bool:
+    """批量更新標單項目資訊 (廠商報價、折數等)，支援指定版本"""
+    print(f"Updating inquiry rows for project {project_id}, version: {version_idx}, category: {system_category}")
     print(f"Updates received: {len(updates)}")
     
     if USE_DB:
@@ -495,8 +569,13 @@ def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dic
             if not project or not project.files:
                 return False
             
-            latest_file = max(project.files, key=lambda x: x.uploaded_at)
-            data = latest_file.data
+            sorted_files = sorted(project.files, key=lambda x: x.uploaded_at)
+            target_idx = version_idx if version_idx != -1 else len(sorted_files) - 1
+            if target_idx < 0 or target_idx >= len(sorted_files):
+                return False
+                
+            target_file = sorted_files[target_idx]
+            data = target_file.data
             rows = data.get("rows", [])
             
             # 建立更新對照表 (使用 item_no + description 做 key)
@@ -528,10 +607,12 @@ def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dic
             
             print(f"Total matches found: {match_count}, modified: {modified}")
             if modified:
-                latest_file.data = data
+                target_file.data = data
                 project.updated_at = datetime.utcnow()
                 db.commit()
-                invalidate_inquiry_rows_cache(project_id)
+                # 僅使該版本快取失效
+                actual_idx = version_idx if version_idx != -1 else len(sorted_files) - 1
+                invalidate_inquiry_rows_cache(project_id, actual_idx)
             return True
         finally:
             db.close()
@@ -572,5 +653,60 @@ def update_inquiry_rows(project_id: str, system_category: str, updates: List[Dic
                 if modified:
                     save_projects(projects)
                     invalidate_inquiry_rows_cache(project_id)
+                return True
+        return False
+
+
+def save_as_new_version(project_id: str, source_version_idx: int, new_file_name: str) -> bool:
+    """將指定版本的數據內容另存為一個全新的版本"""
+    import copy
+    from datetime import datetime
+    if USE_DB:
+        db = get_db_session()
+        try:
+            project = db.query(Project).filter(Project.id == project_id).first()
+            if not project or not project.files:
+                return False
+            
+            sorted_files = sorted(project.files, key=lambda x: x.uploaded_at)
+            if not (0 <= source_version_idx < len(sorted_files)):
+                return False
+                
+            source_file = sorted_files[source_version_idx]
+            
+            # 建立新檔案物件，複製 data
+            new_data = copy.deepcopy(source_file.data)
+            
+            new_file = ProjectFile(
+                project_id=project_id,
+                file_name=new_file_name,
+                data=new_data
+            )
+            db.add(new_file)
+            project.updated_at = datetime.utcnow()
+            db.commit()
+            # 建立新版本後清除快取，避免前端讀到舊版本的最新版快取
+            invalidate_inquiry_rows_cache(project_id)
+            return True
+        finally:
+            db.close()
+    else:
+        # JSON 模式實作
+        projects = load_projects()
+        for p in projects:
+            if p["id"] == project_id and p.get("files"):
+                files = p["files"]
+                if not (0 <= source_version_idx < len(files)):
+                    return False
+                
+                source_file = files[source_version_idx]
+                new_file = {
+                    "file_name": new_file_name,
+                    "uploaded_at": datetime.now().isoformat(),
+                    "data": copy.deepcopy(source_file.get("data", {}))
+                }
+                files.append(new_file)
+                p["updated_at"] = datetime.now().isoformat()
+                save_projects(projects)
                 return True
         return False

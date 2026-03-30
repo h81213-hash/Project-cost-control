@@ -14,7 +14,20 @@
                 "children": {
                     "PVC管  6\" x 8.5mm": {
                         "keywords": [],
-                        "children": {}
+                        "children": {
+                            "台電配電室受電箱、電表箱設備工程": {
+                                "keywords": [
+                                    "已選取2個項目"
+                                ],
+                                "children": {}
+                            },
+                            "\"TPC\"  PANEL": {
+                                "keywords": [
+                                    "已選取2個項目"
+                                ],
+                                "children": {}
+                            }
+                        }
                     },
                     "PVC管  3\" x 5.5mm": {
                         "keywords": [],
@@ -237,6 +250,19 @@
                         "children": {}
                     },
                     "公共、停車場開關箱設備工程": {
+                        "keywords": [
+                            "已選取2個項目"
+                        ],
+                        "children": {}
+                    },
+                    "台電配電室受電箱、電表箱設備工程": {
+                        "keywords": [
+                            "已選取2個項目",
+                            "已選取1個項目"
+                        ],
+                        "children": {}
+                    },
+                    "\"TPC\"  PANEL": {
                         "keywords": [
                             "已選取2個項目"
                         ],
@@ -1411,7 +1437,8 @@
             },
             "配電盤.弱電箱體": {
                 "keywords": [
-                    "ATS"
+                    "ATS",
+                    "NFB"
                 ],
                 "children": {
                     "受電箱P1~P7  PANEL": {
@@ -5018,10 +5045,6 @@
             }
         }
     },
-    "小計(直接成本)": {
-        "keywords": [],
-        "children": {}
-    },
     "利潤及管理費(含施工圖)": {
         "keywords": [],
         "children": {
@@ -5044,14 +5067,6 @@
             }
         }
     },
-    "小計(間接成本)": {
-        "keywords": [],
-        "children": {}
-    },
-    "直接成本+間接成本": {
-        "keywords": [],
-        "children": {}
-    },
     "業主自購類": {
         "keywords": [],
         "children": {
@@ -5062,20 +5077,6 @@
                     "已選取39個項目",
                     "已選取25個項目",
                     "123456789"
-                ],
-                "children": {}
-            }
-        }
-    },
-    "標題": {
-        "keywords": [],
-        "children": {
-            "子標題": {
-                "keywords": [
-                    "台電配電室受電箱、電表箱設備工程",
-                    "電燈、開關插座設備工程",
-                    "外構燈具設備工程(燈具引線不得小於1.25mm2)",
-                    "安全梯排煙設備工程"
                 ],
                 "children": {}
             }
@@ -5092,42 +5093,8 @@
             }
         }
     },
-    "Owner": {
+    "未分類": {
         "keywords": [],
-        "children": {
-            "Sub": {
-                "keywords": [],
-                "children": {
-                    "PBL 照光式按鈕開關   30∮ ( LED )": {
-                        "keywords": [
-                            "PBL照光式按鈕開關30∮(LED)LED_test"
-                        ],
-                        "children": {}
-                    }
-                }
-            }
-        }
-    },
-    "BatchTest": {
-        "keywords": [],
-        "children": {
-            "Systems": {
-                "keywords": [],
-                "children": {
-                    "電氣設備工程": {
-                        "keywords": [
-                            "已選取2個項目"
-                        ],
-                        "children": {}
-                    },
-                    "弱電設備工程": {
-                        "keywords": [
-                            "已選取2個項目"
-                        ],
-                        "children": {}
-                    }
-                }
-            }
-        }
+        "children": {}
     }
 }

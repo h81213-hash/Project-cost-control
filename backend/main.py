@@ -69,6 +69,7 @@ class BatchClassifyRequest(BaseModel):
     add_keyword: bool = False
     keyword: str = ""
     classification_depth: int = 2
+    version_idx: int = -1
 
 class ManualClassifyRequest(BaseModel):
     row_index: int
@@ -77,6 +78,7 @@ class ManualClassifyRequest(BaseModel):
     keyword: str = None
     item_name: str = None
     classification_depth: int = 2
+    version_idx: int = -1
 
 
 @app.get("/")
@@ -109,18 +111,20 @@ def create_project(project: ProjectCreate):
 
 
 @app.get("/projects/{project_id}")
-def get_project(project_id: str, page: Optional[int] = None, page_size: int = 50, system_category: Optional[str] = None):
-    """取得單一專案詳細資訊，支援分頁與類別過濾"""
-    proj = project_service.get_project(project_id, page=page, page_size=page_size, system_category=system_category)
+def get_project(project_id: str, page: Optional[int] = None, page_size: int = 50, system_category: Optional[str] = None, version_idx: int = -1):
+    """取得單一專案詳細資訊，支援分頁、類別過濾與指定版本"""
+    # 將 version_idx 轉為 list[int] 以符合 project_service.get_project 的定義 (預設為最新版 -1)
+    version_indices = [version_idx] if version_idx != -1 else None
+    proj = project_service.get_project(project_id, page=page, page_size=page_size, system_category=system_category, version_indices=version_indices)
     if proj:
         return proj
     raise HTTPException(status_code=404, detail="找不到該專案")
 
 
 @app.get("/projects/{project_id}/inquiry_rows")
-def get_inquiry_rows(project_id: str, system_category: str):
-    """僅取得特定分類的標單列資料 (極輕量化)"""
-    return project_service.get_inquiry_rows(project_id, system_category)
+def get_inquiry_rows(project_id: str, system_category: str, version_idx: int = -1):
+    """僅取得特定分類的標單列資料 (支援指定版本)"""
+    return project_service.get_inquiry_rows(project_id, system_category, version_idx)
 
 
 @app.delete("/projects/{project_id}")
@@ -148,21 +152,23 @@ def update_project_settings(project_id: str, settings: ProjectSettings):
 
 @app.post("/projects/{project_id}/inquiry_rows/update")
 async def update_inquiry_rows(project_id: str, payload: Dict[str, Any]):
-    """批量更新特定類別下的詢價項目"""
+    """批量更新特定類別下的詢價項目 (支援指定版本)"""
     system_category = payload.get("system_category")
     updates = payload.get("updates", [])
+    version_idx = payload.get("version_idx", -1)
+    
     if not system_category:
         raise HTTPException(status_code=400, detail="必須提供類別名稱")
     
-    success = project_service.update_inquiry_rows(project_id, system_category, updates)
+    success = project_service.update_inquiry_rows(project_id, system_category, updates, version_idx)
     if success:
         return {"status": "success"}
     raise HTTPException(status_code=500, detail="更新失敗")
 
 @app.get("/projects/{project_id}/reports")
-def get_project_report(project_id: str, depth: int = 1):
-    """取得專案報表數據 (LV.1 或 LV.2)"""
-    return report_service.get_report_data(project_id, depth=depth)
+def get_project_report(project_id: str, depth: int = 1, version_idx: int = -1):
+    """取得專案報表數據 (支援指定版本)"""
+    return report_service.get_report_data(project_id, depth=depth, version_idx=version_idx)
 
 
 @app.post("/projects/{project_id}/reports/config")
@@ -175,30 +181,60 @@ async def update_report_config(project_id: str, request: Request):
     return {"status": "error", "message": "更新失敗"}
 
 
+@app.post("/projects/{project_id}/files/save_as_new")
+async def save_as_new_version(project_id: str, payload: Dict[str, Any]):
+    """將現有版本另存為新版本"""
+    source_idx = payload.get("source_version_idx")
+    new_name = payload.get("new_file_name")
+    
+    if source_idx is None or not new_name:
+        raise HTTPException(status_code=400, detail="缺少必要參數")
+        
+    success = project_service.save_as_new_version(project_id, source_idx, new_name)
+    if success:
+        return {"status": "success"}
+    return {"status": "error", "message": "另存新檔失敗"}
+
+
 # === 分類管理 API ===
 
 @app.post("/projects/{project_id}/compare")
 async def compare_project_versions(project_id: str, request: Request):
     """比對兩個不同版本的標單檔案"""
     body = await request.json()
-    base_idx = body.get("base_index", 0)  # 基準版本 (通常是舊的)
-    target_idx = body.get("target_index", -1) # 目標版本 (通常是新的)
+    base_idx = body.get("base_index", 0)
+    target_idx = body.get("target_index", -1)
     
-    project = project_service.get_project(project_id)
+    # 步驟 1: 先抓取基本元數據 (不抓任何 data)，確認檔案數量
+    project = project_service.get_project(project_id, version_indices=[])
     if not project or not project.get("files"):
         return {"status": "error", "message": "專案或檔案不存在"}
     
     try:
-        files = project["files"]
-        if target_idx == -1: target_idx = len(files) - 1
+        files_metadata = project["files"]
+        if target_idx == -1: target_idx = len(files_metadata) - 1
         
-        old_data = files[base_idx]["data"]["rows"]
-        new_data = files[target_idx]["data"]["rows"]
+        print(f"[Compare] Base: {base_idx}, Target: {target_idx}, Total Files: {len(files_metadata)}")
+        
+        # 步驟 2: 只抓取需要的兩個版本數據 (減少網路傳輸與記憶體開銷)
+        project_data = project_service.get_project(project_id, version_indices=[base_idx, target_idx])
+        if not project_data:
+            return {"status": "error", "message": "載入專案數據失敗"}
+            
+        files = project_data["files"]
+        print(f"[Compare] Loaded files. Count: {len(files)}")
+        
+        old_data = files[base_idx].get("data", {}).get("rows", [])
+        new_data = files[target_idx].get("data", {}).get("rows", [])
+        
+        print(f"[Compare] Rows count - Old: {len(old_data)}, New: {len(new_data)}")
         
         diff_result = diff_service.compare_and_merge(old_data, new_data)
+        print(f"[Compare] Diff complete. Added: {diff_result['summary']['added']}, Removed: {diff_result['summary']['removed']}")
         
         # 進行成本分析 (基於比對後的結果)
         analysis = category_service.analyze_project_data(diff_result["rows"], max_depth=project.get("classification_depth", 2))
+        print(f"[Compare] Analysis complete.")
         
         return {
             "status": "success", 
@@ -208,7 +244,9 @@ async def compare_project_versions(project_id: str, request: Request):
             }
         }
     except Exception as e:
+        import traceback
         print(f"[Error] Compare failed: {e}")
+        print(traceback.format_exc())
         return {"status": "error", "message": f"比對失敗: {str(e)}"}
 
 @app.post("/projects/{project_id}/apply_diff")
@@ -283,34 +321,54 @@ def analyze_rows(req: AnalyzeRequest):
 def batch_classify(project_id: str, req: BatchClassifyRequest):
     """批次強制分類多個項目"""
     try:
-        projects = project_service.load_projects()
-        proj = next((p for p in projects if p["id"] == project_id), None)
+        proj = project_service.get_project(project_id)
         if not proj:
             return {"status": "error", "message": "找不到該專案"}
             
-        files = proj.get("files", [])
-        if not files:
-            return {"status": "error", "message": "專案尚無檔案"}
+        num_files = len(proj.get("files", []))
+        if num_files == 0:
+            return {"status": "error", "message": "專案尚無數據或檔案"}
             
-        last_file = files[-1]
-        data = last_file.get("data", {})
+        target_idx = req.version_idx if req.version_idx != -1 else num_files - 1
+        if not (0 <= target_idx < num_files):
+            return {"status": "error", "message": f"無效的版本索引: {target_idx}"}
+            
+        proj = project_service.get_project(project_id, version_indices=[target_idx])
+        if not proj or not proj.get("files"):
+            return {"status": "error", "message": "載入版本數據失敗"}
+
+        files = proj["files"]
+        # 注意：get_project 傳回的 files 列表可能只包含請求的索引，
+        # 但 project_service.update_project_files 需要完整的檔案列表。
+        # 因此我們實際上需要取得所有檔案，或者在更新時僅更新該索引。
+        # 為了保險起見，我們載入所有檔案的 metadata，但只保留目標檔案的 data。
+        full_proj = project_service.get_project(project_id)
+        all_files = full_proj.get("files", [])
+        
+        target_file = all_files[target_idx]
+        data = target_file.get("data", {})
         rows = data.get("rows", [])
         
+        print(f"[Batch] Rows loaded: {len(rows)}, Selected indices: {req.row_indices}")
+        
         updated_count = 0
-        parts = req.new_category_path.split(" > ")
-        short_path = " > ".join(parts[:req.classification_depth])
+        
+        # 建立索引對照表以便快速查詢 (使用 _original_index)
+        row_map = {r.get("_original_index"): r for r in rows if "_original_index" in r}
         
         for idx in req.row_indices:
-            if 0 <= idx < len(rows):
+            # 優先嘗試透過 _original_index 查詢，若無則退回到陣列索引 (相容舊邏輯)
+            row = row_map.get(idx)
+            if not row and 0 <= idx < len(rows):
                 row = rows[idx]
+                
+            if row:
                 row["is_manual_category"] = True
                 
-                # 基於要求的邏輯：如果同時加入關鍵字，則把每個項目的描述作為子項目名稱
                 item_description = row.get("description", "未命名項目")
                 current_item_path = req.new_category_path
                 
                 if req.add_keyword:
-                    # 建立品項子分類
                     current_item_path = f"{req.new_category_path} > {item_description}"
                     if req.keyword:
                         category_service.add_keyword_to_path(current_item_path, req.keyword)
@@ -324,48 +382,79 @@ def batch_classify(project_id: str, req: BatchClassifyRequest):
                 row["system_category"] = " > ".join(current_item_path.split(" > ")[:req.classification_depth])
                 updated_count += 1
 
-        # 清除快取，觸發重新量分析
-        category_service._categories_cache = None
-        category_service._name_lookup_cache = None
-        category_service._keyword_entries_cache = None
-        category_service._classify_cache = {}
+        # 核心優化：選擇分析模式
+        if req.add_keyword:
+            # 增量學習模式：傳傳關鍵字以進行精準重連
+            keyword_to_scan = req.keyword or " > ".join(req.new_category_path.split(" > ")[-1:])
+            analysis = category_service.analyze_project_data(
+                rows, 
+                max_depth=req.classification_depth,
+                new_keyword=keyword_to_scan
+            )
+        else:
+            # 快速彙整模式：直接基於 row["system_category"] 統計，不執行關鍵字比對
+            analysis = category_service.build_analysis_from_categories(rows, max_depth=req.classification_depth)
         
-        analysis = category_service.analyze_project_data(rows, max_depth=req.classification_depth)
+        # 收集更新後的列，僅回傳必要的欄位以節省 Payload 空間
+        updated_rows_data = []
+        for idx in req.row_indices:
+            row = row_map.get(idx)
+            if row:
+                updated_rows_data.append({
+                    "_original_index": row.get("_original_index"),
+                    "system_category": row.get("system_category"),
+                    "manual_raw_category": row.get("manual_raw_category"),
+                    "is_manual_category": True
+                })
         
-        data["analysis"] = analysis
-        data["rows"] = rows
+        print(f"[Batch] Saving rows. Analysis count: {len(analysis.get('systems', {}))}")
+        success = project_service.update_project_files(project_id, all_files)
+        print(f"[Batch] Update success: {success}")
         
-        # 使用新方法儲存，支援 JSON 與 DB
-        project_service.update_project_files(project_id, files)
-        
-        return {"status": "success", "updated_count": updated_count, "data": data}
+        return {
+            "status": "success", 
+            "updated_count": updated_count, 
+            "updated_rows": updated_rows_data, 
+            "analysis": analysis
+        }
     except Exception as e:
+        print(f"[Batch] Error: {str(e)}")
         import traceback
-        print(traceback.format_exc())
-        return {"status": "error", "message": f"後端錯誤: {str(e)}"}
+        traceback.print_exc()
+        return {"status": "error", "message": f"發生錯誤: {str(e)}"}
 
 
 @app.post("/projects/{project_id}/manual_classify")
 def manual_classify(project_id: str, req: ManualClassifyRequest):
     """手動強制分類單一項目，可選是否加入關鍵字學習"""
     try:
-        projects = project_service.load_projects()
-        proj = next((p for p in projects if p["id"] == project_id), None)
+        proj = project_service.get_project(project_id)
         if not proj:
             return {"status": "error", "message": "找不到該專案"}
             
-        files = proj.get("files", [])
-        if not files:
-            return {"status": "error", "message": "專案尚無檔案"}
+        num_files = len(proj.get("files", []))
+        if num_files == 0:
+            return {"status": "error", "message": "專案尚無數據或檔案"}
             
-        last_file = files[-1]
-        data = last_file.get("data", {})
+        target_idx = req.version_idx if req.version_idx != -1 else num_files - 1
+        if not (0 <= target_idx < num_files):
+            return {"status": "error", "message": f"無效的版本索引: {target_idx}"}
+            
+        full_proj = project_service.get_project(project_id)
+        all_files = full_proj.get("files", [])
+        
+        target_file = all_files[target_idx]
+        data = target_file.get("data", {})
         rows = data.get("rows", [])
         
-        if req.row_index >= len(rows) or req.row_index < 0:
-            return {"status": "error", "message": "無效的索引"}
+        # 優先嘗試透過 _original_index 查詢
+        row = next((r for r in rows if r.get("_original_index") == req.row_index), None)
+        if not row:
+            if 0 <= req.row_index < len(rows):
+                row = rows[req.row_index]
+            else:
+                return {"status": "error", "message": "無效的索引"}
             
-        row = rows[req.row_index]
         row["is_manual_category"] = True
         row["manual_raw_category"] = req.new_category_path
         
@@ -384,24 +473,84 @@ def manual_classify(project_id: str, req: ManualClassifyRequest):
         else:
             category_service.add_keyword_to_path(final_path)
 
-        category_service._categories_cache = None
-        category_service._name_lookup_cache = None
-        category_service._keyword_entries_cache = None
-        category_service._classify_cache = {}
-        
-        analysis = category_service.analyze_project_data(rows, max_depth=req.classification_depth)
+        # 核心優化：選擇分析模式
+        if req.add_keyword:
+            # 增量學習模式
+            analysis = category_service.analyze_project_data(
+                rows, 
+                max_depth=req.classification_depth,
+                new_keyword=req.keyword or req.item_name
+            )
+        else:
+            # 快速彙整模式
+            analysis = category_service.build_analysis_from_categories(rows, max_depth=req.classification_depth)
         
         data["analysis"] = analysis
         data["rows"] = rows
         
-        # 使用新方法儲存，支援 JSON 與 DB
-        project_service.update_project_files(project_id, files)
+        project_service.update_project_files(project_id, all_files)
         
         return {"status": "success", "data": data}
     except Exception as e:
         import traceback
         print(traceback.format_exc())
         return {"status": "error", "message": f"後端錯誤: {str(e)}"}
+
+
+@app.post("/projects/{project_id}/reclassify")
+def reclassify_project(project_id: str):
+    """重新分析專案中所有非手動分類的項目"""
+    try:
+        # 1. 取得專案摘要，計算最新索引
+        proj = project_service.get_project(project_id)
+        if not proj or not proj.get("files"):
+            return {"status": "error", "message": "找不到專案或尚未上傳標單"}
+            
+        depth = proj.get("classification_depth", 3)
+        latest_idx = len(proj["files"]) - 1
+        
+        # 2. 載入含數據的最後一版本
+        proj = project_service.get_project(project_id, version_indices=[latest_idx])
+        files = proj["files"]
+        last_file = files[latest_idx]
+        data = last_file.get("data", {})
+        rows = data.get("rows", [])
+        
+        # 2. 遍歷並重分類
+        updated_count = 0
+        for row in rows:
+            # 保護機制：跳過手動分類的項目
+            if row.get("is_manual_category"):
+                continue
+                
+            # 執行自動分類
+            description = row.get("description", "")
+            new_cat = category_service.classify_row(description, max_depth=depth)
+            
+            if row.get("system_category") != new_cat:
+                row["system_category"] = new_cat
+                updated_count += 1
+        
+        # 3. 重新產生分析報告 (Analysis Summary)
+        analysis = category_service.analyze_project_data(rows, max_depth=depth)
+        data["analysis"] = analysis
+        data["rows"] = rows
+        
+        # 4. 儲存更新
+        project_service.update_project_files(project_id, files)
+        # 重新分類後讓詢價單快取失效
+        project_service.invalidate_inquiry_rows_cache(project_id)
+        
+        return {
+            "status": "success", 
+            "updated_count": updated_count,
+            "total_rows": len(rows),
+            "data": data
+        }
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return {"status": "error", "message": f"重分類過程出錯: {str(e)}"}
 
 
 # === 標單上傳 API ===
@@ -467,19 +616,22 @@ def debug_paths():
 @app.get("/projects/{project_id}/export")
 def export_project_excel(project_id: str, version_idx: int = -1):
     """將專案內容匯出為 Excel 檔案，並將分類拆解為層級欄位 (LV.1, LV.2, LV.3)"""
-    proj = project_service.get_project(project_id)
-    if not proj or not proj.get("files"):
+    # 決定要匯出的版本
+    # 先抓一次 metadata 算索引
+    temp_proj = project_service.get_project(project_id)
+    if not temp_proj or not temp_proj.get("files"):
         return {"status": "error", "message": "找不到專案或尚未上傳標單"}
     
-    # 決定要匯出的版本
-    files = proj["files"]
+    files_count = len(temp_proj["files"])
     if version_idx == -1:
-        version_idx = len(files) - 1
-    
-    if not (0 <= version_idx < len(files)):
+        version_idx = files_count - 1
+        
+    if not (0 <= version_idx < files_count):
         return {"status": "error", "message": f"無效的版本索引: {version_idx}"}
     
-    target_file = files[version_idx]
+    # 重新載入指定版本的數據
+    proj = project_service.get_project(project_id, version_indices=[version_idx])
+    target_file = proj["files"][version_idx]
     file_data = target_file.get("data", {})
     rows = file_data.get("rows", [])
     mapping = file_data.get("mapping", {})
@@ -538,16 +690,15 @@ def export_project_excel(project_id: str, version_idx: int = -1):
 
 
 @app.get("/projects/{project_id}/inquiry_export")
-async def export_inquiry_excel(project_id: str, category: str):
+async def export_inquiry_excel(project_id: str, category: str, version_idx: int = -1):
     """
-    根據投標詢價範本格式，匯出指定類別的詢價 Excel。
+    根據投標詢價範本格式，匯出指定類別的詢價 Excel (支援指定版本)。
     """
-    # 修正：使用正確的函數名稱 get_project
     proj = project_service.get_project(project_id)
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found")
         
-    # 獲取模板設定，優先使用儲存的值，否則使用系統預設或專案內容
+    # 獲取模板設定
     raw_tpl = proj.get("report_config", {}).get("inquiry_template", {})
     tpl = {
         "company_name": raw_tpl.get("company_name") or "聖暉工程科技股份有限公司",
@@ -561,13 +712,19 @@ async def export_inquiry_excel(project_id: str, category: str):
         "deadline": raw_tpl.get("deadline") or ""
     }
     
-    # 獲取該類別項目
+    # 獲取該版本項目
     files = proj.get("files", [])
     if not files:
         raise HTTPException(status_code=400, detail="No versions found")
         
-    latest_data = files[-1].get("data", {})
-    rows = latest_data.get("rows", [])
+    num_files = len(files)
+    target_idx = version_idx if version_idx != -1 else num_files - 1
+    if not (0 <= target_idx < num_files):
+        raise HTTPException(status_code=400, detail="Invalid version index")
+        
+    sorted_files = sorted(files, key=lambda x: x.get("uploaded_at") or "")
+    target_data = sorted_files[target_idx].get("data", {})
+    rows = target_data.get("rows", [])
     
     # 過濾屬於該類別及其子類別的項目
     # 注意：category 是 LV.2 或大類的顯示名稱
