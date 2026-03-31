@@ -128,17 +128,28 @@ def _get_project_data(db: SessionLocal, project_id: str, include_rows: bool = Fa
         raise HTTPException(status_code=404, detail="專案不存在")
     
     proj_dict = project_service.serialize_project(project)
+    
+    # 基本查詢：過濾該專案的所有檔案
     f_query = db.query(models.ProjectFile).filter(models.ProjectFile.project_id == project_id).order_by(models.ProjectFile.uploaded_at)
     
+    # 處理版本篩選 (version_indices)
     if version_indices is not None:
         all_f = f_query.all()
         target_ids = []
-        for v in version_indices:
-            idx = v if v >= 0 else len(all_f) + v
-            if 0 <= idx < len(all_f):
-                target_ids.append(all_f[idx].id)
-        f_query = f_query.filter(models.ProjectFile.id.in_(target_ids))
+        if all_f:
+            for v in version_indices:
+                idx = v if v >= 0 else len(all_f) + v
+                if 0 <= idx < len(all_f):
+                    target_ids.append(all_f[idx].id)
+        
+        # 若有指定版本但找不到任何檔案，則回傳空檔案列表
+        if not target_ids:
+            proj_dict["files"] = []
+            return proj_dict
+            
+        f_query = db.query(models.ProjectFile).filter(models.ProjectFile.id.in_(target_ids)).order_by(models.ProjectFile.uploaded_at)
     
+    # 效能優化：根據需要延遲載入 heavy rows (JSON)
     if not include_rows:
         f_query = f_query.options(defer(models.ProjectFile.data))
     
@@ -431,27 +442,73 @@ def export_project_excel(project_id: str, version_idx: int = -1):
 async def export_inquiry_excel(project_id: str, category: str, version_idx: int = -1, row_indices: str = None, vendor_name: str = None, vendor_phone: str = None, vendor_fax: str = None):
     db = SessionLocal()
     proj = _get_project_data(db, project_id, include_rows=True, version_indices=[version_idx])
-    rows = proj["files"][0].get("data", {}).get("rows", [])
-    raw_tpl = proj.get("report_config", {}).get("inquiry_template", {})
-    tpl = {**raw_tpl, "project_name": proj["name"], "vendor_to": vendor_name, "vendor_phone": vendor_phone, "vendor_fax": vendor_fax}
+    
+    # --- 防禦性檢查：是否有檔案 ---
+    if not proj.get("files"):
+        raise HTTPException(status_code=400, detail="此專案目前沒有可匯出的標單檔案，請先上傳標單。")
+        
+    target_file = proj["files"][0]
+    rows = target_file.get("data", {}).get("rows", [])
+    
+    # --- 防禦性檢查：報表設定 ---
+    report_config = proj.get("report_config") or {}
+    raw_tpl = report_config.get("inquiry_template") if isinstance(report_config, dict) else {}
+    if not isinstance(raw_tpl, dict): raw_tpl = {}
+    
+    tpl = {
+        **raw_tpl, 
+        "project_name": proj.get("name", ""), 
+        "vendor_to": vendor_name or "", 
+        "vendor_phone": vendor_phone or "", 
+        "vendor_fax": vendor_fax or ""
+    }
+    
     sel_idx = [int(i) for i in row_indices.split(",") if i.strip()] if row_indices else None
     filtered = [r for i, r in enumerate(rows) if (sel_idx is not None and (r.get("_original_index") in sel_idx or i in sel_idx)) or (sel_idx is None and category in (r.get("manual_raw_category") or r.get("system_category") or ""))]
+    
     excel_data = excel_service.generate_inquiry_excel(filtered, tpl)
     from urllib.parse import quote
-    return StreamingResponse(io.BytesIO(excel_data), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    filename = quote(f"詢價單_{proj.get('name', '未命名')}.xlsx")
+    return StreamingResponse(io.BytesIO(excel_data), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"})
 
 @app.post("/projects/{project_id}/inquiry_draft")
 async def create_inquiry_draft(project_id: str, req: InquiryDraftRequest):
     db = SessionLocal()
     proj = _get_project_data(db, project_id, include_rows=True, version_indices=[req.version_idx])
-    rows = proj["files"][0].get("data", {}).get("rows", [])
-    raw_tpl = proj.get("report_config", {}).get("inquiry_template", {})
-    tpl = {**raw_tpl, "project_name": proj["name"], "vendor_to": req.vendor.get("name"), "vendor_phone": req.vendor.get("phone"), "vendor_fax": req.vendor.get("fax")}
+    
+    # --- 防禦性檢查：是否有檔案 ---
+    if not proj.get("files"):
+        raise HTTPException(status_code=400, detail="建立草稿失敗：找不到對應的標單數據。")
+        
+    target_file = proj["files"][0]
+    rows = target_file.get("data", {}).get("rows", [])
+    
+    # --- 防禦性檢查：報表設定 ---
+    report_config = proj.get("report_config") or {}
+    raw_tpl = report_config.get("inquiry_template") if isinstance(report_config, dict) else {}
+    if not isinstance(raw_tpl, dict): raw_tpl = {}
+    
+    req_vendor = req.vendor or {}
+    tpl = {
+        **raw_tpl, 
+        "project_name": proj.get("name", ""), 
+        "vendor_to": req_vendor.get("name", ""), 
+        "vendor_phone": req_vendor.get("phone", ""), 
+        "vendor_fax": req_vendor.get("fax", "")
+    }
+    
     sel_idx = [int(i) for i in req.row_indices.split(",") if i.strip()] if req.row_indices else None
     filtered = [r for i, r in enumerate(rows) if (sel_idx is not None and (r.get("_original_index") in sel_idx or i in sel_idx)) or (sel_idx is None and req.category in (r.get("manual_raw_category") or r.get("system_category") or ""))]
+    
     excel_data = excel_service.generate_inquiry_excel(filtered, tpl)
     provider = mail_service.MailFactory.get_provider(req.provider, client_id=req.outlook_client_id)
-    draft_id = provider.create_draft_with_attachment(to=req.vendor.get("email", ""), subject=req.subject, body=req.body, file_content=excel_data, file_name=f"詢價單_{proj['name']}.xlsx")
+    draft_id = provider.create_draft_with_attachment(
+        to=req_vendor.get("email", ""), 
+        subject=req.subject or f"詢價單 - {proj.get('name', '')}", 
+        body=req.body or "", 
+        file_content=excel_data, 
+        file_name=f"詢價單_{proj.get('name', '未命名')}.xlsx"
+    )
     return {"status": "success", "draft_id": draft_id}
 
 if __name__ == "__main__":
