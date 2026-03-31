@@ -111,6 +111,22 @@ class InquiryDraftRequest(BaseModel):
     subject: str
     body: str
     outlook_client_id: Optional[str] = None
+# --- 全域錯誤攔截器 (偵錯用，修復後建議移除) ---
+import traceback
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_details = traceback.format_exc()
+    print(f"CRITICAL ERROR: {error_details}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "message": str(exc),
+            "traceback": error_details
+        }
+    )
 
 @app.get("/")
 def read_root():
