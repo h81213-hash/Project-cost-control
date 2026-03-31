@@ -134,20 +134,22 @@ def get_project_from_cache(project_id: str) -> Optional[Dict[str, Any]]:
         load_projects()
     return _projects_cache_dict.get(project_id) if _projects_cache_dict else None
 
+def serialize_file(f: "ProjectFile", include_data: bool = False) -> Dict[str, Any]:
+    """將標單檔案物件轉換為字典"""
+    file_info = {
+        "id": f.id,
+        "file_name": f.file_name,
+        "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else "",
+    }
+    if include_data:
+        file_info["data"] = f.data
+    return file_info
+
 def serialize_project(p: "Project", include_data: bool = False) -> Dict[str, Any]:
     """將 SQLAlchemy 物件轉換為字典，預設不包含巨大的 data 欄位以節省記憶體"""
-    files_list = []
     # 確保檔案依上傳時間排序
     sorted_files = sorted(p.files, key=lambda x: x.uploaded_at)
-    
-    for f in sorted_files:
-        file_info = {
-            "file_name": f.file_name,
-            "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else "",
-        }
-        if include_data:
-            file_info["data"] = f.data
-        files_list.append(file_info)
+    files_list = [serialize_file(f, include_data=include_data) for f in sorted_files]
 
     return {
         "id": p.id,
