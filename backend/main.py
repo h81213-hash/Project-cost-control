@@ -119,13 +119,20 @@ from fastapi.responses import JSONResponse
 async def global_exception_handler(request: Request, exc: Exception):
     error_details = traceback.format_exc()
     print(f"CRITICAL ERROR: {error_details}")
+    # 強制加入 CORS 標頭，確保前端能讀取到錯誤訊息
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*"
+    }
     return JSONResponse(
         status_code=500,
         content={
             "status": "error",
             "message": str(exc),
             "traceback": error_details
-        }
+        },
+        headers=headers
     )
 
 @app.get("/")
@@ -479,7 +486,18 @@ async def export_inquiry_excel(project_id: str, category: str, version_idx: int 
         "vendor_fax": vendor_fax or ""
     }
     
-    sel_idx = [int(i) for i in row_indices.split(",") if i.strip()] if row_indices else None
+    # --- 穩健解析 row_indices ---
+    def safe_int_list(s: str):
+        if not s: return None
+        res = []
+        for i in s.split(","):
+            try:
+                if i.strip(): res.append(int(i.strip()))
+            except ValueError:
+                continue
+        return res if res else None
+
+    sel_idx = safe_int_list(row_indices)
     filtered = [r for i, r in enumerate(rows) if (sel_idx is not None and (r.get("_original_index") in sel_idx or i in sel_idx)) or (sel_idx is None and category in (r.get("manual_raw_category") or r.get("system_category") or ""))]
     
     excel_data = excel_service.generate_inquiry_excel(filtered, tpl)
@@ -513,7 +531,18 @@ async def create_inquiry_draft(project_id: str, req: InquiryDraftRequest):
         "vendor_fax": req_vendor.get("fax", "")
     }
     
-    sel_idx = [int(i) for i in req.row_indices.split(",") if i.strip()] if req.row_indices else None
+    # --- 穩健解析 row_indices ---
+    def safe_int_list(s: str):
+        if not s: return None
+        res = []
+        for i in s.split(","):
+            try:
+                if i.strip(): res.append(int(i.strip()))
+            except ValueError:
+                continue
+        return res if res else None
+
+    sel_idx = safe_int_list(req.row_indices)
     filtered = [r for i, r in enumerate(rows) if (sel_idx is not None and (r.get("_original_index") in sel_idx or i in sel_idx)) or (sel_idx is None and req.category in (r.get("manual_raw_category") or r.get("system_category") or ""))]
     
     excel_data = excel_service.generate_inquiry_excel(filtered, tpl)
