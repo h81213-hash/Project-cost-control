@@ -9,7 +9,7 @@
     "end_date": "2026-03-17",
     "note": "LOUE U",
     "created_at": "2026-03-12T11:59:39.997849",
-    "updated_at": "2026-03-24T23:31:42.448033",
+    "updated_at": "2026-03-31T12:09:02.590907",
     "files": [
       {
         "file_name": "一莊標單(原始) 測試初始.xlsx",
@@ -791,7 +791,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -10030,7 +10031,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "三",
@@ -14553,7 +14555,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -15404,7 +15407,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "五",
@@ -16483,7 +16487,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "六",
@@ -16830,7 +16835,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "七",
@@ -17009,7 +17015,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "貳",
@@ -17104,7 +17111,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "一",
@@ -17823,7 +17831,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -18122,7 +18131,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "三",
@@ -18361,7 +18371,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -18588,7 +18599,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "五",
@@ -18791,7 +18803,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "六",
@@ -19570,7 +19583,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "參",
@@ -19665,7 +19679,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "一",
@@ -20852,7 +20867,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -22375,7 +22391,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "三",
@@ -22770,7 +22787,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -23465,7 +23483,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "五",
@@ -23848,7 +23867,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "六",
@@ -24075,7 +24095,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "肆",
@@ -24278,7 +24299,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "一",
@@ -25045,7 +25067,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -25536,7 +25559,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "三",
@@ -25811,7 +25835,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -26410,7 +26435,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "五",
@@ -26985,7 +27011,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "六",
@@ -27692,7 +27719,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "七",
@@ -27799,7 +27827,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "八",
@@ -28086,7 +28115,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "伍",
@@ -28169,7 +28199,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "一",
@@ -28888,7 +28919,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -29235,7 +29267,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "三",
@@ -29654,7 +29687,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -29965,7 +29999,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "陸",
@@ -30396,7 +30431,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "防火填塞工程 > 防火填塞工程"
             },
             {
               "item_no": "",
@@ -30407,7 +30443,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "防火填塞工程 > 防火填塞工程"
             },
             {
               "item_no": "",
@@ -30538,7 +30575,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "一",
@@ -30777,7 +30815,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -30872,7 +30911,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "二",
@@ -31087,7 +31127,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "四",
@@ -31182,7 +31223,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "五",
@@ -31289,7 +31331,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "六",
@@ -31444,7 +31487,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "捌",
@@ -31503,7 +31547,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "按承攬合約金額1%給付品興營造 > 按承攬合約金額1%給付品興營造"
             },
             {
               "item_no": "4",
@@ -31526,7 +31571,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             },
             {
               "item_no": "玖",
@@ -31645,7 +31691,8 @@
               "total_price": "",
               "note": "",
               "is_invalid": true,
-              "should_hide": true
+              "should_hide": true,
+              "_temp_system_category": "未分類"
             }
           ],
           "analysis": {
@@ -32027,7 +32074,34 @@
         }
       }
     ],
-    "classification_depth": 2
+    "classification_depth": 2,
+    "report_config": {
+      "floor_area": "",
+      "categories": {},
+      "summary": {
+        "profit_rate": 0.18,
+        "tax_rate": 0.05
+      },
+      "categoryOrder": [],
+      "inquiry_template": {
+        "company_name": "聖暉工程科技股份有限公司",
+        "phone": "02-2655-8067",
+        "fax": "02-2655-8073",
+        "address": "115台北市南港區園區街3-2號5樓之2(軟體園區H棟)",
+        "mail": "yiyi_yang@acter.com.tw",
+        "contact_person": "楊尚嬑 小姐  分機:609",
+        "project_name": "測試",
+        "project_location": "林口區",
+        "deadline": "",
+        "delivery_requirement": "",
+        "sender_name": "Wanlin",
+        "sender_title": "採購工程師",
+        "mail_provider": "GMAIL",
+        "outlook_client_id": "",
+        "mail_subject_template": "【詢價】{{project_name}}－{{category}} (請於 {{deadline}} 前提供回報)",
+        "mail_body_template": "{{vendor_name}} 您好：\n\n檢附「{{project_name}}」項目詢價單如附件，煩請貴司協助針對「{{category}}」項目評估報價，並於 {{deadline}} 前提供回覆，謝謝。\n\n詳細規格請參閱附件 Excel。\n\n祝  商祺000000\n\n{{company_name}}\n{{sender_title}} {{sender_name}}\n電話：{{phone}}"
+      }
+    }
   },
   {
     "id": "5433baac",

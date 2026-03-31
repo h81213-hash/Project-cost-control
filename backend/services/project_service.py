@@ -3,6 +3,7 @@ import os
 import uuid
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from sqlalchemy import func
 from sqlalchemy.orm import Session, defer, undefer, selectinload
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -72,48 +73,55 @@ def load_projects() -> List[Dict[str, Any]]:
 
 def load_projects_summary() -> List[Dict[str, Any]]:
     """讀取專案摘要（不含 rows/analysis 等大型資料），用於專案列表頁面。
-    JSON 模式：利用快取讀取後去除 data 欄位，確保不額外 I/O。
-    DB 模式：只查詢 projects 表，不 join files 的 data 欄位。"""
+    優化：僅抓取必要欄位，並使用 func.count(ProjectFile.id) 在 DB 端計算數量。"""
     if USE_DB:
         db = SessionLocal()
         try:
-            # 關鍵優化：預設不抓取檔案的 data 內容，防止讀取專案列表時記憶體爆掉
-            projects = db.query(Project).options(
-                selectinload(Project.files).defer(ProjectFile.data)
-            ).all()
+            # 關鍵優化：使用 with_entities 只抓取必要的摘要欄位，並透過 GroupBy 計算檔案計數
+            # 此舉能避免 SQLAlchemy 抓取大型物件，並解決遠端連線下的 N+1 問題
+            query_results = db.query(Project).with_entities(
+                Project.id,
+                Project.name,
+                Project.client,
+                Project.location,
+                Project.manager,
+                Project.start_date,
+                Project.end_date,
+                Project.note,
+                Project.classification_depth,
+                Project.created_at,
+                Project.updated_at,
+                func.count(ProjectFile.id).label('file_count')
+            ).outerjoin(ProjectFile).group_by(Project.id).all()
+
             result = []
-            for p in projects:
+            for r in query_results:
                 proj_dict = {
-                    "id": p.id,
-                    "name": p.name,
-                    "client": p.client,
-                    "location": p.location,
-                    "manager": p.manager,
-                    "start_date": p.start_date,
-                    "end_date": p.end_date,
-                    "note": p.note,
-                    "classification_depth": p.classification_depth,
-                    "created_at": p.created_at.isoformat() if p.created_at else "",
-                    "updated_at": p.updated_at.isoformat() if p.updated_at else "",
-                    "files": [
-                        {"file_name": f.file_name, "uploaded_at": f.uploaded_at.isoformat() if f.uploaded_at else ""}
-                        for f in p.files
-                    ]
+                    "id": r.id,
+                    "name": r.name,
+                    "client": r.client,
+                    "location": r.location,
+                    "manager": r.manager,
+                    "start_date": r.start_date,
+                    "end_date": r.end_date,
+                    "note": r.note,
+                    "classification_depth": r.classification_depth,
+                    "created_at": r.created_at.isoformat() if r.created_at else "",
+                    "updated_at": r.updated_at.isoformat() if r.updated_at else "",
+                    # 前端僅需 files.length，故我們回傳對應長度的空陣列以節省頻寬
+                    "files": [None] * r.file_count 
                 }
                 result.append(proj_dict)
             return result
         finally:
             db.close()
     else:
-        # JSON 模式：利用現有快取，只剝除 data 欄位，不重新讀取檔案
+        # JSON 模式：利用快取讀取
         full_projects = load_projects()
         summary = []
         for p in full_projects:
             p_summary = {k: v for k, v in p.items() if k != "files"}
-            p_summary["files"] = [
-                {"file_name": f.get("file_name", ""), "uploaded_at": f.get("uploaded_at", "")}
-                for f in p.get("files", [])
-            ]
+            p_summary["files"] = [None] * len(p.get("files", []))
             summary.append(p_summary)
         return summary
 
@@ -376,11 +384,16 @@ def get_inquiry_rows(project_id: str, system_category: str, version_idx: int = -
         if cat:
             if norm_query in normalize_text(cat):
                 filtered.append(r)
-        # 2. 如果資料庫沒有分類，即時計算分類 (與 Summary 一致)
+        # 2. 如果資料庫沒有分類，即時計算分類 (並同步存入快取，避免下次計算)
         else:
             description = r.get("description", "")
             if description:
-                new_cat = classify_row(description)
+                # 檢查是否已經在本次快取生命週期中計算過
+                new_cat = r.get("_temp_system_category")
+                if not new_cat:
+                    new_cat = classify_row(description)
+                    r["_temp_system_category"] = new_cat # 存入快取對象中 (in-memory only)
+                
                 if norm_query in normalize_text(new_cat):
                     filtered.append(r)
             elif norm_query == normalize_text("未分類"):

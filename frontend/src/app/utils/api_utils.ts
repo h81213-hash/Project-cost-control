@@ -12,7 +12,7 @@ export interface SafeFetchResponse<T> {
 export async function safeFetch<T = any>(
   url: string,
   options: RequestInit = {},
-  timeoutMs: number = 10000
+  timeoutMs: number = 25000
 ): Promise<SafeFetchResponse<T>> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);

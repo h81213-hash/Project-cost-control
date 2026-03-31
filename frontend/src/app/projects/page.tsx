@@ -17,7 +17,8 @@ import {
   MapPin,
   Pencil,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Users
 } from "lucide-react";
 
 interface Project {
@@ -134,6 +135,12 @@ export default function ProjectsPage() {
             <p className="text-slate-400 font-medium ml-1">建立專案後即可上傳標單進行智慧解析</p>
           </div>
           <div className="flex gap-4">
+            <button 
+                onClick={() => router.push("/vendors")}
+                className="bg-white/70 backdrop-blur-3xl text-slate-600 px-6 py-3 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+            >
+                <Users size={18} className="text-blue-500" /> 供應商管理
+            </button>
             <button
                 onClick={() => router.push("/projects/settings")}
                 className="bg-white/70 backdrop-blur-3xl text-slate-600 px-6 py-3 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"

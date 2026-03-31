@@ -34,7 +34,9 @@ import {
   Mail,
   UserCheck,
   MapPinned,
-  Clock
+  Clock,
+  Tag,
+  User
 } from "lucide-react";
 
 interface InquiryTemplate {
@@ -47,6 +49,13 @@ interface InquiryTemplate {
   project_name: string;
   project_location: string;
   deadline: string;
+  delivery_requirement?: string;
+  sender_name?: string;
+  sender_title?: string;
+  mail_provider?: "GMAIL" | "OUTLOOK";
+  outlook_client_id?: string;
+  mail_subject_template?: string;
+  mail_body_template?: string;
 }
 
 interface ProjectDetail {
@@ -78,6 +87,19 @@ export const formatQuantity = (val: any) => {
   return Math.round(parsed).toString();
 };
 
+/**
+ * 渲染模板工具
+ */
+export const renderTemplate = (template: string, context: Record<string, string>) => {
+  if (!template) return "";
+  let rendered = template;
+  Object.entries(context).forEach(([key, value]) => {
+    const placeholder = new RegExp(`{{${key}}}`, 'g');
+    rendered = rendered.replace(placeholder, value || "");
+  });
+  return rendered;
+};
+
 function InquiryTemplateModal({ 
   isOpen, 
   onClose, 
@@ -98,8 +120,27 @@ function InquiryTemplateModal({
     contact_person: initialData?.contact_person || "楊尚嬑 小姐  分機:609",
     project_name: initialData?.project_name || "",
     project_location: initialData?.project_location || "",
-    deadline: initialData?.deadline || ""
+    deadline: initialData?.deadline || "",
+    delivery_requirement: initialData?.delivery_requirement || "",
+    sender_name: initialData?.sender_name || "Wanlin",
+    sender_title: initialData?.sender_title || "採購工程師",
+    mail_provider: initialData?.mail_provider || "GMAIL",
+    outlook_client_id: initialData?.outlook_client_id || "",
+    mail_subject_template: initialData?.mail_subject_template || "【詢價】{{project_name}}－{{category}} (請於 {{deadline}} 前提供回報)",
+    mail_body_template: initialData?.mail_body_template || "{{vendor_name}} 您好：\n\n檢附「{{project_name}}」項目詢價單如附件，煩請貴司協助針對「{{category}}」項目評估報價，並於 {{deadline}} 前提供回覆，謝謝。\n\n詳細規格請參閱附件 Excel。\n\n祝  商祺\n\n{{company_name}}\n{{sender_title}} {{sender_name}}\n電話：{{phone}}"
   });
+
+  const [lastFocusedField, setLastFocusedField] = useState<'subject' | 'body'>('body');
+
+  // 插入變數輔助
+  const insertTag = (tag: string) => {
+    const placeholder = `{{${tag}}}`;
+    if (lastFocusedField === 'subject') {
+      setData(prev => ({ ...prev, mail_subject_template: (prev.mail_subject_template || "") + placeholder }));
+    } else {
+      setData(prev => ({ ...prev, mail_body_template: (prev.mail_body_template || "") + placeholder }));
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -109,7 +150,7 @@ function InquiryTemplateModal({
         <div className="p-8 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-              <SettingsIcon className="text-blue-500" /> 詢價單模板設定
+              <SettingsIcon className="text-blue-500" /> Mail模板設定
             </h3>
             <p className="text-slate-400 text-sm mt-1">設定匯出 Excel 時顯示的頁首與聯絡資訊</p>
           </div>
@@ -213,17 +254,160 @@ function InquiryTemplateModal({
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">報價回傳截止日</label>
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">報價截止日</label>
               <div className="relative">
                 <input 
                   type="text" 
-                  placeholder="例如: 2023年12月25日"
+                  placeholder="例如: 2026/04/05"
                   value={data.deadline}
                   onChange={e => setData({...data, deadline: e.target.value})}
                   className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                 />
                 <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">寄件人姓名 (Email用)</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={data.sender_name}
+                  onChange={e => setData({...data, sender_name: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">寄件人職稱 (Email用)</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={data.sender_title}
+                  onChange={e => setData({...data, sender_title: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                />
+                <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">交期需求 (預計進場時間)</label>
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="例如: 2026年5月中旬"
+                value={data.delivery_requirement}
+                onChange={e => setData({...data, delivery_requirement: e.target.value})}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+              />
+              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Email 客製化區域 */}
+          <div className="pt-6 border-t border-slate-100 space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                <Mail size={16} /> 郵件內容自定義
+              </h4>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                正在編輯：{lastFocusedField === 'subject' ? '【主旨】' : '【內文】'}
+              </span>
+            </div>
+
+            <div className="bg-blue-50/30 p-4 rounded-2xl flex flex-wrap gap-2">
+              {[
+                { label: "專案名稱", key: "project_name" },
+                { label: "分類", key: "category" },
+                { label: "截止日", key: "deadline" },
+                { label: "供應商", key: "vendor_name" },
+                { label: "發送者", key: "sender_name" },
+                { label: "公司", key: "company_name" },
+                { label: "電話", key: "phone" },
+              ].map(tag => (
+                <button 
+                  key={tag.key}
+                  type="button"
+                  onClick={() => insertTag(tag.key)}
+                  className="bg-white border border-blue-100 text-[11px] font-bold text-blue-600 px-3 py-1.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
+                >
+                  + {tag.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">郵件主旨模板</label>
+                <input 
+                  type="text"
+                  onFocus={() => setLastFocusedField('subject')}
+                  value={data.mail_subject_template}
+                  onChange={e => setData({...data, mail_subject_template: e.target.value})}
+                  className={`w-full px-4 py-3 bg-slate-50 border rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all ${lastFocusedField === 'subject' ? 'border-blue-400 ring-2 ring-blue-500/5' : 'border-slate-100'}`}
+                  placeholder="輸入主旨模板，可用 {{variable}}"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">郵件內文模板</label>
+                <textarea 
+                  rows={8}
+                  onFocus={() => setLastFocusedField('body')}
+                  value={data.mail_body_template}
+                  onChange={e => setData({...data, mail_body_template: e.target.value})}
+                  className={`w-full px-4 py-3 bg-slate-50 border rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all text-sm leading-relaxed ${lastFocusedField === 'body' ? 'border-blue-400 ring-2 ring-blue-500/5' : 'border-slate-100'}`}
+                  placeholder="輸入內文模板，可用 {{variable}}"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <h4 className="text-sm font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+              <Zap size={16} /> 自動草稿服務設定 (God-Mode)
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">選擇郵件服務</label>
+                <select 
+                  value={data.mail_provider}
+                  onChange={e => setData({...data, mail_provider: e.target.value as any})}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all appearance-none"
+                >
+                  <option value="GMAIL">Google Gmail (OAuth2)</option>
+                  <option value="OUTLOOK">Microsoft Outlook (MS Graph)</option>
+                </select>
+              </div>
+
+              {data.mail_provider === "OUTLOOK" && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Outlook Client ID</label>
+                  <input 
+                    type="text" 
+                    placeholder="輸入 Azure 應用程式編號"
+                    value={data.outlook_client_id}
+                    onChange={e => setData({...data, outlook_client_id: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
+              <p className="text-[11px] text-blue-600 leading-relaxed font-medium">
+                {data.mail_provider === "GMAIL" ? (
+                  <>💡 <b>Gmail 提醒：</b>請確保 <code>backend/secrets/credentials.json</code> 已備妥。第一次執行時，伺服器終端機會跳出網頁請您登入授權。</>
+                ) : (
+                  <>💡 <b>Outlook 提醒：</b>請填入 Azure 的 Client ID。執行時，伺服器終端機會提供裝置代碼 (Device Code) 供您驗證。</>
+                )}
+              </p>
             </div>
           </div>
 
@@ -678,6 +862,37 @@ export default function ProjectDetailPage() {
   const [isReclassifying, setIsReclassifying] = useState(false);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   
+  // 智慧廠商媒合狀態
+  const [selectedInquiryIndices, setSelectedInquiryIndices] = useState<number[]>([]);
+  const [selectedInquiryRow, setSelectedInquiryRow] = useState<any | null>(null);
+  const [matchedVendors, setMatchedVendors] = useState<any[]>([]);
+  const [isMatchingVendors, setIsMatchingVendors] = useState(false);
+  const [selectedVendorForExport, setSelectedVendorForExport] = useState<any | null>(null);
+
+  // 當選擇項目時，自動媒合廠商
+  useEffect(() => {
+    if (selectedInquiryRow) {
+      const matchSuppliers = async () => {
+        setIsMatchingVendors(true);
+        try {
+          const desc = encodeURIComponent(selectedInquiryRow.description || "");
+          const note = encodeURIComponent(selectedInquiryRow.remark || selectedInquiryRow.note || "");
+          const cat = encodeURIComponent(activeInquiryCategory || "");
+          const res = await fetch(`${API_BASE_URL}/match_vendors?description=${desc}&note=${note}&category=${cat}`);
+          const data = await res.json();
+          setMatchedVendors(data || []);
+        } catch (e) {
+          console.error("媒合失敗", e);
+        } finally {
+          setIsMatchingVendors(false);
+        }
+      };
+      matchSuppliers();
+    } else {
+      setMatchedVendors([]);
+    }
+  }, [selectedInquiryRow, activeInquiryCategory]);
+  
   // 當選中詢價類別或版本變更時，從後端抓取該類別的所有項目
   useEffect(() => {
     if (activeInquiryCategory && projectId) {
@@ -696,8 +911,10 @@ export default function ProjectDetailPage() {
       };
       fetchItems();
       setInquiryEdits({}); 
+      setSelectedInquiryIndices([]);
     } else {
       setCategoryItems([]);
+      setSelectedInquiryIndices([]);
     }
   }, [activeInquiryCategory, projectId, baseVersionIdx]);
 
@@ -1225,10 +1442,105 @@ export default function ProjectDetailPage() {
     }
   };
 
-  const handleInquiryExport = () => {
+  const handleInquiryExport = (vendorName?: string, vendorPhone?: string, vendorFax?: string) => {
+    if (!project || !activeInquiryCategory || selectedInquiryIndices.length === 0) {
+       alert("請先在列表中勾選要詢價的項目！");
+       return;
+    }
+
+    // 優先使用參數，若無則使用選取的廠商
+    const name = vendorName || selectedVendorForExport?.name;
+    const phone = vendorPhone || selectedVendorForExport?.phone;
+    const fax = vendorFax || selectedVendorForExport?.fax;
+    
+    let url = `${API_BASE_URL}/projects/${projectId}/inquiry_export?category=${encodeURIComponent(activeInquiryCategory)}&version_idx=${baseVersionIdx}&row_indices=${selectedInquiryIndices.join(",")}`;
+    if (name) url += `&vendor_name=${encodeURIComponent(name)}`;
+    if (phone) url += `&vendor_phone=${encodeURIComponent(phone)}`;
+    if (fax) url += `&vendor_fax=${encodeURIComponent(fax)}`;
+    
+    // 改用 window.open 以確保在 Chrome 中有明顯的下載行為
+    window.open(url, '_blank');
+  };
+
+  const sendInquiryEmail = async (vendor: any) => {
     if (!project || !activeInquiryCategory) return;
-    const url = `${API_BASE_URL}/projects/${projectId}/inquiry_export?category=${encodeURIComponent(activeInquiryCategory)}`;
-    window.location.href = url;
+    
+    const tpl: any = project.report_config?.inquiry_template || {
+      company_name: "聖暉工程科技股份有限公司",
+      phone: "02-2655-8067",
+      sender_name: "Wanlin",
+      mail_provider: "GMAIL"
+    };
+
+    const projectName = project.name || "";
+    const category = activeInquiryCategory || "";
+    const deadline = tpl.deadline || "指定日期";
+
+    const context = {
+      project_name: projectName,
+      project_location: project.location || "",
+      category: category,
+      deadline: deadline,
+      vendor_name: vendor.name,
+      company_name: tpl.company_name,
+      sender_name: tpl.sender_name || "",
+      sender_title: tpl.sender_title || "",
+      phone: tpl.phone || ""
+    };
+
+    const defaultSubject = `【詢價】${projectName}－${category} (請於 ${deadline} 前提供回報)`;
+    const defaultBody = `${vendor.name} 您好：\n\n檢附「${projectName}」項目詢價單如附件，煩請貴司協助針對「${category}」項目評估報價，並於 ${deadline} 前提供回覆，謝謝。\n\n詳細規格請參閱附件 Excel。\n\n祝  商祺\n\n${tpl.company_name}\n${tpl.sender_title || ""} ${tpl.sender_name || ""}\n電話：${tpl.phone}`;
+
+    let subject = tpl.mail_subject_template ? renderTemplate(tpl.mail_subject_template, context) : defaultSubject;
+    let body = tpl.mail_body_template ? renderTemplate(tpl.mail_body_template, context) : defaultBody;
+
+    // 處理 Body 的換行符號轉為 %0D%0A 以利後續處理
+    body = body.replace(/\n/g, '%0D%0A');
+
+    // --- 新增：呼叫後端 API 建立草稿 ---
+    setLoading(true);
+    try {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/inquiry_draft`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vendor: vendor,
+          category: category,
+          version_idx: baseVersionIdx,
+          row_indices: selectedInquiryIndices.join(","),
+          provider: tpl.mail_provider || "GMAIL",
+          subject: subject,
+          body: body
+        })
+      });
+
+      if (ok && data?.status === "success") {
+        alert(`🎉 神級自動化成功！\n已在您的 ${tpl.mail_provider} 草稿夾中建立電子郵件，並已自動夾帶 Excel 詢價單附件。`);
+      } else {
+        // 錯誤處理：如果是權限問題，或是找不到 credentials
+        if (data?.message?.includes("FileNotFoundError")) {
+          alert("錯誤：後端找不到 credentials.json。請將下載的金鑰放置於 backend/secrets/ 資料夾下。");
+        } else {
+          alert("建立草稿失敗: " + (data?.message || error || "未知錯誤"));
+          
+          // 回退機制：如果 API 失敗，至少讓使用者可以用 mailto
+          console.log("正在啟用回退機制 (mailto)...");
+          const mailtoUri = `mailto:${vendor.email || ""}?subject=${encodeURIComponent(subject)}&body=${body}`;
+          window.location.href = mailtoUri;
+          
+          // 同步嘗試寫入剪貼簿
+          const plainBody = body.replace(/%0D%0A/g, '\n');
+          navigator.clipboard.writeText(plainBody).catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.error("Draft API failed", err);
+      alert("連線後端建立草稿失敗，已自動開啟本地郵件程式作為備案。");
+      const mailtoUri = `mailto:${vendor.email || ""}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      window.location.href = mailtoUri;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteVersion = async (index: number) => {
@@ -2156,12 +2468,16 @@ export default function ProjectDetailPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="text-[10px] text-slate-400 italic font-medium text-right leading-tight hidden md:block">
-                      僅重新分析自動分類項<br/>保留手動分類結果
-                    </div>
+                    <button 
+                       onClick={() => setTemplateModalOpen(true)}
+                       className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-2xl text-[13px] font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+                    >
+                       <SettingsIcon size={16} className="text-slate-400" /> Mail模板設定
+                    </button>
                     <button
                       onClick={handleReclassify}
                       disabled={isReclassifying}
+                      title="僅重新分析『自動分類』的項目，您手動修改過的分類將會被保留。"
                       className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-[13px] font-bold text-slate-700 hover:bg-slate-50 hover:border-blue-200 transition-all shadow-sm active:scale-95 disabled:opacity-50 group"
                     >
                       {isReclassifying ? <RotateCcw size={16} className="animate-spin text-blue-500" /> : <RotateCcw size={16} className="text-blue-500 group-hover:rotate-180 transition-transform duration-500" />}
@@ -2265,6 +2581,21 @@ export default function ProjectDetailPage() {
                   <table className="w-full text-sm text-left">
                     <thead className="bg-slate-50/50 text-[10px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100/50">
                       <tr>
+                        <th className="px-6 py-4 w-10 text-center">
+                          <input 
+                            type="checkbox" 
+                            checked={categoryItems.length > 0 && selectedInquiryIndices.length === categoryItems.length}
+                            onChange={(e) => {
+                               if (e.target.checked) {
+                                  const allIndices = categoryItems.map((r: any, idx: number) => r._original_index !== undefined ? r._original_index : idx);
+                                  setSelectedInquiryIndices(allIndices);
+                               } else {
+                                  setSelectedInquiryIndices([]);
+                               }
+                            }}
+                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                          />
+                        </th>
                         <th className="px-6 py-4 w-14">項次</th>
                         <th className="px-6 py-4 min-w-[200px]">項目名稱 (Description)</th>
                         <th className="px-6 py-4 min-w-[150px]">備註</th>
@@ -2309,9 +2640,41 @@ export default function ProjectDetailPage() {
                               const internalCost = totalPrice * discountRate;
                               
                               return (
-                                <tr key={i} className={`hover:bg-blue-50/30 transition-colors border-b border-slate-50 last:border-0 ${currentEdit ? 'bg-amber-50/20' : ''}`}>
+                                <tr 
+                                  key={i} 
+                                  onClick={(e) => {
+                                     // 防止點擊 Checkbox 時觸發 Row Click (會開啟側邊欄)
+                                     if ((e.target as HTMLElement).tagName === 'INPUT') return;
+                                     setSelectedInquiryRow(row);
+                                  }}
+                                  className={`hover:bg-blue-50/30 transition-all border-b border-slate-50 cursor-pointer relative group ${selectedInquiryRow?.description === row.description && selectedInquiryRow?.item_no === row.item_no ? 'bg-blue-50/50 ring-1 ring-blue-500/20 z-10' : ''} ${currentEdit ? 'bg-amber-50/20' : ''}`}
+                                >
+                                  <td className="px-6 py-4 text-center w-10">
+                                     <input 
+                                       type="checkbox" 
+                                       checked={selectedInquiryIndices.includes(row._original_index !== undefined ? row._original_index : i)}
+                                       onChange={(e) => {
+                                          const idx = row._original_index !== undefined ? row._original_index : i;
+                                          if (e.target.checked) {
+                                             setSelectedInquiryIndices([...selectedInquiryIndices, idx]);
+                                          } else {
+                                             setSelectedInquiryIndices(selectedInquiryIndices.filter(x => x !== idx));
+                                          }
+                                       }}
+                                       className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                     />
+                                  </td>
                                   <td className="px-6 py-4 font-mono text-slate-400 w-14 whitespace-nowrap">{row.item_no || "-"}</td>
-                                  <td className="px-6 py-4 font-bold text-slate-800 min-w-[200px] whitespace-normal break-words leading-relaxed">{row.description}</td>
+                                  <td className="px-6 py-4 font-bold text-slate-800 min-w-[200px] whitespace-normal break-words leading-relaxed">
+                                    <div className="flex flex-col py-0.5">
+                                      {row.parent_section && (
+                                        <span className="text-[10px] text-slate-500 font-medium tracking-wider mb-1 bg-slate-50 w-fit px-1.5 py-0.5 rounded-sm border border-slate-100 truncate max-w-[280px]" title={row.parent_section}>
+                                          {row.parent_section}
+                                        </span>
+                                      )}
+                                      <span className="leading-tight">{row.description}</span>
+                                    </div>
+                                  </td>
                                   <td className="px-6 py-4 text-[12px] text-slate-500 min-w-[150px] whitespace-normal italic">{row.remark || row.note || row.specification || "-"}</td>
                                   <td className="px-6 py-4 text-center w-16 text-slate-500">{row.unit}</td>
                                   <td className="px-6 py-4 text-right font-black w-20">{formatQuantity(row.quantity)}</td>
@@ -2383,15 +2746,183 @@ export default function ProjectDetailPage() {
                     onClick={() => setTemplateModalOpen(true)}
                     className="px-6 py-3 rounded-full font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center gap-2"
                   >
-                    <SettingsIcon size={18} /> 模板設定
+                    <SettingsIcon size={18} /> Mail模板設定
                   </button>
                   <button 
-                    onClick={handleInquiryExport}
+                    onClick={() => handleInquiryExport()}
                     className="px-10 py-4 bg-slate-900 text-white rounded-full font-semibold shadow-xl shadow-slate-200 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                   >
                     <FileSpreadsheet size={20} /> 產出詢價單
                   </button>
                 </div>
+
+                {/* 智慧詢價側邊助理 (Supplier Sidebar Drawer) */}
+                {selectedInquiryRow && (
+                  <div className="fixed inset-y-0 right-0 w-[400px] bg-white/95 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] border-l border-slate-100 z-[60] flex flex-col animate-in slide-in-from-right duration-500">
+                    <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                       <div>
+                         <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                           <Zap size={20} className="text-amber-500 fill-amber-500" /> 智慧詢價助理
+                         </h3>
+                         <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">選中項目：{selectedInquiryRow.item_no || "無編號"}</p>
+                       </div>
+                       <button 
+                        onClick={() => setSelectedInquiryRow(null)}
+                        className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all"
+                       >
+                         <X size={20} />
+                       </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                       {/* 選中項目摘要 */}
+                       <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-xl">
+                          <span className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-2">Item Description</span>
+                          <p className="text-sm font-bold leading-relaxed">{selectedInquiryRow.description}</p>
+                          {selectedInquiryRow.remark && (
+                            <div className="mt-4 pt-4 border-t border-white/10 flex items-start gap-2">
+                               <Tag size={12} className="text-blue-400 mt-0.5" />
+                               <span className="text-xs text-white/60 italic">{selectedInquiryRow.remark}</span>
+                            </div>
+                          )}
+                       </div>
+
+                       {/* 媒合建議列表 */}
+                       <div className="space-y-4">
+                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center justify-between">
+                            建議供應商 (按相關性排序)
+                            <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[9px]">{matchedVendors.length} Found</span>
+                          </h4>
+
+                          {isMatchingVendors ? (
+                            <div className="space-y-4 py-4">
+                               {[...Array(3)].map((_, i) => (
+                                 <div key={i} className="h-24 bg-slate-50 rounded-3xl animate-pulse"></div>
+                               ))}
+                            </div>
+                          ) : matchedVendors.length > 0 ? (
+                            <div className="space-y-3">
+                               {matchedVendors.map((vendor, vidx) => (
+                                 <div 
+                                    key={vendor.id} 
+                                    onClick={() => {
+                                      if (selectedVendorForExport?.id === vendor.id) setSelectedVendorForExport(null);
+                                      else setSelectedVendorForExport(vendor);
+                                    }}
+                                    className={`group p-5 rounded-3xl border-2 transition-all animate-in slide-in-from-bottom-2 cursor-pointer ${
+                                      selectedVendorForExport?.id === vendor.id 
+                                        ? 'bg-blue-50/50 border-blue-500 shadow-lg shadow-blue-500/10' 
+                                        : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-md'
+                                    }`}
+                                    style={{ animationDelay: `${vidx * 50}ms` }}
+                                 >
+                                    <div className="flex justify-between items-start mb-4">
+                                       <div className="flex items-center gap-3">
+                                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all ${
+                                            selectedVendorForExport?.id === vendor.id ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600'
+                                          }`}>
+                                             {vendor.name[0]}
+                                          </div>
+                                          <div>
+                                             <div className="font-bold text-slate-800 text-sm">{vendor.name}</div>
+                                             <div className="flex items-center gap-2 mt-1">
+                                                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${vendor.match_score > 70 ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                                  MATCH {vendor.match_score}%
+                                                </span>
+                                             </div>
+                                          </div>
+                                       </div>
+                                       <div className="flex gap-2" onClick={e => e.stopPropagation()}>
+                                          <div className="relative group">
+                                             <button 
+                                               onClick={() => sendInquiryEmail(vendor)}
+                                               className="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                             >
+                                                <Mail size={16} />
+                                             </button>
+                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl">
+                                                生成詢價郵件草稿
+                                             </div>
+                                          </div>
+                                          <div className="relative group">
+                                             <button 
+                                               onClick={() => handleInquiryExport(vendor.name, vendor.phone, vendor.fax)}
+                                               className="p-2.5 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                                             >
+                                                <FileSpreadsheet size={16} />
+                                             </button>
+                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-all pointer-events-none whitespace-nowrap z-[100] shadow-xl">
+                                                匯出此廠商專用 Excel
+                                             </div>
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 py-3 border-t border-slate-50 mt-2">
+                                       {vendor.phone && (
+                                         <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                                            <Phone size={10} /> {vendor.phone}
+                                         </div>
+                                       )}
+                                       {vendor.contact && (
+                                         <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium ml-auto">
+                                            <User size={10} /> {vendor.contact}
+                                         </div>
+                                       )}
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
+                          ) : (
+                            <div className="py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                               <Search size={32} className="text-slate-200 mx-auto mb-3" />
+                               <p className="text-slate-400 text-xs font-medium">尚未找到匹配標籤的廠商</p>
+                               <button 
+                                onClick={() => router.push("/vendors")}
+                                className="text-blue-600 text-[11px] font-bold mt-2 hover:underline"
+                               >前往廠商管理新增標籤</button>
+                            </div>
+                          )}
+                       </div>
+                    </div>
+
+                    <div className="p-8 border-t border-slate-100 bg-slate-50/50 space-y-3">
+                       {selectedInquiryIndices.length > 0 ? (
+                         <div className="bg-blue-600/10 p-3 rounded-xl border border-blue-600/20 mb-4 flex items-center gap-2">
+                            <Check size={14} className="text-blue-600" />
+                            <span className="text-[10px] font-bold text-blue-700">已選取 {selectedInquiryIndices.length} 個項目</span>
+                         </div>
+                       ) : (
+                         <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 mb-4 flex items-center gap-2">
+                            <AlertCircle size={14} className="text-amber-500" />
+                            <span className="text-[10px] font-medium text-amber-700">請在左側勾選項目以啟用專屬詢價單</span>
+                         </div>
+                       )}
+                       <button 
+                         onClick={() => {
+                            if (selectedInquiryIndices.length === 0) {
+                               alert("請先勾選要詢價的項目！");
+                               return;
+                            }
+                             const firstVendor = matchedVendors[0];
+                             if (firstVendor) {
+                               sendInquiryEmail(firstVendor);
+                             } else {
+                               handleInquiryExport();
+                             }
+                         }}
+                         disabled={selectedInquiryIndices.length === 0}
+                         className={`w-full py-4 rounded-2xl font-black shadow-xl transition-all text-sm flex items-center justify-center gap-2 ${
+                            selectedInquiryIndices.length > 0 
+                               ? "bg-[#007AFF] text-white hover:scale-[1.02] active:scale-95 cursor-pointer shadow-blue-500/25" 
+                               : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                         }`}
+                       >
+                          <Zap size={18} />
+                          一鍵生成詢價郵件 + Excel
+                       </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -1,3 +1,17 @@
+# Environments
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Secrets & Authentication
+credentials.json
+token.json
+*.pickle
+secrets/
+backend/secrets/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -5,16 +19,13 @@ __pycache__/
 backend/.env
 backend/*.json
 !backend/requirements.txt
+!backend/report_config.json # If this is a template (adjust if it contains sensitive data)
 
 # Node
 node_modules/
 frontend/.next/
 frontend/out/
 frontend/build/
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
 
 # OS
 .DS_Store
@@ -23,3 +34,6 @@ Thumbs.db
 # Database
 *.db
 *.sqlite
+data/*.json
+!data/categories.json
+!data/vendors.json
