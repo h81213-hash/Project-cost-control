@@ -47,26 +47,48 @@ class GmailProvider(MailProvider):
         self.service = None
 
     def authenticate(self):
-        if os.path.exists(self.token_path):
+        # 1. 嘗試從環境變數讀取 Token (優先，因為不需要互動)
+        env_token_json = os.getenv("GMAIL_TOKEN_JSON")
+        if env_token_json:
+            try:
+                from google.oauth2.credentials import Credentials
+                token_data = json.loads(env_token_json)
+                self.creds = Credentials.from_authorized_user_info(token_data, self.SCOPES)
+                print("Authenticated Gmail using GMAIL_TOKEN_JSON.")
+            except Exception as e:
+                print(f"Failed to load GMAIL_TOKEN_JSON: {e}")
+
+        # 2. 如果環境變數沒有，嘗試從本地檔案讀取 (本地開發模式)
+        if (not self.creds or not self.creds.valid) and os.path.exists(self.token_path):
             with open(self.token_path, 'rb') as token:
                 self.creds = pickle.load(token)
+                print("Authenticated Gmail using local token.pickle.")
         
-        # If there are no (valid) credentials available, let the user log in.
+        # 3. 處理過期自動重新整理
+        if self.creds and self.creds.expired and self.creds.refresh_token:
+            self.creds.refresh(Request())
+        
+        # 4. 如果還是沒有有效憑證 (首次登入或環境變數皆無)
         if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                if not os.path.exists(self.creds_path):
-                    raise FileNotFoundError(f"Missing Gmail credentials! Please place 'credentials.json' in {self.secrets_dir}")
-                
+            # 優先嘗試環境變數中的憑證定義
+            env_creds_json = os.getenv("GMAIL_CREDENTIALS_JSON")
+            if env_creds_json:
+                creds_info = json.loads(env_creds_json)
+                flow = InstalledAppFlow.from_client_config(creds_info, self.SCOPES)
+            elif os.path.exists(self.creds_path):
                 flow = InstalledAppFlow.from_client_secrets_file(self.creds_path, self.SCOPES)
-                # Note: In a real server, we might need a fixed port or handle redirect.
-                # For local dev, this will open a browser.
-                self.creds = flow.run_local_server(port=0)
+            else:
+                raise FileNotFoundError(f"Missing Gmail credentials! (Neither 'GMAIL_CREDENTIALS_JSON' env nor 'credentials.json' file found in {self.secrets_dir})")
             
-            # Save the credentials for the next run
-            with open(self.token_path, 'wb') as token:
-                pickle.dump(self.creds, token)
+            # 生產環境不建議使用 run_local_server，但在本地可保留
+            # 注意：Render 環境下此行會噴錯，除非已設定 GMAIL_TOKEN_JSON
+            self.creds = flow.run_local_server(port=0)
+            
+            # 自動儲存到本地 (本地開發環境)
+            if not os.getenv("RENDER"):
+                os.makedirs(self.secrets_dir, exist_ok=True)
+                with open(self.token_path, 'wb') as token:
+                    pickle.dump(self.creds, token)
 
         self.service = build('gmail', 'v1', credentials=self.creds)
 
