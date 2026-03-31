@@ -45,32 +45,56 @@ class GmailProvider(MailProvider):
         self.token_path = os.path.join(secrets_dir, 'token.pickle')
         self.creds = None
         self.service = None
+        
+        # App Password setup
+        self.user = os.getenv("GMAIL_USER")
+        self.app_password = os.getenv("GMAIL_APP_PASSWORD")
+        if self.app_password:
+            # 移除空格 (Google 給予時常有空格，但協議不需要)
+            self.app_password = self.app_password.replace(" ", "").replace("\n", "").strip()
+        
+        self.use_app_password = bool(self.user and self.app_password)
 
     def authenticate(self):
-        # 1. 嘗試從環境變數讀取 Token (優先，因為不需要互動)
+        # 如果是 App Password 模式，不需要 OAuth2 認證
+        if self.use_app_password:
+            print(f"[Auth] Using App Password mode for {self.user}")
+            return
+
+        # 1. 嘗試從環境變數讀取 Token
         env_token_json = os.getenv("GMAIL_TOKEN_JSON")
         if env_token_json:
             try:
                 from google.oauth2.credentials import Credentials
                 token_data = json.loads(env_token_json)
                 self.creds = Credentials.from_authorized_user_info(token_data, self.SCOPES)
-                print("Authenticated Gmail using GMAIL_TOKEN_JSON.")
+                print(f"[Auth] Loaded GMAIL_TOKEN_JSON for account: {token_data.get('account')}")
             except Exception as e:
-                print(f"Failed to load GMAIL_TOKEN_JSON: {e}")
+                print(f"[Auth] Failed to parse GMAIL_TOKEN_JSON: {e}")
 
-        # 2. 如果環境變數沒有，嘗試從本地檔案讀取 (本地開發模式)
+        # 2. 如果環境變數沒有，嘗試從本地檔案讀取
         if (not self.creds or not self.creds.valid) and os.path.exists(self.token_path):
-            with open(self.token_path, 'rb') as token:
-                self.creds = pickle.load(token)
-                print("Authenticated Gmail using local token.pickle.")
+            try:
+                with open(self.token_path, 'rb') as token:
+                    self.creds = pickle.load(token)
+                    print("[Auth] Loaded local token.pickle.")
+            except Exception as e:
+                print(f"[Auth] Failed to load local token.pickle: {e}")
         
-        # 3. 處理過期自動重新整理
+        # 3. 處理過期自動重新整理 (加固防禦機制)
         if self.creds and self.creds.expired and self.creds.refresh_token:
-            self.creds.refresh(Request())
+            try:
+                print("[Auth] Token expired, attempting to refresh...")
+                self.creds.refresh(Request())
+                print("[Auth] Token refreshed successfully.")
+            except Exception as e:
+                print(f"[Auth] Refresh failed ({e}), but proceeding with existing token if possible.")
+                # 如果更新失敗但 Token 同時存在，我們不要直接崩潰，嘗試強行使用
+                if not self.creds.token:
+                    raise e
         
-        # 4. 如果還是沒有有效憑證 (首次登入或環境變數皆無)
+        # 4. 如果還是沒有有效憑證 (最後防線)
         if not self.creds or not self.creds.valid:
-            # 優先嘗試環境變數中的憑證定義
             env_creds_json = os.getenv("GMAIL_CREDENTIALS_JSON")
             if env_creds_json:
                 creds_info = json.loads(env_creds_json)
@@ -78,21 +102,30 @@ class GmailProvider(MailProvider):
             elif os.path.exists(self.creds_path):
                 flow = InstalledAppFlow.from_client_secrets_file(self.creds_path, self.SCOPES)
             else:
-                raise FileNotFoundError(f"Missing Gmail credentials! (Neither 'GMAIL_CREDENTIALS_JSON' env nor 'credentials.json' file found in {self.secrets_dir})")
+                # 如果連 App Password 都沒有且 OAuth 資料也不足，才報錯
+                if not self.use_app_password:
+                    raise FileNotFoundError(f"Missing Gmail credentials! (GMAIL_CREDENTIALS_JSON env/file not found)")
             
-            # 生產環境不建議使用 run_local_server，但在本地可保留
-            # 注意：Render 環境下此行會噴錯，除非已設定 GMAIL_TOKEN_JSON
-            self.creds = flow.run_local_server(port=0)
-            
-            # 自動儲存到本地 (本地開發環境)
-            if not os.getenv("RENDER"):
-                os.makedirs(self.secrets_dir, exist_ok=True)
-                with open(self.token_path, 'wb') as token:
-                    pickle.dump(self.creds, token)
+            # 生產環境下直接報錯引導使用者更新環境變數
+            if not self.use_app_password:
+                if os.getenv("RENDER") or os.getenv("NETLIFY"):
+                     raise Exception("Gmail Token is invalid/expired on server. Please use App Password or update GMAIL_TOKEN_JSON from local environment.")
+                
+                self.creds = flow.run_local_server(port=0)
+                
+                if not os.getenv("RENDER"):
+                    os.makedirs(self.secrets_dir, exist_ok=True)
+                    with open(self.token_path, 'wb') as token:
+                        pickle.dump(self.creds, token)
 
-        self.service = build('gmail', 'v1', credentials=self.creds)
+        if self.creds:
+            self.service = build('gmail', 'v1', credentials=self.creds, cache_discovery=False)
 
     def create_draft_with_attachment(self, to: str, subject: str, body: str, file_content: bytes, file_name: str) -> str:
+        # 如果是 App Password 模式，使用 IMAP 建立草稿
+        if self.use_app_password:
+            return self._create_draft_via_imap(to, subject, body, file_content, file_name)
+
         if not self.service:
             self.authenticate()
 
@@ -108,7 +141,6 @@ class GmailProvider(MailProvider):
         part = MIMEBase('application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         part.set_payload(file_content)
         encoders.encode_base64(part)
-        # 使用 library 內建方式設定參數，會自動處理非 ASCII 檔名編碼 (RFC 2231)
         part.add_header('Content-Disposition', 'attachment', filename=file_name)
         message.attach(part)
 
@@ -120,6 +152,54 @@ class GmailProvider(MailProvider):
         ).execute()
         
         return draft['id']
+
+    def _create_draft_via_imap(self, to: str, subject: str, body: str, file_content: bytes, file_name: str) -> str:
+        import imaplib
+        import time
+        from email import encoders
+        
+        print(f"[IMAP] Connecting to imap.gmail.com for {self.user}...")
+        
+        message = MIMEMultipart()
+        message['To'] = to
+        message['From'] = self.user
+        message['Subject'] = subject
+        display_body = body.replace('%0D%0A', '\n')
+        message.attach(MIMEText(display_body, 'plain', 'utf-8'))
+
+        part = MIMEBase('application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        part.set_payload(file_content)
+        encoders.encode_base64(part)
+        part.add_header('Content-Disposition', 'attachment', filename=file_name)
+        message.attach(part)
+
+        try:
+            # 1. 連線與登入
+            # 使用 SSL 安全連線到 Gmail IMAP
+            mail = imaplib.IMAP4_SSL("imap.gmail.com")
+            mail.login(self.user, self.app_password)
+            
+            # 2. 確定草稿夾名稱 (Gmail 預設通常是 "[Gmail]/Drafts" 或 "[Gmail]/草稿")
+            drafts_folder = "[Gmail]/Drafts"
+            status, folders = mail.list()
+            if status == 'OK':
+                for f in folders:
+                    folder_name = f.decode()
+                    # 智慧判斷：搜尋包含「草稿」或「Drafts」字樣的資料夾
+                    if '"\u8349\u7a3f"' in folder_name or "Drafts" in folder_name: 
+                        drafts_folder = folder_name.split(' "/" ')[-1].strip('"')
+                        break
+
+            # 3. 追加訊息到草稿夾
+            print(f"[IMAP] Appending draft to {drafts_folder}...")
+            # 第二個參數 "" 代表標記（Flags），我們保持空白
+            mail.append(drafts_folder, "", imaplib.Time2Internaldate(time.time()), message.as_bytes())
+            mail.logout()
+            print("[IMAP] Draft created successfully via IMAP!")
+            return "imap_draft_success"
+        except Exception as e:
+            print(f"[IMAP] Error: {e}")
+            raise Exception(f"Failed to create draft via IMAP: {e}")
 
 class OutlookProvider(MailProvider):
     # MS Graph API Scopes
