@@ -33,8 +33,7 @@ else:
         pool_size=5,             # 限制連線數，避免超出 Neon 配額
         max_overflow=10,
         connect_args={
-            "connect_timeout": 10,                 # 建立連線不超過 10 秒
-            "options": "-c statement_timeout=20000" # 單條 SQL 執行不超過 20 秒
+            "connect_timeout": 10                  # 建立連線不超過 10 秒
         }
     )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
