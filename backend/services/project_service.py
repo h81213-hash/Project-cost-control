@@ -218,8 +218,8 @@ def save_projects(projects: List[Dict[str, Any]]):
             json.dump(projects, f, ensure_ascii=False, indent=2)
         invalidate_cache()
 
-def get_project(project_id: str, page: Optional[int] = None, page_size: Optional[int] = 50, system_category: Optional[str] = None, version_indices: Optional[List[int]] = None, include_all_rows: bool = False) -> Optional[Dict[str, Any]]:
-    """取得單一專案詳細資訊，支援分頁與類別過濾，並可指定要載入 data 的版本索引 (預設為最新)"""
+def get_project(project_id: str, page: Optional[int] = None, page_size: Optional[int] = 50, system_category: Optional[str] = None, version_indices: Optional[List[int]] = None, include_all_rows: bool = False, filter_type: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """取得單一專案詳細資訊，支援分頁、類別過濾與特殊條件過濾 (如 AI 建議)"""
     if USE_DB:
         db = get_db_session()
         try:
@@ -249,14 +249,27 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
                         # 手動讀取該檔案的 data (此時會觸發單一 SELECT 讀取 JSON)
                         raw_data = target_file_obj.data or {}
                         all_rows = raw_data.get("rows", [])
-                        # 為每一列增加原始索引，以便後續手動分類能精準對應 (即使在有濾網的情況下)
+                        # 為每一列增加原始索引
                         for idx, row in enumerate(all_rows):
                             row["_original_index"] = idx
+                            # 【自動校正】排除異常狀態 (避免統計錯誤)
+                            if row.get("is_ai_category") and (not row.get("system_category") or row.get("system_category") == "未分類"):
+                                row["is_ai_category"] = False
+                        
+                        # 核心修復：在分頁前計算全域分析數據
+                        from .category_service import analyze_project_data
+                        depth = raw_data.get("classification_depth", 2)
+                        current_analysis = analyze_project_data(all_rows, max_depth=depth)
                         
                         if system_category:
                             all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
                         
-                        data_copy = {k: v for k, v in raw_data.items() if k != "rows"}
+                        # [V2.2] 支援全域過濾 AI 建議 (無視原本順序，直接提取 171 筆)
+                        if filter_type == "ai_suggestions":
+                            all_rows = [r for r in all_rows if r.get("is_ai_category")]
+                        
+                        data_copy = {k: v for k, v in raw_data.items() if k not in ["rows", "analysis"]}
+                        data_copy["analysis"] = current_analysis
                         
                         # 分頁邏輯：如果是要求的版本則提供分頁資料
                         is_target_version = (version_indices and v_idx in version_indices) or (v_idx == len(db_files) - 1)
@@ -301,11 +314,27 @@ def get_project(project_id: str, page: Optional[int] = None, page_size: Optional
                         
                         if i in version_indices:
                             orig_data = f.get("data", {})
-                            data_copy = {k: v for k, v in orig_data.items() if k != "rows"}
                             all_rows = orig_data.get("rows", [])
+                            
+                            # 【自動校正】(JSON 模式)
+                            for row in all_rows:
+                                if row.get("is_ai_category") and (not row.get("system_category") or row.get("system_category") == "未分類"):
+                                    row["is_ai_category"] = False
+                            
+                            # 核心修復：在分頁前計算全域分析數據 (JSON 模式)
+                            from .category_service import analyze_project_data
+                            depth = orig_data.get("classification_depth", 2)
+                            current_analysis = analyze_project_data(all_rows, max_depth=depth)
                             
                             if system_category:
                                 all_rows = [r for r in all_rows if system_category in r.get("system_category", "")]
+                                
+                            # [V2.2] 支援全域過濾 AI 建議 (JSON 模式)
+                            if filter_type == "ai_suggestions":
+                                all_rows = [r for r in all_rows if r.get("is_ai_category")]
+                                
+                            data_copy = {k: v for k, v in orig_data.items() if k not in ["rows", "analysis"]}
+                            data_copy["analysis"] = current_analysis
                                 
                             # 分頁邏輯
                             is_target_version = (version_indices and i in version_indices) or (i == len(p["files"]) - 1)

@@ -644,7 +644,8 @@ const ProjectTableRow = memo(({
   isReverted,
   onRevert,
   onIgnore,
-  displayCategory
+  displayCategory,
+  onConfirmAI
 }: any) => {
   const isAdded = row.diff_status === "added";
   const isModified = row.diff_status === "modified";
@@ -703,9 +704,17 @@ const ProjectTableRow = memo(({
             )}
           </td>
           <td className="px-4 py-3 sticky left-[120px] bg-inherit">
-            <div className="flex items-center gap-2 group/cat">
-              <span className={`text-[10px] px-2 py-0.5 rounded-lg font-bold font-mono ${getCategoryColor(row.system_category)}`}>
-                {displayCategory}
+            <div className="flex items-center gap-1.5 group/cat">
+              <span className={`text-[10px] px-2 py-0.5 rounded-lg font-bold font-mono flex items-center gap-1 ${getCategoryColor(row.system_category)}`}>
+                {row.is_ai_category && (
+                  <button onClick={(e) => { e.stopPropagation(); onConfirmAI && onConfirmAI(); }} title="確認 AI 建議" className="flex items-center bg-amber-50 hover:bg-emerald-50 text-amber-500 hover:text-emerald-600 px-1 py-0.5 rounded shadow-sm border border-transparent hover:border-emerald-200 transition-all">
+                    <Zap size={10} className="fill-current animate-pulse mr-0.5" />
+                    <span className="text-[8px]">確認</span>
+                  </button>
+                )}
+                <span onClick={(e) => { e.stopPropagation(); onEdit && onEdit(); }} className="cursor-pointer hover:underline decoration-dashed underline-offset-2">
+                  {displayCategory}
+                </span>
               </span>
               <button onClick={onEdit} className="opacity-0 group-hover/cat:opacity-100 text-slate-300 hover:text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-all">
                 <GripVertical size={14} />
@@ -719,9 +728,17 @@ const ProjectTableRow = memo(({
             <input type="checkbox" checked={isSelected} onChange={(e)=>onToggleSelect(e.target.checked)} className="rounded" />
           </td>
           <td className="px-4 py-3 sticky left-10 bg-inherit">
-            <div className="flex items-center gap-2 group/cat">
-              <span className={`text-[10px] px-2 py-0.5 rounded-lg font-bold font-mono ${getCategoryColor(row.system_category)}`}>
-                {displayCategory}
+            <div className="flex items-center gap-1.5 group/cat">
+              <span className={`text-[10px] px-2 py-0.5 rounded-lg font-bold font-mono flex items-center gap-1 ${getCategoryColor(row.system_category)}`}>
+                {row.is_ai_category && (
+                  <button onClick={(e) => { e.stopPropagation(); onConfirmAI && onConfirmAI(); }} title="確認 AI 建議" className="flex items-center bg-amber-50 hover:bg-emerald-50 text-amber-500 hover:text-emerald-600 px-1 py-0.5 rounded shadow-sm border border-transparent hover:border-emerald-200 transition-all">
+                    <Zap size={10} className="fill-current animate-pulse mr-0.5" />
+                    <span className="text-[8px]">確認</span>
+                  </button>
+                )}
+                <span onClick={(e) => { e.stopPropagation(); onEdit && onEdit(); }} className="cursor-pointer hover:underline decoration-dashed underline-offset-2">
+                  {displayCategory}
+                </span>
               </span>
               <button onClick={onEdit} className="opacity-0 group-hover/cat:opacity-100 text-slate-300 hover:text-blue-600 p-1 rounded-full hover:bg-blue-50 transition-all">
                 <GripVertical size={14} />
@@ -860,6 +877,10 @@ export default function ProjectDetailPage() {
   const [inquiryEdits, setInquiryEdits] = useState<Record<string, { unit_price: number, discount_rate: number }>>({});
   const [isSavingInquiry, setIsSavingInquiry] = useState(false);
   const [isReclassifying, setIsReclassifying] = useState(false);
+  const [isAIClassifying, setIsAIClassifying] = useState(false);
+  const [aiStatusMessage, setAiStatusMessage] = useState("");
+  const [aiProgress, setAiProgress] = useState(0);
+  const [filterType, setFilterType] = useState<string | null>(null);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   
   // 智慧廠商媒合狀態
@@ -892,7 +913,9 @@ export default function ProjectDetailPage() {
       setMatchedVendors([]);
     }
   }, [selectedInquiryRow, activeInquiryCategory]);
-  
+
+
+
   // 當選中詢價類別或版本變更時，從後端抓取該類別的所有項目
   useEffect(() => {
     if (activeInquiryCategory && projectId) {
@@ -1021,9 +1044,9 @@ export default function ProjectDetailPage() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
 
-  const fetchProject = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+  const fetchProject = useCallback(async (pageNum: number = 1, append: boolean = false, customPageSize?: number, customFilterType: string | null = null) => {
     // 捲動不快取，初次載入才檢查
-    if (pageNum === 1 && !append) {
+    if (pageNum === 1 && !append && !customFilterType) {
         const cacheKey = `project_${projectId}_v${baseVersionIdx}`;
         if (typeof window !== "undefined") {
             const cachedData = localStorage.getItem(cacheKey);
@@ -1042,8 +1065,11 @@ export default function ProjectDetailPage() {
     }
 
     try {
-      // 傳遞版本索引
-      const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=50&version_idx=${baseVersionIdx}`);
+      const limit = customPageSize || 50;
+      const effectiveFilter = customFilterType !== null ? customFilterType : filterType;
+      const url = `${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=${limit}&version_idx=${baseVersionIdx}${effectiveFilter ? `&filter_type=${effectiveFilter}` : ""}`;
+      
+      const { data, ok } = await safeFetch(url);
       if (ok && data && data.id) {
         setProject(data);
         // 重要：不再固定取最後一個，而是取 baseVersionIdx
@@ -1053,14 +1079,22 @@ export default function ProjectDetailPage() {
           const pagination = newData.pagination;
 
           if (append) {
-            setResult((prev: any) => ({
-              ...prev,
-              rows: [...(prev?.rows || []), ...(newData.rows || [])]
-            }));
+            setResult((prev: any) => {
+              const prevRows = prev?.rows || [];
+              const newRows = newData.rows || [];
+              const existingIds = new Set(prevRows.map((r: any) => r._original_index));
+              const uniqueNewRows = newRows.filter((r: any) => !existingIds.has(r._original_index));
+              
+              return {
+                ...prev,
+                rows: [...prevRows, ...uniqueNewRows]
+              };
+            });
           } else {
             setResult(newData);
+            // 只有在首次載入 (及 AI 重新整理) 時更新快取
             const cacheKey = `project_${projectId}_v${baseVersionIdx}`;
-            if (typeof window !== "undefined") {
+            if (typeof window !== "undefined" && !effectiveFilter) {
               localStorage.setItem(cacheKey, JSON.stringify(data));
             }
           }
@@ -1090,7 +1124,7 @@ export default function ProjectDetailPage() {
       setLoading(false);
       setIsFetchingMore(false);
     }
-  }, [projectId, baseVersionIdx]);
+  }, [projectId, baseVersionIdx, filterType]);
 
   const loadMore = useCallback(async () => {
     if (isFetchingMore || !hasMore || loading) return;
@@ -1110,6 +1144,46 @@ export default function ProjectDetailPage() {
     if (node) observer.current.observe(node);
   }, [loading, isFetchingMore, hasMore, loadMore]);
 
+
+  // 監控 AI 分類進度（背景輪詢）
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isAIClassifying) {
+      intervalId = setInterval(async () => {
+        try {
+          const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-status`, { method: "GET" }, 5000);
+          if (ok && data) {
+            if (data.status === "processing" || data.status === "started") {
+              if (data.progress && data.progress !== aiProgress) {
+                 setAiProgress(data.progress);
+                 if (data.progress > 0) {
+                    setAiStatusMessage(`⚡ AI 正在掃描並分類標單項目...`);
+                    // 使用 page * 50 抓取目前已經加載的頁數長度
+                    fetchProject(1, false, page * 50);
+                 }
+              }
+            } else if (data.status === "completed") {
+              setIsAIClassifying(false);
+              setAiProgress(100);
+              setAiStatusMessage("✅ AI 分類全部完成！");
+              fetchProject(1, false);
+              if (project?.classification_depth) {
+                fetchReport(project.classification_depth);
+              }
+              setTimeout(() => { setAiStatusMessage(""); setAiProgress(0); }, 5000);
+            } else if (data.status === "error") {
+              setIsAIClassifying(false);
+              setAiStatusMessage(`❌ AI 分類發生錯誤: ${data.last_error || "請重試"}`);
+              setTimeout(() => setAiStatusMessage(""), 5000);
+            }
+          }
+        } catch (e) {
+          console.error("Polling error:", e);
+        }
+      }, 3000);
+    }
+    return () => { if (intervalId) clearInterval(intervalId); };
+  }, [isAIClassifying, projectId, baseVersionIdx, project?.classification_depth, aiProgress, fetchProject, page]);
 
   const tabs = [
     { id: "home", label: "分類", icon: <Home size={18} /> },
@@ -1302,6 +1376,7 @@ export default function ProjectDetailPage() {
     try {
       const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reclassify?version_idx=${baseVersionIdx}`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" }
       }, 120000);
       if (ok && data) {
         alert(`重新分析完成！\n本次共更新了 ${data.updated_count} 個項目的分類。`);
@@ -1320,12 +1395,96 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleAIClassify = async () => {
+    if (!project) return;
+    
+    // 計算未分類數量 (過濾掉自訂或已經指定分類的項目)
+    const unclassifiedCount = result?.rows?.filter((r: any) => r.system_category === "未分類" && !r.is_manual_category).length || 0;
+    
+    if (!window.confirm(`確定要啟用 AI 智慧分類填補未分類項目嗎？\n\n系統將會嘗試理解「未分類」項目的描述以及單位，並自動推測符合現有類別的最精準放置位置。\n\n注意：這可能會耗費一些時間，且推測結果可能含有少數瑕疵，事後仍可手動調整。`)) return;
+
+    setIsAIClassifying(true);
+    setAiProgress(0);
+    setAiStatusMessage("⚡ 正在建立 AI 任務...");
+    try {
+      const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-classify?version_idx=${baseVersionIdx}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      }, 10000); 
+      
+      if (ok && (data?.status === "success" || data?.status === "started")) {
+        setAiStatusMessage("⚡ AI 已經在背景啟動，請稍候...");
+        // setIsAIClassifying(false) 已經拔除，讓它等 useEffect 輪詢自己抓到 completed/error
+      } else {
+        const detail = data?.detail || "";
+        alert(`❌ AI 分類啟動失敗\n\n原因: ${data?.message || error || "未知錯誤"}\n\n${detail}`);
+        setIsAIClassifying(false);
+        setAiStatusMessage("");
+      }
+    } catch (e) {
+      console.error("AI Classify Error:", e);
+      alert("AI 分類發生網路錯誤，請檢視後端 Log。");
+      setIsAIClassifying(false);
+      setAiStatusMessage("");
+    }
+  };
+  
+  const handleStopAI = async () => {
+    try {
+      setAiStatusMessage("⚡ 正在停止分析...");
+      await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-stop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      // 停止後一秒，後端循環會自己中斷，這裡前端也強制關閉狀態
+      setTimeout(() => setIsAIClassifying(false), 800);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleExport = () => {
     if (!project) return;
     window.location.href = `${API_BASE_URL}/projects/${project.id}/export?version_idx=${baseVersionIdx}`;
   };
 
 
+
+  // 確認 AI 建議的功能 (Optimistic Update)
+  const handleConfirmAI = async (rowIndices: number[]) => {
+    // 立即更新畫面 (Optimistic)
+    const previousResult = result ? JSON.parse(JSON.stringify(result)) : null;
+    
+    setResult((prev: any) => {
+      if (!prev || !prev.rows) return prev;
+      const newRows = prev.rows.map((r: any) => {
+        if (rowIndices.includes(r._original_index !== undefined ? r._original_index : -1)) {
+          return { ...r, is_ai_category: false, is_manual_category: true };
+        }
+        return r;
+      });
+      return { ...prev, rows: newRows };
+    });
+
+    try {
+      const { ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/confirm_ai`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          row_indices: rowIndices,
+          version_idx: baseVersionIdx
+        })
+      });
+      
+      if (!ok) {
+        console.error("[Optimistic UI] Rollback triggered due to fetch failure:", error);
+        if (previousResult) setResult(previousResult);
+      }
+    } catch (e) {
+      console.error("[Optimistic UI] Rollback triggered due to error:", e);
+      if (previousResult) setResult(previousResult);
+    }
+  };
 
   const handleCompare = async () => {
     if (!project) return;
@@ -2304,31 +2463,121 @@ export default function ProjectDetailPage() {
                         ))}
                       </div>
                     </div>
-                    <div className="w-px h-10 bg-slate-200/50"></div>
+                    <div className="w-px h-8 bg-slate-200/60 hidden sm:block"></div>
                     <div>
                       <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest block mb-1 px-1 flex items-center gap-1.5">
                         <BarChart3 size={12} className="text-slate-400" /> 項目統計
                       </span>
-                      <div className="flex items-baseline gap-1.5 px-1">
-                        <span className="text-2xl font-semibold text-slate-800 tracking-tight">
-                          {isCompareMode && diffResult ? diffResult.diff.rows.length : totalRows} 
-                        </span>
-                        <span className="text-xs font-medium text-slate-400">筆</span>
-                        {isPending && <div className="ml-2 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>}
+                      <div className="flex items-center gap-2 px-1">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-2xl font-semibold text-slate-800 tracking-tight">
+                            {isCompareMode && diffResult ? diffResult.diff.rows.length : totalRows} 
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-400">筆總數</span>
+                        </div>
+                        
+                        {!isCompareMode && result?.rows && (
+                          <div className="flex items-center gap-3 ml-3 pl-3 border-l border-slate-200/70">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] text-slate-400 font-bold tracking-wider mb-0.5">未分類</span>
+                              <span className="text-sm font-bold text-slate-700">
+                                {result?.analysis?.systems?.["未分類"]?.count || 0}
+                              </span>
+                            </div>
+                            <button 
+                                onClick={() => {
+                                  const next = filterType === "ai_suggestions" ? null : "ai_suggestions";
+                                  setFilterType(next);
+                                  // 重置頁碼並重新抓取
+                                  fetchProject(1, false, 50, next);
+                                }}
+                                className={`flex flex-col hover:bg-slate-50 p-1.5 rounded-xl transition-all border ${filterType === "ai_suggestions" ? "bg-amber-100 border-amber-300 ring-2 ring-amber-400" : "border-transparent"}`}
+                              >
+                                <span className={`text-[9px] font-bold tracking-wider mb-0.5 ${filterType === "ai_suggestions" ? "text-amber-700" : "text-amber-500"}`}>AI 已分建議</span>
+                                <span className={`text-sm font-bold ${filterType === "ai_suggestions" ? "text-amber-800" : "text-amber-600"}`}>
+                                  {Object.values(result?.analysis?.systems || {}).reduce((acc: number, sys: any) => acc + (sys.ai_count || 0), 0)}
+                                </span>
+                              </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => startTransition(() => setShowUnclassified(!showUnclassified))}
-                    className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all border ${
-                      showUnclassified 
-                        ? "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100" 
-                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm"
-                    } ${isPending ? 'opacity-50 cursor-wait' : ''} flex items-center gap-2`}
-                  >
-                    {showUnclassified ? <AlertCircle size={16} /> : <Search size={16} />}
-                    {showUnclassified ? "顯示全部項目" : "僅看未分類項目"}
-                  </button>
+                      <div className="flex flex-col items-end gap-2">
+                        {filterType === "ai_suggestions" && (
+                          <div className="bg-amber-50 text-amber-700 text-[11px] font-bold px-4 py-1.5 rounded-full border border-amber-200 flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
+                            <Zap size={14} className="fill-amber-500" /> 正在檢視全案 {Object.values(result?.analysis?.systems || {}).reduce((acc: number, sys: any) => acc + (sys.ai_count || 0), 0)} 筆 AI 分類建議
+                             <button onClick={() => { setFilterType(null); fetchProject(1, false, 50, null); }} className="ml-2 hover:bg-amber-200 p-1 rounded-full"><X size={12} /></button>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleAIClassify}
+                            disabled={isAIClassifying}
+                            className={`px-6 py-2.5 rounded-full text-sm font-black transition-all border shadow-lg ${
+                            isAIClassifying 
+                                ? "bg-amber-50 text-amber-500 border-amber-200 animate-pulse" 
+                                : "bg-gradient-to-r from-amber-400 to-amber-500 text-white border-amber-300 hover:shadow-amber-500/20 hover:scale-105 active:scale-95"
+                            } flex items-center gap-2`}
+                        >
+                            {isAIClassifying ? <RotateCcw size={16} className="animate-spin" /> : <Zap size={16} className="fill-white" />}
+                            {isAIClassifying ? "AI 分類中..." : "AI 智慧補完未分類"}
+                        </button>
+
+                        <button
+                            onClick={() => startTransition(() => setShowUnclassified(!showUnclassified))}
+                            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all border ${
+                            showUnclassified 
+                                ? "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100" 
+                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 shadow-sm"
+                            } ${isPending ? 'opacity-50 cursor-wait' : ''} flex items-center gap-2`}
+                        >
+                            {showUnclassified ? <AlertCircle size={16} /> : <Search size={16} />}
+                            {showUnclassified ? "顯示全部項目" : "僅看未分類項目"}
+                        </button>
+                        
+                        {result?.rows?.some((r: any) => r.is_ai_category) && (
+                          <button
+                              onClick={() => handleConfirmAI(result.rows.filter((r: any) => r.is_ai_category).map((r: any) => r._original_index !== undefined ? r._original_index : -1))}
+                              className={`px-4 py-2.5 rounded-full text-sm font-semibold transition-all border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 flex items-center gap-2`}
+                          >
+                              <Check size={16} />
+                              全部確認 AI 建議
+                          </button>
+                        )}
+                        </div>
+                        {aiStatusMessage && (
+                            <div className="flex flex-col gap-1.5 w-full max-w-xs mt-1 animate-in slide-in-from-top-2 duration-300">
+                                <div className={`text-[11px] font-bold px-3 py-1.5 rounded-full border shadow-sm flex items-center justify-between transition-colors ${
+                                    isAIClassifying ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                                    aiStatusMessage.includes('✅') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                    'bg-rose-50 text-rose-700 border-rose-200'
+                                }`}>
+                                    <span className={isAIClassifying ? 'animate-pulse' : ''}>{aiStatusMessage}</span>
+                                    {isAIClassifying && (
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono text-amber-600 block shrink-0">{aiProgress}%</span>
+                                        <button 
+                                          onClick={(e) => { e.stopPropagation(); handleStopAI(); }}
+                                          title="中斷分析"
+                                          className="p-1 hover:bg-rose-100 text-rose-500 rounded-full transition-all group"
+                                        >
+                                          <X size={12} className="group-hover:scale-110" />
+                                        </button>
+                                      </div>
+                                    )}
+                                </div>
+                                {isAIClassifying && (
+                                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden ring-1 ring-inset ring-slate-200 shadow-inner">
+                                        <div 
+                                            className="bg-gradient-to-r from-amber-400 to-amber-500 h-1.5 rounded-full transition-all duration-500 ease-out" 
+                                            style={{ width: `${aiProgress}%` }}
+                                        ></div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Main Table */}
@@ -2383,7 +2632,7 @@ export default function ProjectDetailPage() {
                             ? "未分類" 
                             : (row.system_category.split(">")[project.classification_depth - 1]?.trim() || "-");
                           
-                          if (showUnclassified && displayCategory !== "未分類") return null;
+                          if (showUnclassified && displayCategory !== "未分類" && !row.is_ai_category) return null;
 
                           return (
                             <ProjectTableRow 
@@ -2401,6 +2650,7 @@ export default function ProjectDetailPage() {
                               onRevert={() => setRevertedItemIndices([...revertedItemIndices, rowIdx])}
                               onIgnore={() => setIgnoredItemIndices([...ignoredItemIndices, rowIdx])}
                               displayCategory={displayCategory}
+                              onConfirmAI={() => handleConfirmAI([rowIdx])}
                             />
                           );
                         })}
