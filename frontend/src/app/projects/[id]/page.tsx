@@ -1153,12 +1153,13 @@ export default function ProjectDetailPage() {
     if (isAIClassifying) {
       intervalId = setInterval(async () => {
         try {
-          const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-status`, { method: "GET" });
+          const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-status?version_idx=${baseVersionIdx}`, { method: "GET" });
           if (ok && data) {
             if (data.status === "processing" || data.status === "started") {
-              if (data.progress && data.progress !== aiProgress) {
+              // 修復：進度為 0 時也要能正確更新狀態
+              if (data.progress !== undefined && data.progress !== aiProgress) {
                  setAiProgress(data.progress);
-                 if (data.progress > 0) {
+                 if (data.progress >= 0) {
                     setAiStatusMessage(`⚡ AI 正在掃描並分類標單項目...`);
                     // 使用 page * 50 抓取目前已經加載的頁數長度
                     fetchProject(1, false, page * 50);

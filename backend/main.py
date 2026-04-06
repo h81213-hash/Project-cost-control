@@ -14,6 +14,7 @@ from services import project_service, category_service, excel_parser, diff_servi
 from database import engine, Base, SessionLocal
 import models
 from services.excel_parser import ExcelParser
+from services.ai_service import ai_service
 
 load_dotenv()
 
@@ -814,12 +815,7 @@ class _AIPersistence:
 
 
 def _run_ai_classification(project_id: str, version_idx: int, depth: int):
-    """背景執行的 AI 分類邏輯。
-    
-    【核心修復】使用 _AIPersistence 統一讀寫層，
-    支援 JSON 模式和 DB 模式，不再依賴有缺降的 project_service 中間層。
-    """
-    from services.ai_service import ai_service
+    """背景執行的 AI 分類邏輯。"""
     from services.category_service import load_categories, analyze_project_data
     import time
     import copy
@@ -1050,9 +1046,13 @@ async def ai_classify_project(project_id: str, background_tasks: BackgroundTasks
         raise HTTPException(status_code=404, detail=f"找不到專案: {project_id}")
     
     depth = _AIPersistence.get_project_depth(project_id)
+    
+    # 【核心優化】立即在主執行緒寫入初始狀態，解決前端輪詢真空期問題
+    _AIPersistence.update_status(project_id, version_idx, "processing", 0)
+    
     background_tasks.add_task(_run_ai_classification, project_id, version_idx, depth)
     
-    return {"status": "started", "message": "AI 分類已在背景啟動，請稍候並重新整理頁面查看進度"}
+    return {"status": "success", "message": "AI 分類已在背景啟動，進度將即時更新"}
 
 @app.get("/projects/{project_id}/ai-status")
 def get_ai_status(project_id: str, version_idx: int = -1):
