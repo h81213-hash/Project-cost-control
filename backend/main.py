@@ -1180,6 +1180,24 @@ async def export_inquiry_excel(project_id: str, category: str, version_idx: int 
     filename = quote(f"詢價單_{proj.get('name', '未命名')}.xlsx")
     return StreamingResponse(io.BytesIO(excel_data), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"})
 
+@app.get("/projects/{project_id}/report_export")
+def export_report_excel(project_id: str, version_idx: int = -1):
+    lv1_data = report_service.get_report_data(project_id, depth=1, version_idx=version_idx)
+    lv2_data = report_service.get_report_data(project_id, depth=2, version_idx=version_idx)
+    
+    if lv1_data.get("status") == "error":
+        raise HTTPException(status_code=400, detail=lv1_data.get("message"))
+        
+    excel_data = excel_service.generate_report_excel(lv1_data, lv2_data, lv1_data.get("project_name", "專案報表"))
+    
+    from urllib.parse import quote
+    filename = quote(f"專案成本報表_{lv1_data.get('project_name', '工程')}.xlsx")
+    return StreamingResponse(
+        io.BytesIO(excel_data), 
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"}
+    )
+
 @app.post("/projects/{project_id}/inquiry_draft")
 async def create_inquiry_draft(project_id: str, req: InquiryDraftRequest):
     db = SessionLocal()

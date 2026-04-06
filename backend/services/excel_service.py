@@ -132,3 +132,116 @@ def generate_inquiry_excel(
     output = io.BytesIO()
     wb.save(output)
     return output.getvalue()
+
+def generate_report_excel(
+    lv1_data: Dict[str, Any], 
+    lv2_data: Dict[str, Any], 
+    project_name: str
+) -> bytes:
+    """
+    生成專案成本報表 Excel，包含 LV.1 與 LV.2 兩個分頁。
+    """
+    wb = Workbook()
+    
+    # --- 樣式定義 ---
+    font_header = Font(name="標楷體", size=16, bold=True)
+    font_bold = Font(name="標楷體", size=11, bold=True)
+    font_normal = Font(name="標楷體", size=11)
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+    border_thin = Border(
+        left=Side(style='thin'), 
+        right=Side(style='thin'), 
+        top=Side(style='thin'), 
+        bottom=Side(style='thin')
+    )
+    
+    def fill_sheet(ws, data, title):
+        ws.title = title
+        # 表頭
+        ws.merge_cells('A1:G1')
+        ws['A1'] = f"{project_name} - {title}"
+        ws['A1'].font = font_header
+        ws['A1'].alignment = align_center
+        
+        # 欄位標題
+        headers = ["項次", "分類名稱", "廠商報價(元)", "占比", "公司成本(元)", "占比", "備註說明"]
+        ws.append([]) # 空一行
+        ws.append(headers)
+        header_row = 3
+        for col, text in enumerate(headers, 1):
+            cell = ws.cell(row=header_row, column=col)
+            cell.font = font_bold
+            cell.alignment = align_center
+            cell.border = border_thin
+            
+        # 欄寬
+        col_widths = [8, 30, 20, 10, 20, 10, 35]
+        for i, w in enumerate(col_widths, 1):
+            ws.column_dimensions[chr(64+i)].width = w
+            
+        # 數據內容
+        categories = data.get("categories", [])
+        total_internal = data.get("summary", {}).get("direct_internal", 0)
+        
+        for idx, cat in enumerate(categories, 1):
+            row_num = header_row + idx
+            ws.cell(row=row_num, column=1, value=idx).border = border_thin
+            ws.cell(row=row_num, column=2, value=cat.get("name", "")).border = border_thin
+            ws.cell(row=row_num, column=3, value=round(cat.get("supplier_total", 0))).border = border_thin
+            ws.cell(row=row_num, column=4, value=cat.get("supplier_ratio", 0)/100).border = border_thin
+            ws.cell(row=row_num, column=5, value=round(cat.get("internal_total", 0))).border = border_thin
+            
+            # 計算成本占比
+            internal_ratio = (cat.get("internal_total", 0) / total_internal) if total_internal > 0 else 0
+            ws.cell(row=row_num, column=6, value=internal_ratio).border = border_thin
+            
+            ws.cell(row=row_num, column=7, value=cat.get("remark", "")).border = border_thin
+            
+            # 格式化
+            ws.cell(row=row_num, column=1).alignment = align_center
+            ws.cell(row=row_num, column=2).alignment = align_center
+            ws.cell(row=row_num, column=3).number_format = '#,##0'
+            ws.cell(row=row_num, column=4).number_format = '0.0%'
+            ws.cell(row=row_num, column=5).number_format = '#,##0'
+            ws.cell(row=row_num, column=6).number_format = '0.0%'
+            
+            # 字體設定
+            for col in range(1, 8):
+                ws.cell(row=row_num, column=col).font = font_normal
+
+        # Summary 區塊
+        summary = data.get("summary", {})
+        start_summary = header_row + len(categories) + 2
+        summary_items = [
+            ("直接工程發包合計", summary.get("direct_supplier", 0), summary.get("direct_internal", 0)),
+            (f"利潤及管理費 ({int(summary.get('profit_rate', 0.18)*100)}%)", summary.get("indirect_supplier", 0), summary.get("indirect_internal", 0)),
+            ("小計", summary.get("direct_supplier", 0) + summary.get("indirect_supplier", 0), summary.get("direct_internal", 0) + summary.get("indirect_internal", 0)),
+            (f"營業稅 ({int(summary.get('tax_rate', 0.05)*100)}%)", summary.get("tax_supplier", 0), 0),
+            ("總計", summary.get("total_supplier", 0), summary.get("total_internal", 0))
+        ]
+        
+        for i, (label, s_val, i_val) in enumerate(summary_items):
+            r = start_summary + i
+            ws.merge_cells(f'A{r}:B{r}')
+            ws[f'A{r}'] = label
+            ws[f'A{r}'].alignment = align_right
+            ws[f'A{r}'].font = font_bold
+            
+            ws.cell(row=r, column=3, value=round(s_val)).font = font_bold
+            ws.cell(row=r, column=3).number_format = '#,##0'
+            
+            ws.cell(row=r, column=5, value=round(i_val)).font = font_bold
+            ws.cell(row=r, column=5).number_format = '#,##0'
+
+    # 填充分頁一
+    ws1 = wb.active
+    fill_sheet(ws1, lv1_data, "大分類(LV.1)")
+    
+    # 填充分頁二
+    ws2 = wb.create_sheet("成本管制(LV.2)")
+    fill_sheet(ws2, lv2_data, "成本管制(LV.2)")
+    
+    output = io.BytesIO()
+    wb.save(output)
+    return output.getvalue()

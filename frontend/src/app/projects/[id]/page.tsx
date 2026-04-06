@@ -164,10 +164,10 @@ function InquiryTemplateModal({
         </div>
         
         <div className="p-8 overflow-y-auto max-h-[70vh] space-y-8">
-          {/* Section 1: 🏢 寄件公司資訊 (Excel 頁首) */}
+          {/* Section 1: 🏢 寄件公司資訊 (詢價單抬頭) */}
           <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
             <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
-              <Building2 size={14} /> 寄件公司資訊 (頁首用)
+              <Building2 size={14} /> 寄件公司資訊 (詢價單抬頭)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -221,10 +221,10 @@ function InquiryTemplateModal({
             </div>
           </div>
 
-          {/* Section 2: 👤 寄件人資訊 (Email 簽名) */}
+          {/* Section 2: 👤 寄件人資訊 (Mail 署名) */}
           <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
             <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
-              <User size={14} /> 寄件人資訊 (簽名用)
+              <User size={14} /> 寄件人資訊 (Mail 署名)
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -1407,6 +1407,27 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleReportExport = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/projects/${projectId}/report_export?version_idx=${baseVersionIdx}`);
+      if (!response.ok) throw new Error("匯出失敗");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `專案成本報表_${project?.name || "工程"}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert("匯出報表失敗，請稍後再試");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleReclassify = async () => {
     if (!project || !window.confirm("確定要重新分析分類嗎？\n\n注意：系統僅會重新分析『自動分類』的項目，您手動修改過的分類將會被保留。")) return;
     
@@ -1938,6 +1959,14 @@ export default function ProjectDetailPage() {
                               成本管制 (LV.2)
                             </button>
                           </div>
+
+                          <button 
+                            onClick={handleReportExport}
+                            disabled={loading || !reportData}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[13px] font-bold hover:bg-emerald-100 transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            <FileSpreadsheet size={16} /> 匯出報表 Excel
+                          </button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4 border-y border-slate-100">
