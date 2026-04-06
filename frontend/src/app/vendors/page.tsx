@@ -175,11 +175,25 @@ export default function VendorsPage() {
             <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : error ? (
-          <div className="bg-rose-50 border border-rose-100 p-8 rounded-3xl text-center">
-             <AlertCircle size={40} className="text-rose-500 mx-auto mb-4" />
-             <p className="text-rose-600 font-bold">{error}</p>
+          <div className="bg-rose-50 border border-rose-100 p-12 rounded-[40px] text-center flex flex-col items-center gap-4">
+             <AlertCircle size={48} className="text-rose-500" />
+             <div>
+               <p className="text-rose-700 text-xl font-bold">{error === "連線逾時 (Timeout)" ? "伺服器正在喚醒中" : error}</p>
+               <p className="text-slate-400 text-sm mt-2">
+                 {error === "連線逾時 (Timeout)" 
+                   ? "後端服務正在從休眠中啟動，可能需要 30-60 秒，請稍候重試。" 
+                   : "請確認後端服務是否正常運作。"}
+               </p>
+             </div>
+             <button 
+               onClick={fetchVendors}
+               className="mt-4 px-8 py-3 bg-rose-500 text-white rounded-full font-bold shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all flex items-center gap-2"
+             >
+               重新連線
+             </button>
           </div>
         ) : (
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredVendors.map(vendor => (
               <div key={vendor.id} className="group bg-white rounded-[32px] border border-slate-200 p-8 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all relative overflow-hidden">

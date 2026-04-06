@@ -821,6 +821,7 @@ export default function ProjectDetailPage() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showUnclassified, setShowUnclassified] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [activeInquiryCategory, setActiveInquiryCategory] = useState<string | null>(null);
@@ -944,7 +945,7 @@ export default function ProjectDetailPage() {
   const fetchReport = useCallback(async (depth: number) => {
     setIsFetchingReport(true);
     try {
-      const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reports?depth=${depth}&version_idx=${baseVersionIdx}`, {}, 60000);
+      const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/reports?depth=${depth}&version_idx=${baseVersionIdx}`);
       if (ok && data) {
         setReportData(data);
         if (data.config) {
@@ -1065,11 +1066,12 @@ export default function ProjectDetailPage() {
     }
 
     try {
+      setError(null);
       const limit = customPageSize || 50;
       const effectiveFilter = customFilterType !== null ? customFilterType : filterType;
       const url = `${API_BASE_URL}/projects/${projectId}?page=${pageNum}&page_size=${limit}&version_idx=${baseVersionIdx}${effectiveFilter ? `&filter_type=${effectiveFilter}` : ""}`;
       
-      const { data, ok } = await safeFetch(url);
+      const { data, ok, error } = await safeFetch(url);
       if (ok && data && data.id) {
         setProject(data);
         // 重要：不再固定取最後一個，而是取 baseVersionIdx
@@ -1151,7 +1153,7 @@ export default function ProjectDetailPage() {
     if (isAIClassifying) {
       intervalId = setInterval(async () => {
         try {
-          const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-status`, { method: "GET" }, 5000);
+          const { data, ok } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-status`, { method: "GET" });
           if (ok && data) {
             if (data.status === "processing" || data.status === "started") {
               if (data.progress && data.progress !== aiProgress) {
@@ -1334,7 +1336,7 @@ export default function ProjectDetailPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
-      }, 30000);
+      });
       
       if (ok && resData?.status === "success" && result) {
         const finalRows = result.rows.map((row: any) => {
@@ -1410,7 +1412,7 @@ export default function ProjectDetailPage() {
       const { data, ok, error } = await safeFetch(`${API_BASE_URL}/projects/${projectId}/ai-classify?version_idx=${baseVersionIdx}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" }
-      }, 10000); 
+      }); 
       
       if (ok && (data?.status === "success" || data?.status === "started")) {
         setAiStatusMessage("⚡ AI 已經在背景啟動，請稍候...");
@@ -1794,8 +1796,45 @@ export default function ProjectDetailPage() {
     return COLOR_PALETTE[Math.abs(hash) % COLOR_PALETTE.length];
   };
 
+  if (error && !project) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="bg-white p-12 rounded-[40px] shadow-xl border border-slate-100 max-w-md w-full flex flex-col items-center gap-6">
+          <AlertCircle size={64} className="text-rose-500" />
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+              {error === "連線逾時 (Timeout)" ? "伺服器正在喚醒中" : "載入失敗"}
+            </h2>
+            <p className="text-slate-400 mt-3 font-medium leading-relaxed">
+              {error === "連線逾時 (Timeout)" 
+                ? "後端服務正在啟動（約需 30-60 秒），請點擊下方按鈕重試。" 
+                : error}
+            </p>
+          </div>
+          <button 
+            onClick={() => fetchProject()}
+            className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all active:scale-95 flex items-center justify-center gap-2"
+          >
+            <RotateCcw size={20} /> 重新整理
+          </button>
+          <button 
+            onClick={() => router.push("/projects")}
+            className="text-slate-400 font-bold hover:text-slate-600 transition-colors"
+          >
+            返回列表
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!project) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-400">載入中...</div>;
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-slate-400 font-bold animate-pulse">正在載入專案資料...</p>
+      </div>
+    );
   }
 
   return (

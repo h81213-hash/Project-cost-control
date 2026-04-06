@@ -12,7 +12,8 @@ export interface SafeFetchResponse<T> {
 export async function safeFetch<T = any>(
   url: string,
   options: RequestInit = {},
-  timeoutMs: number = 25000
+  timeoutMs: number = 60000, // 增加至 60 秒以對應 Render 冷啟動
+  retryCount: number = 0
 ): Promise<SafeFetchResponse<T>> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -28,13 +29,14 @@ export async function safeFetch<T = any>(
     if (!response.ok) {
       // 嘗試讀取錯誤訊息
       let errMsg = `HTTP Error: ${response.status}`;
+      let errData = null;
       try {
-        const errJson = await response.json();
-        errMsg = errJson.message || errMsg;
+        errData = await response.json();
+        errMsg = errData.detail || errData.message || errData.error || errMsg;
       } catch (e) {
         // Ignore parsing error
       }
-      return { data: null, error: errMsg, ok: false, status: response.status };
+      return { data: errData, error: errMsg, ok: false, status: response.status };
     }
 
     const data = await response.json();
@@ -43,9 +45,16 @@ export async function safeFetch<T = any>(
     clearTimeout(id);
     
     let errMsg = "連線失敗";
-    if (err.name === "AbortError") {
+    const isTimeout = err.name === "AbortError";
+    
+    if (isTimeout) {
       errMsg = "連線逾時 (Timeout)";
-    } else if (err instanceof TypeError && err.message === "Failed to fetch") {
+      // 如果是逾時且尚未重試過，則自動重試一次
+      if (retryCount < 1) {
+        console.warn(`[SafeFetch] ${url} 逾時，正在嘗試自動重試...`);
+        return safeFetch(url, options, timeoutMs, retryCount + 1);
+      }
+    } else if (err.name === "TypeError" && err.message === "Failed to fetch") {
       errMsg = "無法連線至後端伺服器 (Failed to fetch)";
     } else {
       errMsg = err.message || "發生未知錯誤";
@@ -60,3 +69,4 @@ export async function safeFetch<T = any>(
     };
   }
 }
+

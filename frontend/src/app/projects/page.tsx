@@ -267,9 +267,14 @@ export default function ProjectsPage() {
           <div className="flex flex-col items-center justify-center py-20 gap-4 bg-rose-50/50 rounded-[40px] border border-rose-100">
             <AlertCircle size={40} className="text-rose-500" />
             <div className="text-center">
-              <p className="text-rose-700 font-bold">{error}</p>
-              <p className="text-slate-400 text-xs mt-1">請確認後端服務 (Port 8002) 是否已正確啟動。</p>
+              <p className="text-rose-700 font-bold">{error === "連線逾時 (Timeout)" ? "伺服器正在啟動中" : error}</p>
+              <p className="text-slate-400 text-xs mt-1">
+                {error === "連線逾時 (Timeout)" 
+                  ? "由於一段時間未動作，系統正在重新喚醒後端服務，請稍候再試。" 
+                  : "請確認網路連線或後端服務是否正常。"}
+              </p>
             </div>
+
             <button 
               onClick={fetchProjects}
               className="mt-2 px-6 py-2 bg-rose-500 text-white rounded-full font-bold shadow-lg shadow-rose-500/20 hover:bg-rose-600 transition-all flex items-center gap-2"

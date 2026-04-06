@@ -230,15 +230,14 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2, new_key
     summary = {
         "total_cost": 0,
         "classification_depth": max_depth,
-        "systems": {}
+        "systems": {"未分類": {"count": 0, "total": 0, "ai_count": 0}}
     }
-
-    summary["systems"]["未分類"] = {"count": 0, "total": 0}
     
     # 識別是否為增量更新
     is_incremental = new_keyword is not None
     norm_new_keyword = normalize_text(new_keyword) if new_keyword else None
 
+    # --- 第一階段：規則引擎 (原本的關鍵字比對) ---
     for row in rows:
         if row.get("should_hide"):
             continue
@@ -253,26 +252,21 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2, new_key
         # 確認是否需要重新分類
         needs_reclassify = False
         if not is_incremental:
-            # 全量更新模式：非手動分類者皆需重掃
-            if not row.get("is_manual_category"):
+            if not row.get("is_manual_category") and not row.get("is_ai_category"):
                 needs_reclassify = True
         else:
-            # 增量更新模式：僅對未分類或命中新關鍵字者重掃
             current_cat = row.get("system_category", "未分類")
             if current_cat == "未分類":
                 needs_reclassify = True
             elif norm_new_keyword and norm_new_keyword in normalize_text(description):
-                # 只有當項目不是手動強制分類時，才給予自動重新判定的機會
                 if not row.get("is_manual_category"):
                     needs_reclassify = True
 
-        # 核心優化：若沒單位也沒數量，標註為無類別 (標題/合計)
         unit = str(row.get("unit") or "").strip()
         quantity = row.get("quantity")
         is_empty_record = not unit and (quantity is None or str(quantity).strip() == "")
         
         if row.get("is_manual_category"):
-            # 手動分類：尊重 manual_raw_category 並依當前深度截斷
             raw_path = row.get("manual_raw_category", row.get("system_category", "未分類"))
             parts = raw_path.split(" > ")
             full_path = " > ".join(parts[:max_depth])
@@ -283,28 +277,39 @@ def analyze_project_data(rows: List[Dict[str, Any]], max_depth: int = 2, new_key
         elif needs_reclassify:
             full_path = classify_row(description, max_depth=max_depth)
             row["system_category"] = full_path
+            # 如果因為關鍵字變更而重新分類，清除 AI 標記
+            if row.get("is_ai_category"):
+                del row["is_ai_category"]
         else:
-            # 維持現狀
             cat = row.get("system_category", "未分類")
             parts = cat.split(" > ")
             full_path = " > ".join(parts[:max_depth])
             row["system_category"] = full_path
 
         if full_path not in summary["systems"]:
-            summary["systems"][full_path] = {"count": 0, "total": 0}
+            summary["systems"][full_path] = {"count": 0, "total": 0, "ai_count": 0}
 
         summary["systems"][full_path]["count"] += 1
+        # 只有在「非未分類」的情況下，才計入 AI 分類建議統計
+        if row.get("is_ai_category") and full_path != "未分類":
+            summary["systems"][full_path]["ai_count"] += 1
+            
         summary["systems"][full_path]["total"] += total_price
         summary["total_cost"] += total_price
 
+    # --- 第二階段：AI 已整合至 main.py 獨立觸發，不再內部自動執行 ---
+    
     # 計算百分比
     for system in summary["systems"].values():
         if summary["total_cost"] > 0:
-            system["percentage"] = round(system["total"] / summary["total_cost"] * 100, 1)
+            percentage = (system["total"] / summary["total_cost"]) * 100
+            system["percentage"] = round(percentage, 1)
         else:
             system["percentage"] = 0
 
-    print(f"[Analyze] Duration: {time.time() - start_time:.3f}s, rows={len(rows)}, incremental={is_incremental}")
+    end_time = time.time()
+    summary["analysis_time"] = end_time - start_time
+    print(f"[Analyze] Duration: {summary['analysis_time']:.3f}s, rows={len(rows)}")
     return summary
 
 
