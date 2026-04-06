@@ -36,7 +36,11 @@ import {
   MapPinned,
   Clock,
   Tag,
-  User
+  User,
+  Building2,
+  Send,
+  HardHat,
+  MapPin
 } from "lucide-react";
 
 interface InquiryTemplate {
@@ -159,153 +163,184 @@ function InquiryTemplateModal({
           </button>
         </div>
         
-        <div className="p-8 overflow-y-auto max-h-[60vh] space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">公司名稱</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.company_name}
-                  onChange={e => setData({...data, company_name: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+        <div className="p-8 overflow-y-auto max-h-[70vh] space-y-8">
+          {/* Section 1: 🏢 寄件公司資訊 (Excel 頁首) */}
+          <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
+              <Building2 size={14} /> 寄件公司資訊 (頁首用)
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">公司名稱</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.company_name}
+                    onChange={e => setData({...data, company_name: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">電話</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.phone}
+                    onChange={e => setData({...data, phone: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">傳真</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.fax}
+                    onChange={e => setData({...data, fax: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <Printer className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">收件 Mail</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">公司地址</label>
               <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.mail}
-                  onChange={e => setData({...data, mail: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                <textarea 
+                  rows={2}
+                  value={data.address}
+                  onChange={e => setData({...data, address: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm resize-none"
                 />
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">電話</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.phone}
-                  onChange={e => setData({...data, phone: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">傳真</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.fax}
-                  onChange={e => setData({...data, fax: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <Printer className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">工程名稱</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                value={data.project_name}
-                onChange={e => setData({...data, project_name: e.target.value})}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-              />
-              <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">工程地點</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                value={data.project_location}
-                onChange={e => setData({...data, project_location: e.target.value})}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-              />
-              <MapPinned className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">聯絡人</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.contact_person}
-                  onChange={e => setData({...data, contact_person: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <UserCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">報價截止日</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="例如: 2026/04/05"
-                  value={data.deadline}
-                  onChange={e => setData({...data, deadline: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                <MapPin className="absolute left-4 top-5 text-slate-300 w-4 h-4" />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">寄件人姓名 (Email用)</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  value={data.sender_name}
-                  onChange={e => setData({...data, sender_name: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-                />
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+          {/* Section 2: 👤 寄件人資訊 (Email 簽名) */}
+          <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
+              <User size={14} /> 寄件人資訊 (簽名用)
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">聯絡人姓名與分機</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.contact_person}
+                    onChange={e => setData({...data, contact_person: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <UserCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">寄件人姓名 (Email用)</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.sender_name}
+                    onChange={e => setData({...data, sender_name: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">寄件人職稱 (Email用)</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">寄件人職稱 (Email用)</label>
               <div className="relative">
                 <input 
                   type="text" 
                   value={data.sender_title}
                   onChange={e => setData({...data, sender_title: e.target.value})}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
                 />
                 <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">交期需求 (預計進場時間)</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="例如: 2026年5月中旬"
-                value={data.delivery_requirement}
-                onChange={e => setData({...data, delivery_requirement: e.target.value})}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 font-medium focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
-              />
-              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+          {/* Section 3: 🏗️ 標案工程資訊 */}
+          <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
+              <HardHat size={14} /> 標案工程明細
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">工程名稱</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={data.project_name}
+                    onChange={e => setData({...data, project_name: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">報價截止日</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="例如: 2026/04/05"
+                    value={data.deadline}
+                    onChange={e => setData({...data, deadline: e.target.value})}
+                    className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                  />
+                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">工程地點</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={data.project_location}
+                  onChange={e => setData({...data, project_location: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                />
+                <MapPinned className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">交期需求 (預計進場時間)</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="例如: 2026年5月中旬"
+                  value={data.delivery_requirement}
+                  onChange={e => setData({...data, delivery_requirement: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                />
+                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: 📩 預設收件資訊 */}
+          <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100/50 space-y-4">
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-4 flex items-center gap-2">
+              <Send size={14} /> 預設收件資訊 (收件方)
+            </h4>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">預設收件 Mail</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={data.mail}
+                  onChange={e => setData({...data, mail: e.target.value})}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-2xl text-slate-700 font-medium focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4" />
+              </div>
             </div>
           </div>
 
